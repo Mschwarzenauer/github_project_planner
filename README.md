@@ -53,7 +53,7 @@
     <li><strong>Consistent elements:</strong> Header with logo and navigation, footer with contact info and copyright</li>
   </ul>
 
-  <h3>7. Special Features (optional)</h3>
+  <h3>6. Special Features (optional)</h3>
   <p>We may add some hover effects to the website.</p>
 
 </body>
