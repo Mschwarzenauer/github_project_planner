@@ -1,0 +1,2 @@
+# EventPlanner
+Smart event planner
