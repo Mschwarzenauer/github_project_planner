@@ -1,60 +1,66 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>EventPlanner - Project Description</title>
-</head>
-<body>
+# 📌 GitHub Projektplaner
 
-  <h1>EventPlanner</h1>
-  <h2>Website Project Description</h2>
+**Projekt von:** Matheo Schwarzenauer, Jannick Gladik  
 
-  <p><strong>Matheo Schwarzenauer, Jannick Gladik</strong></p>
+---
 
-  <h3>1. Project Title</h3>
-  <p><strong>Smart Event Planner</strong></p>
+## 🎯 Ziel des Projekts
+Dieser Projektplaner dient als zentrale Übersicht für die Organisation und Verwaltung von Projekten auf GitHub.  
+Er soll helfen:
+- Aufgaben klar zu strukturieren  
+- Fortschritt transparent zu machen  
+- Zusammenarbeit im Team zu erleichtern  
 
-  <h3>2. Project Idea</h3>
-  <p>
-    This website helps users plan and organize events of any kind — from birthday parties 
-    and weddings to business meetings and workshops. It includes tools for managing tasks, 
-    tracking budgets, setting deadlines, and assigning responsibilities.
-  </p>
-  <p>
-    This topic is useful because many people struggle with organizing events efficiently. 
-    A digital planner makes the process smoother, more structured, and less stressful.
-  </p>
+---
 
-  <h3>3. Target Audience</h3>
-  <p>The website is designed for anyone who wants to plan an event — especially:</p>
-  <ul>
-    <li>Companies &amp; schools</li>
-    <li>Event organizers, freelancers, or individuals planning private events</li>
-    <li>People who want a simple, intuitive tool without needing professional software</li>
-  </ul>
-  <p>
-    It will be helpful for users who need a clear overview of tasks, deadlines, and costs.
-  </p>
+## 🗂 Projekt-Struktur
+Das Repository enthält:
+- `README.md` → Projektübersicht & Plan  
+- `.github/ISSUE_TEMPLATE/` → Vorlagen für Aufgaben & Bugs  
+- GitHub **Projects Board** → Kanban-Ansicht für Fortschritt  
+- GitHub **Milestones** → Größere Etappen & Releases  
 
-  <h3>4. Structure of the Website</h3>
-  <p>The website will have 2 HTML pages:</p>
-  <ul>
-    <li><code>index.html</code> → Home page with introduction and features</li>
-    <li><code>planner.html</code> → Event planning tools (task list, budget tracker, timeline)</li>
-  </ul>
+---
 
-  <h3>5. Design and Layout</h3>
-  <p>The design will be clean and modern:</p>
-  <ul>
-    <li><strong>Colors:</strong> green color palette</li>
-    <li><strong>Fonts:</strong> Aptos</li>
-    <li><strong>Shapes:</strong> Rounded buttons and cards for a friendly interface</li>
-    <li><strong>Navigation menu:</strong> Horizontal top menu with links to all pages</li>
-    <li><strong>Consistent elements:</strong> Header with logo and navigation, footer with contact info and copyright</li>
-  </ul>
+## 📊 Projektorganisation
 
-  <h3>6. Special Features (optional)</h3>
-  <p>We may add some hover effects to the website.</p>
+### 🔖 Labels
+- `task` → normale Aufgaben  
+- `bug` → Fehlerberichte  
+- `enhancement` → Verbesserungen  
+- `documentation` → Doku-Aufgaben  
 
-</body>
-</html>
+### 🗂 Issues
+Alle Aufgaben werden als **Issues** angelegt und mit Labels versehen.  
+Beispiel:  
+- [ ] Aufgabe erstellen  
+- [ ] Label hinzufügen  
+- [ ] Verantwortliche Person zuweisen  
+
+### 📌 Milestones
+- **MVP** → Minimal funktionsfähige Version  
+- **Release 1.0** → Erste stabile Version  
+- **Feature-Erweiterungen** → Neue Funktionen  
+
+### 📋 Project Board
+Spalten:
+- **To Do**  
+- **In Progress**  
+- **Review**  
+- **Done**  
+
+---
+
+## 🚀 Nächste Schritte
+- [ ] Repository erstellen  
+- [ ] README.md hinzufügen  
+- [ ] Issue Templates anlegen  
+- [ ] Project Board konfigurieren  
+- [ ] Erste Aufgaben eintragen  
+
+---
+
+## ⚡ Vorteile
+- Klare Struktur für Teamarbeit  
+- Transparente Fortschrittskontrolle  
+- Einfache Erweiterung durch GitHub‑Features  
