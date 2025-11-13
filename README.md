@@ -31,7 +31,7 @@ Das Repository enthält:
 - `documentation` → Doku-Aufgaben  
 
 ### 🗂 Issues
-Alle Aufgaben werden als **Issues** angelegt und mit Labels versehen.  
+Alle Aufgaben werden als **problems** angelegt und mit Labels versehen.  
 Beispiel:  
 - [ ] Aufgabe erstellen  
 - [ ] Label hinzufügen  
@@ -54,7 +54,7 @@ Spalten:
 ## 🚀 Nächste Schritte
 - [ ] Repository erstellen  
 - [ ] README.md hinzufügen  
-- [ ] Issue Templates anlegen  
+- [ ] problem Templates anlegen  
 - [ ] Project Board konfigurieren  
 - [ ] Erste Aufgaben eintragen  
 
