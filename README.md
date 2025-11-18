@@ -1,4 +1,4 @@
-# 📌 GitHub Projektplaner
+# 📌 Projektplaner
 
 **Projekt von:** Matheo Schwarzenauer, Jannick Gladik  
 
