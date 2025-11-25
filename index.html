@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projektplaner</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+    <h1>📋 Projektplaner</h1>
+    <p>Projektorplanung zur besseren organisation</p>
+</header>
+
+<section class="form-section">
+    <h2>Projektinformationen</h2>
+
+    <label>Projektname</label>
+    <input type="text" placeholder="Name des Projekts" size="30">
+
+    <label>Projektbeschreibung</label>
+    <textarea rows="4" placeholder="Ziele, Rahmenbedingungen, Stakeholder ..."></textarea>
+
+    <div class="grid-2">
+        <div>
+            <label>Startdatum</label>
+            <input type="date">
+        </div>
+        <div>
+            <label>Enddatum</label>
+            <input type="date">
+        </div>
+    </div>
+</section>
+
+<section class="form-section">
+    <h2>Meilensteine</h2>
+    <table>
+        <tr>
+            <th>Meilenstein</th>
+            <th>Fälligkeitsdatum</th>
+            <th>Status</th>
+        </tr>
+        <tr>
+            <td contenteditable="true">MVP</td>
+            <td><input type="date"></td>
+            <td contenteditable="true">In Planung</td>
+        </tr>
+        <tr>
+            <td contenteditable="true">Release 1.0</td>
+            <td><input type="date"></td>
+            <td contenteditable="true">Offen</td>
+        </tr>
+    </table>
+</section>
+
+<section class="form-section">
+    <h2>Kanban Board</h2>
+    <div class="kanban">
+        <div class="col">
+            <h3>To Do</h3>
+            <div class="kanban-box" contenteditable="true">Neue Aufgabe eingeben…</div>
+        </div>
+        <div class="col">
+            <h3>In Progress</h3>
+            <div class="kanban-box" contenteditable="true"></div>
+        </div>
+        <div class="col">
+            <h3>Review</h3>
+            <div class="kanban-box" contenteditable="true"></div>
+        </div>
+        <div class="col">
+            <h3>Done</h3>
+            <div class="kanban-box" contenteditable="true"></div>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <p>© 2025 Projektplaner • HTML & CSS only • Offline nutzbar</p>
+</footer>
+
+</body>
+</html>
