@@ -1,0 +1,186 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background: #f4f6f9;
+    color: #333;
+}
+
+/* Navigation */
+nav {
+    background: #0d6efd;
+    padding: 0;
+    display: flex;
+    gap: 0;
+    border-bottom: 3px solid #0b5ed7;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    padding: 15px 25px;
+    font-weight: bold;
+    transition: all 0.3s;
+    border-bottom: 3px solid transparent;
+}
+
+nav a:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+nav a.active {
+    background: #0b5ed7;
+    border-bottom: 3px solid #fff;
+}
+
+header {
+    text-align: center;
+    padding: 25px;
+    background: #0d6efd;
+    color: white;
+}
+
+.form-section {
+    width: 90%;
+    max-width: 1000px;
+    margin: 25px auto;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+}
+
+label {
+    font-weight: bold;
+    margin-top: 10px;
+    display: block;
+}
+
+input, textarea {
+    width: 90%;
+    padding: 10px;
+    margin: 5px 0 15px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+.grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+/* Tabelle */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+th, td {
+    padding: 8px;
+    border: 1px solid #ccc;
+}
+
+/* Kanban */
+.kanban {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+}
+
+.col {
+    background: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 15px;
+}
+
+.kanban-box {
+    background: #eef2f7;
+    min-height: 120px;
+    border-radius: 8px;
+    padding: 10px;
+    border: 1px solid #c6c9cf;
+    overflow-y: auto;
+}
+
+/* Aufgaben */
+.task {
+    background: white;
+    padding: 8px;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    border: 1px solid #bbb;
+    cursor: grab;
+}
+
+/* Buttons */
+.button-group {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.save-btn, .logout-btn, .nav-link, .nav-btn {
+    padding: 10px 20px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.save-btn {
+    background: #28a745;
+    color: white;
+}
+
+.save-btn:hover {
+    background: #218838;
+    transform: scale(1.05);
+}
+
+.logout-btn {
+    background: #dc3545;
+    color: white;
+}
+
+.logout-btn:hover {
+    background: #c82333;
+}
+
+.nav-link, .nav-btn {
+    background: #0d6efd;
+    color: white;
+}
+
+.nav-link:hover, .nav-btn:hover {
+    background: #0b5ed7;
+    transform: scale(1.05);
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 10px 0;
+    margin-top: 20px;
+    font-size: 0.9rem;
+    color: #777;
+}
+
+/* Mobile */
+@media (max-width: 800px) {
+    .kanban {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+@media (max-width: 500px) {
+    .kanban {
+        grid-template-columns: 1fr;
+    }
+}

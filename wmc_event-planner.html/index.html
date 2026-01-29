@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projektplaner</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav>
+    <a href="index.html" class="active">📋 Dashboard</a>
+    <a href="projektplanung.html">📊 Projektplanung</a>
+    <a href="info.html">ℹ️ Info</a>
+</nav>
+
+<header>
+    <h1>📋 Projektplaner</h1>
+    <p>Projektplanung zur besseren Organisation</p>
+</header>
+
+<!-- LOGIN -->
+<section id="loginBox" class="form-section">
+    <h2>Login</h2>
+
+    <label>Benutzername</label>
+    <input id="username" type="text">
+
+    <label>Passwort</label>
+    <input id="password" type="password">
+
+    <button onclick="login()">Login</button>
+</section>
+
+<!-- APP -->
+<div id="app" style="display:none;">
+
+<section class="form-section">
+    <h2>Projektinformationen</h2>
+
+    <label>Projektname</label>
+    <input id="projectName" type="text">
+
+    <label>Projektbeschreibung</label>
+    <textarea id="projectDesc" rows="4"></textarea>
+
+    <div class="grid-2">
+        <div>
+            <label>Startdatum</label>
+            <input id="startDate" type="date">
+        </div>
+        <div>
+            <label>Enddatum</label>
+            <input id="endDate" type="date">
+        </div>
+    </div>
+</section>
+
+<section class="form-section">
+    <h2>Meilensteine</h2>
+    <table>
+        <tr>
+            <th>Meilenstein</th>
+            <th>Fälligkeitsdatum</th>
+            <th>Status</th>
+        </tr>
+        <tbody id="milestoneTable">
+            <tr>
+                <td contenteditable="true" onblur="saveAll()">MVP</td>
+                <td><input type="date" onchange="saveAll()"></td>
+                <td contenteditable="true" onblur="saveAll()">In Planung</td>
+            </tr>
+            <tr>
+                <td contenteditable="true" onblur="saveAll()">Release 1.0</td>
+                <td><input type="date" onchange="saveAll()"></td>
+                <td contenteditable="true" onblur="saveAll()">Offen</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<section class="form-section">
+    <h2>Kanban Board</h2>
+
+    <div class="kanban">
+        <div class="col">
+            <h3>To Do</h3>
+            <input id="newTask" placeholder="Neue Aufgabe erstellen"
+                onkeydown="if(event.key==='Enter'){addTask()}">
+            <div class="kanban-box" id="todo"
+                ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        </div>
+
+        <div class="col">
+            <h3>In Progress</h3>
+            <div class="kanban-box" id="progress"
+                ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        </div>
+
+        <div class="col">
+            <h3>Review</h3>
+            <div class="kanban-box" id="review"
+                ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        </div>
+
+        <div class="col">
+            <h3>Done</h3>
+            <div class="kanban-box" id="done"
+                ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        </div>
+    </div>
+
+    <div class="button-group">
+        <button onclick="saveAll()" class="save-btn">💾 Speichern</button>
+        <button onclick="showUserInfo()" class="save-btn" style="background: #17a2b8;">👤 User Info</button>
+        <button onclick="logout()" class="logout-btn">Logout</button>
+    </div>
+</section>
+
+</div>
+
+<footer>
+    <p>© 2025 Projektplaner • HTML, CSS & JavaScript • LocalStorage</p>
+</footer>
+
+<script>
+let currentUser = null;
+let taskId = 0;
+
+// Speicher-Events für automatisches Speichern
+document.addEventListener("change", saveAll);
+document.addEventListener("input", saveAll);
+
+// Speichern beim Schließen des Tabs
+window.addEventListener("beforeunload", () => {
+    if (currentUser) saveAll();
+});
+
+/* LOGIN */
+function login() {
+    const u = username.value.trim();
+    const p = password.value;
+    if (!u || !p) return alert("Bitte alles ausfüllen");
+
+    const users = JSON.parse(localStorage.getItem("users") || "{}");
+
+    // Neuer User - Passwort speichern
+    if (!users[u]) {
+        users[u] = { password: p, data: {} };
+        localStorage.setItem("users", JSON.stringify(users));
+    } else if (users[u].password !== p) {
+        // Bestehendes Passwort - muss korrekt sein
+        return alert("Falsches Passwort");
+    }
+
+    currentUser = u;
+    localStorage.setItem("currentUser", u);
+    
+    console.log("User " + u + " eingeloggt");
+
+    loginBox.style.display = "none";
+    app.style.display = "block";
+    loadAll();
+}
+
+function logout() {
+    console.log("User " + currentUser + " abgeloggt");
+    localStorage.removeItem("currentUser");
+    currentUser = null;
+    username.value = "";
+    password.value = "";
+    loginBox.style.display = "block";
+    app.style.display = "none";
+}
+
+function showUserInfo() {
+    const users = JSON.parse(localStorage.getItem("users") || "{}");
+    const userCount = Object.keys(users).length;
+    const userList = Object.keys(users).join(", ");
+    const currentData = users[currentUser];
+    
+    alert(`👤 User-Information\n\n` +
+          `Aktueller User: ${currentUser}\n` +
+          `Gesamt Benutzer: ${userCount}\n` +
+          `Alle User: ${userList}\n\n` +
+          `Passwort gespeichert: ${currentData?.password ? "✓ Ja" : "✗ Nein"}\n` +
+          `Projekte gespeichert: ${currentData?.data ? "✓ Ja" : "✗ Nein"}`);
+}
+
+/* KANBAN */
+function addTask() {
+    const text = newTask.value.trim();
+    if (!text) return;
+
+    const t = document.createElement("div");
+    t.className = "task";
+    t.textContent = text;
+    t.draggable = true;
+    t.id = "task-" + taskId++;
+    t.ondragstart = drag;
+
+    todo.appendChild(t);
+    newTask.value = "";
+    saveAll();
+}
+
+function allowDrop(e) { 
+    e.preventDefault(); 
+    e.target.style.opacity = "0.8";
+}
+
+function drag(e) { 
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("id", e.target.id); 
+}
+
+function drop(e) {
+    e.preventDefault();
+    e.target.style.opacity = "1";
+    
+    const id = e.dataTransfer.getData("id");
+    const element = document.getElementById(id);
+    
+    if (element) {
+        // Finde die richtige Kanban-Box (parent)
+        let dropTarget = e.target;
+        while (dropTarget && !dropTarget.classList.contains("kanban-box")) {
+            dropTarget = dropTarget.parentElement;
+        }
+        
+        if (dropTarget) {
+            dropTarget.appendChild(element);
+            saveAll();
+        }
+    }
+}
+
+/* STORAGE */
+function saveAll() {
+    if (!currentUser) return;
+    
+    const users = JSON.parse(localStorage.getItem("users"));
+    
+    // Meilensteine aus Tabelle auslesen
+    const milestones = [];
+    document.querySelectorAll("#milestoneTable tr").forEach(row => {
+        const cells = row.querySelectorAll("td, input");
+        if (cells.length === 3) {
+            milestones.push({
+                name: cells[0].textContent || cells[0].value,
+                date: cells[1].value,
+                status: cells[2].textContent || cells[2].value
+            });
+        }
+    });
+    
+    users[currentUser].data = {
+        projectName: projectName.value,
+        projectDesc: projectDesc.value,
+        startDate: startDate.value,
+        endDate: endDate.value,
+        milestones: milestones,
+        todo: todo.innerHTML,
+        progress: progress.innerHTML,
+        review: review.innerHTML,
+        done: done.innerHTML,
+        taskId: taskId
+    };
+    localStorage.setItem("users", JSON.stringify(users));
+}
+
+function loadAll() {
+    const u = JSON.parse(localStorage.getItem("users"))[currentUser].data || {};
+    projectName.value = u.projectName || "";
+    projectDesc.value = u.projectDesc || "";
+    startDate.value = u.startDate || "";
+    endDate.value = u.endDate || "";
+    
+    // Meilensteine laden
+    if (u.milestones && u.milestones.length > 0) {
+        milestoneTable.innerHTML = "";
+        u.milestones.forEach(m => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td contenteditable="true" onblur="saveAll()">${m.name}</td>
+                <td><input type="date" value="${m.date}" onchange="saveAll()"></td>
+                <td contenteditable="true" onblur="saveAll()">${m.status}</td>
+            `;
+            milestoneTable.appendChild(row);
+        });
+    }
+    
+    // Kanban-Aufgaben laden
+    todo.innerHTML = u.todo || "";
+    progress.innerHTML = u.progress || "";
+    review.innerHTML = u.review || "";
+    done.innerHTML = u.done || "";
+    
+    // Task ID wiederherstellen
+    taskId = u.taskId || 0;
+    
+    // Drag-Events für Aufgaben aktivieren
+    document.querySelectorAll(".task").forEach(t => {
+        t.draggable = true;
+        t.ondragstart = drag;
+    });
+}
+
+/* AUTO LOGIN */
+window.onload = () => {
+    const u = localStorage.getItem("currentUser");
+    if (u) {
+        currentUser = u;
+        loginBox.style.display = "none";
+        app.style.display = "block";
+        loadAll();
+    }
+    // Set active nav
+    if (document.querySelector("nav a[href='index.html']")) {
+        document.querySelector("nav a[href='index.html']").classList.add("active");
+    }
+};
+</script>
+
+</body>
+</html>
