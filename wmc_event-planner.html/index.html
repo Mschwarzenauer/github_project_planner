@@ -64,10 +64,15 @@
 <div id="projectDetail" style="display: none;">
 
 <section class="form-section">
-    <h2>Projektinformationen</h2>
+    <h2>📌 Projekt: <span id="projectNameDisplay"></span></h2>
+    <button onclick="goBack()" style="margin-bottom: 15px; background: #6c757d;">← Zurück zur Projektliste</button>
+</section>
+
+<section class="form-section">
+    <h2>ℹ️ Projektinformationen</h2>
 
     <label>Projektname</label>
-    <input id="projectName" type="text" onchange="saveProjectData()">
+    <input id="projectNameInput" type="text" onchange="saveProjectData()">
 
     <label>Projektbeschreibung</label>
     <textarea id="projectDesc" rows="4" onchange="saveProjectData()"></textarea>
@@ -197,22 +202,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // ========== LOGIN & LOGOUT ==========
 function login() {
-    const user = username.value.trim();
-    const pass = password.value.trim();
+    const user = document.getElementById("username").value.trim();
+    const pass = document.getElementById("password").value.trim();
 
     if (!user || !pass) return alert("Benutzername und Passwort erforderlich");
 
     const users = JSON.parse(localStorage.getItem("users") || "{}");
 
     if (users[user] && users[user].password === pass) {
-        // Existierender User
         currentUser = user;
         localStorage.setItem("currentUser", user);
         document.getElementById("loginBox").style.display = "none";
         showApp();
         loadProjectList();
     } else if (!users[user]) {
-        // Neuer User - erstellen
         users[user] = { password: pass, projects: [] };
         localStorage.setItem("users", JSON.stringify(users));
         currentUser = user;
@@ -244,7 +247,7 @@ function loadProjectList() {
     const userData = users[currentUser] || { password: "", projects: [] };
     const projects = userData.projects || [];
 
-    const html = projects.map((pid, idx) => {
+    const html = projects.map((pid) => {
         const p = getProjectById(pid);
         const name = p ? p.name : "Gelöschtes Projekt";
         return `<button onclick="selectProject('${pid}')" style="padding: 10px 20px; background: #0d6efd; color: white; border: none; border-radius: 4px; cursor: pointer;">${name}</button>`;
@@ -303,7 +306,6 @@ function createProject() {
 
     localStorage.setItem("projects", JSON.stringify(projects));
 
-    // User-Liste aktualisieren
     const users = JSON.parse(localStorage.getItem("users") || "{}");
     if (!users[currentUser].projects) users[currentUser].projects = [];
     users[currentUser].projects.push(projectId);
@@ -324,7 +326,6 @@ function deleteProject() {
         delete projects[currentProject];
         localStorage.setItem("projects", JSON.stringify(projects));
 
-        // Aus allen User-Listen entfernen
         const users = JSON.parse(localStorage.getItem("users") || "{}");
         Object.keys(users).forEach(u => {
             if (users[u].projects) {
@@ -353,7 +354,8 @@ function loadProjectData() {
         return;
     }
 
-    document.getElementById("projectName").value = p.name || "";
+    document.getElementById("projectNameDisplay").textContent = p.name;
+    document.getElementById("projectNameInput").value = p.name || "";
     document.getElementById("projectDesc").value = p.description || "";
     document.getElementById("startDate").value = p.startDate || "";
     document.getElementById("endDate").value = p.endDate || "";
@@ -383,7 +385,7 @@ function saveProjectData() {
 
     if (!p) return;
 
-    p.name = document.getElementById("projectName").value;
+    p.name = document.getElementById("projectNameInput").value;
     p.description = document.getElementById("projectDesc").value;
     p.startDate = document.getElementById("startDate").value;
     p.endDate = document.getElementById("endDate").value;
@@ -415,7 +417,7 @@ function saveProjectData() {
     p.kanban = kanban;
 
     localStorage.setItem("projects", JSON.stringify(projects));
-    console.log("Projekt gespeichert:", p.name);
+    console.log("Projekt gespeichert");
 }
 
 // ========== KANBAN ==========
@@ -463,7 +465,6 @@ function drop(e) {
 
     if (!targetBox) return;
 
-    // Task-Element finden und verschieben
     const allTasks = document.querySelectorAll(".task");
     allTasks.forEach(t => {
         if (t.textContent === task) {
@@ -511,10 +512,8 @@ function addMemberToProject() {
 
     if (p.members.includes(username)) return alert("Benutzer ist bereits Mitglied");
 
-    // Mitglied hinzufügen
     p.members.push(username);
 
-    // Projekt zur User-Liste hinzufügen
     if (!users[username].projects) users[username].projects = [];
     if (!users[username].projects.includes(currentProject)) {
         users[username].projects.push(currentProject);
@@ -537,7 +536,6 @@ function removeMember(username) {
 
     p.members = p.members.filter(m => m !== username);
 
-    // Projekt aus User-Liste entfernen
     const users = JSON.parse(localStorage.getItem("users") || "{}");
     if (users[username].projects) {
         users[username].projects = users[username].projects.filter(id => id !== currentProject);

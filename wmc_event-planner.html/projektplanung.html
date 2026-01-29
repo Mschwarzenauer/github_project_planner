@@ -21,11 +21,22 @@
 
 <div id="app">
 
+<!-- Projekt-Wahl (wenn nicht ausgewählt) -->
+<div id="projectSelectView">
+    <section class="form-section">
+        <h2>🎯 Projekt auswählen</h2>
+        <div id="projectList" style="display: flex; gap: 10px; flex-wrap: wrap; margin: 15px 0;">
+        </div>
+    </section>
+</div>
+
+<!-- Projekt-Detail (wenn ausgewählt) -->
+<div id="projectDetailView" style="display: none;">
+
 <!-- Projekt-Info -->
 <section class="form-section">
-    <h2>📌 Aktuelles Projekt</h2>
-    <p><strong>Projekt:</strong> <span id="currentProjectName">-</span></p>
-    <button onclick="backToDashboard()" style="margin-top: 10px; background: #6c757d;">← Zurück zum Dashboard</button>
+    <h2>📌 Aktuelles Projekt: <span id="currentProjectName">-</span></h2>
+    <button onclick="changeProjekt()" style="margin-top: 10px; background: #6c757d;">← Projekt wechseln</button>
 </section>
 
 <!-- Ressourcenplanung -->
@@ -58,11 +69,11 @@
     <div class="grid-2">
         <div>
             <label>Gesamtbudget (€)</label>
-            <input id="totalBudget" type="number" min="0" onchange="saveProjectPlanning()">
+            <input id="totalBudget" type="number" min="0" onchange="updateBudgetDisplay(); saveProjectPlanning()">
         </div>
         <div>
             <label>Bisherige Ausgaben (€)</label>
-            <input id="spentBudget" type="number" min="0" onchange="saveProjectPlanning()">
+            <input id="spentBudget" type="number" min="0" onchange="updateBudgetDisplay(); saveProjectPlanning()">
         </div>
     </div>
 
@@ -127,6 +138,8 @@
     </div>
 </section>
 
+</div><!-- end projectDetailView -->
+
 </div>
 
 <footer>
@@ -139,7 +152,6 @@ let currentProject = null;
 
 document.addEventListener("DOMContentLoaded", () => {
     const u = localStorage.getItem("currentUser");
-    const p = localStorage.getItem("currentProject");
     
     if (!u) {
         window.location.href = "index.html";
@@ -147,21 +159,103 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     
     currentUser = u;
-    currentProject = p;
+    const p = localStorage.getItem("currentProject");
     
-    if (!currentProject) {
-        alert("Bitte wählen Sie zuerst ein Projekt aus");
-        window.location.href = "index.html";
-        return;
+    if (p && getProjectById(p)) {
+        currentProject = p;
+        loadProjectDetail();
+    } else {
+        loadProjectList();
     }
     
-    loadProjectPlanning();
     setActiveNav();
 });
 
 function getProjectById(projectId) {
     const projects = JSON.parse(localStorage.getItem("projects") || "{}");
     return projects[projectId] || null;
+}
+
+function loadProjectList() {
+    const users = JSON.parse(localStorage.getItem("users") || "{}");
+    const userData = users[currentUser] || { password: "", projects: [] };
+    const projects = userData.projects || [];
+
+    const html = projects.map((pid) => {
+        const p = getProjectById(pid);
+        const name = p ? p.name : "Gelöschtes Projekt";
+        return `<button onclick="selectProject('${pid}')" style="padding: 10px 20px; background: #0d6efd; color: white; border: none; border-radius: 4px; cursor: pointer;">${name}</button>`;
+    }).join("");
+
+    document.getElementById("projectList").innerHTML = html || "<p>Keine Projekte. Bitte erstelle eines im Dashboard.</p>";
+    document.getElementById("projectSelectView").style.display = "block";
+    document.getElementById("projectDetailView").style.display = "none";
+}
+
+function selectProject(projectId) {
+    currentProject = projectId;
+    localStorage.setItem("currentProject", projectId);
+    loadProjectDetail();
+}
+
+function changeProjekt() {
+    currentProject = null;
+    localStorage.removeItem("currentProject");
+    loadProjectList();
+}
+
+function loadProjectDetail() {
+    const p = getProjectById(currentProject);
+    if (!p) {
+        alert("Projekt nicht gefunden");
+        loadProjectList();
+        return;
+    }
+
+    document.getElementById("currentProjectName").textContent = p.name;
+    document.getElementById("projectSelectView").style.display = "none";
+    document.getElementById("projectDetailView").style.display = "block";
+
+    const data = p.projectPlanning || {};
+    
+    if (data.team && data.team.length > 0) {
+        document.getElementById("teamTable").innerHTML = "";
+        data.team.forEach(member => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${member.name}</td>
+                <td>${member.role}</td>
+                <td><input type="number" min="0" max="100" value="${member.availability || 100}" onchange="saveProjectPlanning()" style="width: 80px;"></td>
+                <td><button onclick="this.parentElement.parentElement.remove(); saveProjectPlanning();" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">✕</button></td>
+            `;
+            document.getElementById("teamTable").appendChild(row);
+        });
+    }
+
+    document.getElementById("totalBudget").value = data.totalBudget || "";
+    document.getElementById("spentBudget").value = data.spentBudget || "";
+    document.getElementById("budgetDetails").value = data.budgetDetails || "";
+    updateBudgetDisplay();
+
+    document.getElementById("timelineEvents").value = data.timelineEvents || "";
+
+    if (data.risks && data.risks.length > 0) {
+        document.getElementById("riskTable").innerHTML = "";
+        data.risks.forEach(risk => {
+            const row = document.createElement("tr");
+            const bgColor = risk.level === "Hoch" ? "#dc3545" : risk.level === "Mittel" ? "#ffc107" : "#28a745";
+            row.innerHTML = `
+                <td>${risk.name}</td>
+                <td><span style="padding: 4px 8px; border-radius: 4px; color: white; background: ${bgColor};">${risk.level}</span></td>
+                <td><input type="text" placeholder="Maßnahmen" value="${risk.measures || ""}" onchange="saveProjectPlanning()" style="width: 100%;"></td>
+                <td><select onchange="saveProjectPlanning();"><option${risk.status === "Offen" ? " selected" : ""}>Offen</option><option${risk.status === "In Arbeit" ? " selected" : ""}>In Arbeit</option><option${risk.status === "Gelöst" ? " selected" : ""}>Gelöst</option></select></td>
+            `;
+            document.getElementById("riskTable").appendChild(row);
+        });
+    }
+
+    document.getElementById("qualityMetrics").value = data.qualityMetrics || "";
+    document.getElementById("blockers").value = data.blockers || "";
 }
 
 function addTeamMember() {
@@ -263,63 +357,6 @@ function saveProjectPlanning() {
     }
 }
 
-function loadProjectPlanning() {
-    const p = getProjectById(currentProject);
-    if (!p) {
-        alert("Projekt nicht gefunden");
-        window.location.href = "index.html";
-        return;
-    }
-
-    document.getElementById("currentProjectName").textContent = p.name;
-    localStorage.setItem("currentProject", currentProject);
-
-    const data = p.projectPlanning || {};
-    
-    if (data.team && data.team.length > 0) {
-        document.getElementById("teamTable").innerHTML = "";
-        data.team.forEach(member => {
-            const row = document.createElement("tr");
-            row.innerHTML = `
-                <td>${member.name}</td>
-                <td>${member.role}</td>
-                <td><input type="number" min="0" max="100" value="${member.availability || 100}" onchange="saveProjectPlanning()" style="width: 80px;"></td>
-                <td><button onclick="this.parentElement.parentElement.remove(); saveProjectPlanning();" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">✕</button></td>
-            `;
-            document.getElementById("teamTable").appendChild(row);
-        });
-    }
-
-    document.getElementById("totalBudget").value = data.totalBudget || "";
-    document.getElementById("spentBudget").value = data.spentBudget || "";
-    document.getElementById("budgetDetails").value = data.budgetDetails || "";
-    updateBudgetDisplay();
-
-    document.getElementById("timelineEvents").value = data.timelineEvents || "";
-
-    if (data.risks && data.risks.length > 0) {
-        document.getElementById("riskTable").innerHTML = "";
-        data.risks.forEach(risk => {
-            const row = document.createElement("tr");
-            const bgColor = risk.level === "Hoch" ? "#dc3545" : risk.level === "Mittel" ? "#ffc107" : "#28a745";
-            row.innerHTML = `
-                <td>${risk.name}</td>
-                <td><span style="padding: 4px 8px; border-radius: 4px; color: white; background: ${bgColor};">${risk.level}</span></td>
-                <td><input type="text" placeholder="Maßnahmen" value="${risk.measures || ""}" onchange="saveProjectPlanning()" style="width: 100%;"></td>
-                <td><select onchange="saveProjectPlanning();"><option${risk.status === "Offen" ? " selected" : ""}>Offen</option><option${risk.status === "In Arbeit" ? " selected" : ""}>In Arbeit</option><option${risk.status === "Gelöst" ? " selected" : ""}>Gelöst</option></select></td>
-            `;
-            document.getElementById("riskTable").appendChild(row);
-        });
-    }
-
-    document.getElementById("qualityMetrics").value = data.qualityMetrics || "";
-    document.getElementById("blockers").value = data.blockers || "";
-}
-
-function backToDashboard() {
-    window.location.href = "index.html";
-}
-
 function setActiveNav() {
     document.querySelectorAll("nav a").forEach(link => {
         link.classList.remove("active");
@@ -328,13 +365,6 @@ function setActiveNav() {
         }
     });
 }
-
-// Auto-update Budget Display bei Input
-document.addEventListener("change", (e) => {
-    if (e.target.id === "totalBudget" || e.target.id === "spentBudget") {
-        updateBudgetDisplay();
-    }
-});
 </script>
 
 </body>
