@@ -2,16 +2,16 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     background: #f4f6f9;
-    color: #333;
+    color: #059448;
 }
 
 /* Navigation */
 nav {
-    background: #0d6efd;
+    background: #059448;
     padding: 0;
     display: flex;
     gap: 0;
-    border-bottom: 3px solid #0b5ed7;
+    border-bottom: 3px solid #059448;
 }
 
 nav a {
@@ -35,7 +35,7 @@ nav a.active {
 header {
     text-align: center;
     padding: 25px;
-    background: #0d6efd;
+    background: #059448;
     color: white;
 }
 
