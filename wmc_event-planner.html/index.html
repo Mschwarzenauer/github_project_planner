@@ -230,6 +230,7 @@ function logout() {
         currentUser = null;
         currentProject = null;
         localStorage.removeItem("currentUser");
+        localStorage.removeItem("currentProject");
         document.getElementById("loginBox").style.display = "block";
         document.getElementById("app").style.display = "none";
         document.getElementById("username").value = "";
@@ -254,6 +255,7 @@ function loadProjectList() {
 
 function selectProject(projectId) {
     currentProject = projectId;
+    localStorage.setItem("currentProject", projectId);
     loadProjectData();
     document.getElementById("projectList").parentElement.style.display = "none";
     document.getElementById("projectDetail").style.display = "block";
