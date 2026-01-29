@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projektplanung Info</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .info-card {
+            background: white;
+            border-left: 4px solid #0d6efd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .info-card h3 {
+            margin-top: 0;
+            color: #0d6efd;
+        }
+        .steps {
+            list-style: none;
+            padding: 0;
+            counter-reset: step-counter;
+        }
+        .steps li {
+            counter-increment: step-counter;
+            padding: 10px 0 10px 40px;
+            position: relative;
+        }
+        .steps li:before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 10px;
+            background: #0d6efd;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="index.html">📋 Dashboard</a>
+    <a href="projektplanung.html">📊 Projektplanung</a>
+    <a href="info.html" class="active">ℹ️ Info</a>
+</nav>
+
+<header>
+    <h1>ℹ️ Projektplanung Info</h1>
+    <p>Alles Wissenswerte zur erfolgreichen Projektplanung</p>
+</header>
+
+<div id="app">
+
+<!-- Was ist Projektplanung -->
+<section class="form-section">
+    <h2>Was ist Projektplanung?</h2>
+    <div class="info-card">
+        <h3>Definition</h3>
+        <p>Projektplanung ist der Prozess der Vorbereitung und Planung aller Aspekte eines Projekts. Sie umfasst die Definition von Zielen, Ressourcen, Timeline und Risiken, um das Projekt erfolgreich umzusetzen.</p>
+    </div>
+</section>
+
+<!-- Hauptkomponenten -->
+<section class="form-section">
+    <h2>🎯 Hauptkomponenten der Projektplanung</h2>
+    
+    <div class="info-card">
+        <h3>1. Ressourcenplanung</h3>
+        <p><strong>Definition:</strong> Identifikation und Zuweisung von Team-Mitgliedern, Materialien und anderen Ressourcen.</p>
+        <p><strong>Wichtig:</strong></p>
+        <ul>
+            <li>Klare Definition von Rollen und Verantwortlichkeiten</li>
+            <li>Verfügbarkeit und Kapazität der Ressourcen prüfen</li>
+            <li>Skill-Set der Team-Mitglieder berücksichtigen</li>
+        </ul>
+    </div>
+
+    <div class="info-card">
+        <h3>2. Budget-Planung</h3>
+        <p><strong>Definition:</strong> Festlegung und Überwachung aller Projektkosten.</p>
+        <p><strong>Wichtig:</strong></p>
+        <ul>
+            <li>Realistische Kostenschätzung erstellen</li>
+            <li>Puffer für unerwartete Ausgaben einplanen (10-20%)</li>
+            <li>Regelmäßige Kontrolle von IST vs. SOLL Ausgaben</li>
+        </ul>
+    </div>
+
+    <div class="info-card">
+        <h3>3. Timeline & Meilensteine</h3>
+        <p><strong>Definition:</strong> Festlegung von Terminen und wichtigen Projektpunkten.</p>
+        <p><strong>Wichtig:</strong></p>
+        <ul>
+            <li>Realistische Zeitschätzungen</li>
+            <li>Abhängigkeiten zwischen Aufgaben beachten</li>
+            <li>Puffer für Verzögerungen einplanen</li>
+            <li>Regelmäßige Überprüfung und Anpassung</li>
+        </ul>
+    </div>
+
+    <div class="info-card">
+        <h3>4. Risikoanalyse</h3>
+        <p><strong>Definition:</strong> Identifikation und Bewertung potenzieller Probleme.</p>
+        <p><strong>Wichtig:</strong></p>
+        <ul>
+            <li>Alle möglichen Risiken identifizieren</li>
+            <li>Wahrscheinlichkeit und Auswirkung bewerten</li>
+            <li>Maßnahmen zur Risikominderung planen</li>
+            <li>Regelmäßige Überprüfung und Anpassung</li>
+        </ul>
+    </div>
+
+    <div class="info-card">
+        <h3>5. Qualitätskontrolle</h3>
+        <p><strong>Definition:</strong> Sicherung von Qualitätsstandards und Metriken.</p>
+        <p><strong>Wichtig:</strong></p>
+        <ul>
+            <li>Klare Qualitätskriterien definieren</li>
+            <li>Regelmäßige Reviews und Tests durchführen</li>
+            <li>Feedback-Mechanismen etablieren</li>
+            <li>Abhängigkeiten und Blockaden dokumentieren</li>
+        </ul>
+    </div>
+</section>
+
+<!-- Best Practices -->
+<section class="form-section">
+    <h2>✨ Best Practices</h2>
+    
+    <div class="info-card">
+        <h3>Schritte zur erfolgreichen Projektplanung</h3>
+        <ol class="steps">
+            <li><strong>Ziele definieren</strong> - Klare und messbare Projektziele festlegen</li>
+            <li><strong>Scope festlegen</strong> - Was ist im Projekt enthalten, was nicht?</li>
+            <li><strong>Team zusammenstellen</strong> - Richtige Leute mit richtigen Skills</li>
+            <li><strong>Ressourcen planen</strong> - Zeit, Budget und Material kalkulieren</li>
+            <li><strong>Timeline erstellen</strong> - Meilensteine und Termine setzen</li>
+            <li><strong>Risiken identifizieren</strong> - Potenzielle Probleme vorhersehen</li>
+            <li><strong>Kommunikation etablieren</strong> - Regelmäßige Updates und Meetings</li>
+            <li><strong>Monitoring durchführen</strong> - Projektfortschritt überwachen</li>
+            <li><strong>Anpassungen vornehmen</strong> - Plan bei Bedarf aktualisieren</li>
+            <li><strong>Abschluss durchführen</strong> - Lessons Learned festhalten</li>
+        </ol>
+    </div>
+</section>
+
+<!-- Tipps & Tricks -->
+<section class="form-section">
+    <h2>💡 Tipps & Tricks</h2>
+    
+    <div class="info-card">
+        <h3>Zeitmanagement</h3>
+        <ul>
+            <li>Verwende die "Planning Poker" Methode für realistische Zeitschätzungen</li>
+            <li>Addiere 20-30% Buffer zu Zeitschätzungen hinzu</li>
+            <li>Nutze ein Kanban-Board für bessere Visualisierung</li>
+            <li>Wöchentliche Stand-ups durchführen</li>
+        </ul>
+    </div>
+
+    <div class="info-card">
+        <h3>Budget-Management</h3>
+        <ul>
+            <li>Nutze eine detaillierte Kostenaufschlüsselung</li>
+            <li>Überwache Ausgaben monatlich</li>
+            <li>Dokumentiere unerwartete Kosten sofort</li>
+            <li>Kommuniziere Budget-Änderungen zeitig</li>
+        </ul>
+    </div>
+
+    <div class="info-card">
+        <h3>Risikomanagement</h3>
+        <ul>
+            <li>Führe regelmäßige Risikoreviews durch</li>
+            <li>Priorisiere Risiken nach Auswirkung</li>
+            <li>Entwickle konkrete Maßnahmenpläne</li>
+            <li>Designiere einen "Risk Owner" für jedes Risiko</li>
+        </ul>
+    </div>
+
+    <div class="info-card">
+        <h3>Team-Kommunikation</h3>
+        <ul>
+            <li>Klare und häufige Kommunikation ist essentiell</li>
+            <li>Nutze verschiedene Kommunikationskanäle</li>
+            <li>Dokumentiere alle wichtigen Entscheidungen</li>
+            <li>Feedback-Mechanismen etablieren</li>
+        </ul>
+    </div>
+</section>
+
+<!-- Häufige Fehler -->
+<section class="form-section">
+    <h2>⚠️ Häufige Fehler zu vermeiden</h2>
+    
+    <div class="info-card">
+        <h3>Was oft schiefgeht:</h3>
+        <ul>
+            <li>❌ <strong>Unklare Ziele</strong> - Leads zu Verwirrung und falsche Prioritäten</li>
+            <li>❌ <strong>Zu optimistische Zeitschätzungen</strong> - Verschwommene Deadlines</li>
+            <li>❌ <strong>Unzureichendes Budget</strong> - Qualitätsprobleme und Stress</li>
+            <li>❌ <strong>Schlechte Risiko-Identifikation</strong> - Überraschungen während Projekts</li>
+            <li>❌ <strong>Fehlende Kommunikation</strong> - Stakeholder verlieren Vertrauen</li>
+            <li>❌ <strong>Keine Monitoring</strong> - Verlust von Kontrolle</li>
+            <li>❌ <strong>Starre Planung</strong> - Keine Anpassung an neue Anforderungen</li>
+        </ul>
+    </div>
+</section>
+
+<!-- Ressourcen -->
+<section class="form-section">
+    <h2>📚 Weitere Ressourcen</h2>
+    
+    <div class="info-card">
+        <h3>Empfohlene Methoden</h3>
+        <ul>
+            <li><strong>Agile:</strong> Flexibel und iterativ, gut für sich ändernde Anforderungen</li>
+            <li><strong>Waterfall:</strong> Linear und strukturiert, gut für komplexe, aber stabile Projekte</li>
+            <li><strong>Hybrid:</strong> Kombination von Agile und traditionellen Methoden</li>
+            <li><strong>Kanban:</strong> Fokus auf Workflow und kontinuierliche Verbesserung</li>
+        </ul>
+    </div>
+
+    <div class="info-card">
+        <h3>Verwendung dieses Tools</h3>
+        <ul>
+            <li>Nutze das <strong>Dashboard</strong> für dein Kanban-Board und Meilensteine</li>
+            <li>Nutze <strong>Projektplanung</strong> für detaillierte Planung und Tracking</li>
+            <li>Speichere regelmäßig deine Daten mit dem 💾 Button</li>
+            <li>Deine Daten sind sicher in deinem Browser gespeichert (localStorage)</li>
+        </ul>
+    </div>
+</section>
+
+<!-- Navigation Footer -->
+<section class="form-section">
+    <div class="button-group">
+        <a href="index.html" class="nav-link">← Dashboard</a>
+        <a href="projektplanung.html" class="nav-link">→ Projektplanung</a>
+    </div>
+</section>
+
+</div>
+
+<footer>
+    <p>© 2025 Projektplaner • Projektplanung Informationen</p>
+</footer>
+
+<script>
+// Set active nav
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("nav a").forEach(link => {
+        link.classList.remove("active");
+    });
+    document.querySelector("nav a[href='info.html']").classList.add("active");
+});
+</script>
+
+</body>
+</html>
