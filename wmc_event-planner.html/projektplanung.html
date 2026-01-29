@@ -21,9 +21,16 @@
 
 <div id="app">
 
+<!-- Projekt-Info -->
+<section class="form-section">
+    <h2>📌 Aktuelles Projekt</h2>
+    <p><strong>Projekt:</strong> <span id="currentProjectName">-</span></p>
+    <button onclick="backToDashboard()" style="margin-top: 10px; background: #6c757d;">← Zurück zum Dashboard</button>
+</section>
+
 <!-- Ressourcenplanung -->
 <section class="form-section">
-    <h2> Ressourcenplanung</h2>
+    <h2>👥 Ressourcenplanung</h2>
     
     <label>Team-Mitglied hinzufügen</label>
     <div style="display: flex; gap: 10px;">
@@ -46,7 +53,7 @@
 
 <!-- Budget-Planung -->
 <section class="form-section">
-    <h2> Budget-Planung</h2>
+    <h2>💰 Budget-Planung</h2>
     
     <div class="grid-2">
         <div>
@@ -70,7 +77,7 @@
 
 <!-- Timeline -->
 <section class="form-section">
-    <h2> Projekt-Timeline</h2>
+    <h2>📅 Projekt-Timeline</h2>
     
     <label>Wichtige Termine</label>
     <input id="timelineEvents" type="text" placeholder="z.B. Kick-Off: 15.02.2025, Erste Demo: 01.03.2025" onchange="saveProjectPlanning()" style="width: 100%;">
@@ -78,7 +85,7 @@
 
 <!-- Risikoanalyse -->
 <section class="form-section">
-    <h2> Risikoanalyse</h2>
+    <h2>⚠️ Risikoanalyse</h2>
     
     <div style="display: flex; gap: 10px; margin-bottom: 15px;">
         <input id="riskName" type="text" placeholder="Risiko-Beschreibung" style="flex: 2;">
@@ -104,7 +111,7 @@
 
 <!-- Qualitätskontrolle -->
 <section class="form-section">
-    <h2> Qualitätskontrolle</h2>
+    <h2>✅ Qualitätskontrolle</h2>
     
     <label>Qualitäts-Metriken</label>
     <textarea id="qualityMetrics" rows="4" placeholder="Code-Review-Standard, Test-Abdeckung, Performance-Anforderungen..." onchange="saveProjectPlanning()"></textarea>
@@ -116,83 +123,102 @@
 <!-- Navigation Footer -->
 <section class="form-section">
     <div class="button-group">
-        <button onclick="saveProjectPlanning()" class="save-btn"> Speichern</button>
+        <button onclick="saveProjectPlanning()" class="save-btn">💾 Speichern</button>
     </div>
 </section>
 
 </div>
 
 <footer>
-    <p> 2025 Projektplaner  Projektplanung Modul</p>
+    <p>© 2025 Projektplaner • Projektplanung Modul</p>
 </footer>
 
 <script>
 let currentUser = null;
+let currentProject = null;
 
-document.addEventListener("change", saveProjectPlanning);
-document.addEventListener("input", () => updateBudgetDisplay());
-
-window.addEventListener("beforeunload", () => {
-    if (currentUser) saveProjectPlanning();
+document.addEventListener("DOMContentLoaded", () => {
+    const u = localStorage.getItem("currentUser");
+    const p = localStorage.getItem("currentProject");
+    
+    if (!u) {
+        window.location.href = "index.html";
+        return;
+    }
+    
+    currentUser = u;
+    currentProject = p;
+    
+    if (!currentProject) {
+        alert("Bitte wählen Sie zuerst ein Projekt aus");
+        window.location.href = "index.html";
+        return;
+    }
+    
+    loadProjectPlanning();
+    setActiveNav();
 });
 
+function getProjectById(projectId) {
+    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    return projects[projectId] || null;
+}
+
 function addTeamMember() {
-    const name = memberName.value.trim();
-    const role = memberRole.value.trim();
+    const name = document.getElementById("memberName").value.trim();
+    const role = document.getElementById("memberRole").value.trim();
     if (!name || !role) return alert("Bitte Name und Rolle eintragen");
 
     const row = document.createElement("tr");
-    row.innerHTML = '
-        <td>' + name + '</td>
-        <td>' + role + '</td>
+    row.innerHTML = `
+        <td>${name}</td>
+        <td>${role}</td>
         <td><input type="number" min="0" max="100" value="100" onchange="saveProjectPlanning()" style="width: 80px;"></td>
-        <td><button onclick="this.parentElement.parentElement.remove(); saveProjectPlanning();" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;"></button></td>
-    ';
-    teamTable.appendChild(row);
-    memberName.value = "";
-    memberRole.value = "";
+        <td><button onclick="this.parentElement.parentElement.remove(); saveProjectPlanning();" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">✕</button></td>
+    `;
+    document.getElementById("teamTable").appendChild(row);
+    document.getElementById("memberName").value = "";
+    document.getElementById("memberRole").value = "";
     saveProjectPlanning();
 }
 
 function addRisk() {
-    const name = riskName.value.trim();
-    const level = riskLevel.value;
+    const name = document.getElementById("riskName").value.trim();
+    const level = document.getElementById("riskLevel").value;
     if (!name) return alert("Bitte Risiko-Beschreibung eintragen");
 
     const row = document.createElement("tr");
-    row.innerHTML = '
-        <td>' + name + '</td>
-        <td><span style="padding: 4px 8px; border-radius: 4px; color: white; background: ' + (level === 'Hoch' ? '#dc3545' : level === 'Mittel' ? '#ffc107' : '#28a745') + ';">' + level + '</span></td>
+    const bgColor = level === "Hoch" ? "#dc3545" : level === "Mittel" ? "#ffc107" : "#28a745";
+    row.innerHTML = `
+        <td>${name}</td>
+        <td><span style="padding: 4px 8px; border-radius: 4px; color: white; background: ${bgColor};">${level}</span></td>
         <td><input type="text" placeholder="Maßnahmen" onchange="saveProjectPlanning()" style="width: 100%;"></td>
         <td><select onchange="saveProjectPlanning();"><option>Offen</option><option>In Arbeit</option><option>Gelöst</option></select></td>
-    ';
-    riskTable.appendChild(row);
-    riskName.value = "";
+    `;
+    document.getElementById("riskTable").appendChild(row);
+    document.getElementById("riskName").value = "";
     saveProjectPlanning();
 }
 
 function updateBudgetDisplay() {
-    const total = parseInt(totalBudget.value) || 0;
-    const spent = parseInt(spentBudget.value) || 0;
+    const total = parseInt(document.getElementById("totalBudget").value) || 0;
+    const spent = parseInt(document.getElementById("spentBudget").value) || 0;
     const remaining = total - spent;
     const usage = total > 0 ? Math.round((spent / total) * 100) : 0;
 
-    budgetRemaining.textContent = remaining;
-    budgetUsage.textContent = usage;
+    document.getElementById("budgetRemaining").textContent = remaining;
+    document.getElementById("budgetUsage").textContent = usage;
 }
 
 function saveProjectPlanning() {
-    if (!currentUser) return;
+    if (!currentProject) return;
 
     try {
-        const users = JSON.parse(localStorage.getItem("users") || "{}");
+        const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+        const p = projects[currentProject];
         
-        if (!users[currentUser]) {
-            users[currentUser] = { password: "", data: {} };
-        }
-        if (!users[currentUser].data) {
-            users[currentUser].data = {};
-        }
+        if (!p) return;
+        if (!p.projectPlanning) p.projectPlanning = {};
 
         const team = [];
         document.querySelectorAll("#teamTable tr").forEach(row => {
@@ -219,81 +245,80 @@ function saveProjectPlanning() {
             }
         });
 
-        users[currentUser].data.projectPlanning = {
+        p.projectPlanning = {
             team: team,
-            totalBudget: totalBudget.value || "",
-            spentBudget: spentBudget.value || "",
-            budgetDetails: budgetDetails.value || "",
-            timelineEvents: timelineEvents.value || "",
+            totalBudget: document.getElementById("totalBudget").value || "",
+            spentBudget: document.getElementById("spentBudget").value || "",
+            budgetDetails: document.getElementById("budgetDetails").value || "",
+            timelineEvents: document.getElementById("timelineEvents").value || "",
             risks: risks,
-            qualityMetrics: qualityMetrics.value || "",
-            blockers: blockers.value || ""
+            qualityMetrics: document.getElementById("qualityMetrics").value || "",
+            blockers: document.getElementById("blockers").value || ""
         };
 
-        localStorage.setItem("users", JSON.stringify(users));
+        localStorage.setItem("projects", JSON.stringify(projects));
+        console.log("Projektplanung gespeichert");
     } catch (e) {
         console.error("Fehler beim Speichern:", e);
     }
 }
 
 function loadProjectPlanning() {
-    if (!currentUser) return;
-
-    try {
-        const users = JSON.parse(localStorage.getItem("users") || "{}");
-        const data = (users[currentUser]?.data?.projectPlanning) || {};
-        
-        if (data.team && data.team.length > 0) {
-            teamTable.innerHTML = "";
-            data.team.forEach(member => {
-                const row = document.createElement("tr");
-                row.innerHTML = '
-                    <td>' + member.name + '</td>
-                    <td>' + member.role + '</td>
-                    <td><input type="number" min="0" max="100" value="' + (member.availability || 100) + '" onchange="saveProjectPlanning()" style="width: 80px;"></td>
-                    <td><button onclick="this.parentElement.parentElement.remove(); saveProjectPlanning();" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;"></button></td>
-                ';
-                teamTable.appendChild(row);
-            });
-        }
-
-        if (totalBudget) totalBudget.value = data.totalBudget || "";
-        if (spentBudget) spentBudget.value = data.spentBudget || "";
-        if (budgetDetails) budgetDetails.value = data.budgetDetails || "";
-        updateBudgetDisplay();
-
-        if (timelineEvents) timelineEvents.value = data.timelineEvents || "";
-
-        if (data.risks && data.risks.length > 0) {
-            riskTable.innerHTML = "";
-            data.risks.forEach(risk => {
-                const row = document.createElement("tr");
-                const bgColor = risk.level === "Hoch" ? "#dc3545" : risk.level === "Mittel" ? "#ffc107" : "#28a745";
-                row.innerHTML = '
-                    <td>' + risk.name + '</td>
-                    <td><span style="padding: 4px 8px; border-radius: 4px; color: white; background: ' + bgColor + ';">' + risk.level + '</span></td>
-                    <td><input type="text" placeholder="Maßnahmen" value="' + (risk.measures || "") + '" onchange="saveProjectPlanning()" style="width: 100%;"></td>
-                    <td><select onchange="saveProjectPlanning();"><option' + (risk.status === "Offen" ? " selected" : "") + '>Offen</option><option' + (risk.status === "In Arbeit" ? " selected" : "") + '>In Arbeit</option><option' + (risk.status === "Gelöst" ? " selected" : "") + '>Gelöst</option></select></td>
-                ';
-                riskTable.appendChild(row);
-            });
-        }
-
-        if (qualityMetrics) qualityMetrics.value = data.qualityMetrics || "";
-        if (blockers) blockers.value = data.blockers || "";
-    } catch (e) {
-        console.error("Fehler beim Laden:", e);
+    const p = getProjectById(currentProject);
+    if (!p) {
+        alert("Projekt nicht gefunden");
+        window.location.href = "index.html";
+        return;
     }
+
+    document.getElementById("currentProjectName").textContent = p.name;
+    localStorage.setItem("currentProject", currentProject);
+
+    const data = p.projectPlanning || {};
+    
+    if (data.team && data.team.length > 0) {
+        document.getElementById("teamTable").innerHTML = "";
+        data.team.forEach(member => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${member.name}</td>
+                <td>${member.role}</td>
+                <td><input type="number" min="0" max="100" value="${member.availability || 100}" onchange="saveProjectPlanning()" style="width: 80px;"></td>
+                <td><button onclick="this.parentElement.parentElement.remove(); saveProjectPlanning();" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">✕</button></td>
+            `;
+            document.getElementById("teamTable").appendChild(row);
+        });
+    }
+
+    document.getElementById("totalBudget").value = data.totalBudget || "";
+    document.getElementById("spentBudget").value = data.spentBudget || "";
+    document.getElementById("budgetDetails").value = data.budgetDetails || "";
+    updateBudgetDisplay();
+
+    document.getElementById("timelineEvents").value = data.timelineEvents || "";
+
+    if (data.risks && data.risks.length > 0) {
+        document.getElementById("riskTable").innerHTML = "";
+        data.risks.forEach(risk => {
+            const row = document.createElement("tr");
+            const bgColor = risk.level === "Hoch" ? "#dc3545" : risk.level === "Mittel" ? "#ffc107" : "#28a745";
+            row.innerHTML = `
+                <td>${risk.name}</td>
+                <td><span style="padding: 4px 8px; border-radius: 4px; color: white; background: ${bgColor};">${risk.level}</span></td>
+                <td><input type="text" placeholder="Maßnahmen" value="${risk.measures || ""}" onchange="saveProjectPlanning()" style="width: 100%;"></td>
+                <td><select onchange="saveProjectPlanning();"><option${risk.status === "Offen" ? " selected" : ""}>Offen</option><option${risk.status === "In Arbeit" ? " selected" : ""}>In Arbeit</option><option${risk.status === "Gelöst" ? " selected" : ""}>Gelöst</option></select></td>
+            `;
+            document.getElementById("riskTable").appendChild(row);
+        });
+    }
+
+    document.getElementById("qualityMetrics").value = data.qualityMetrics || "";
+    document.getElementById("blockers").value = data.blockers || "";
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    const u = localStorage.getItem("currentUser");
-    if (u) {
-        currentUser = u;
-        loadProjectPlanning();
-    }
-    setActiveNav();
-});
+function backToDashboard() {
+    window.location.href = "index.html";
+}
 
 function setActiveNav() {
     document.querySelectorAll("nav a").forEach(link => {
@@ -303,6 +328,13 @@ function setActiveNav() {
         }
     });
 }
+
+// Auto-update Budget Display bei Input
+document.addEventListener("change", (e) => {
+    if (e.target.id === "totalBudget" || e.target.id === "spentBudget") {
+        updateBudgetDisplay();
+    }
+});
 </script>
 
 </body>
