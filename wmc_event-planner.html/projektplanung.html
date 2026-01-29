@@ -294,14 +294,15 @@ function loadProjectPlanning() {
 }
 
 /* Init */
-let currentUser = localStorage.getItem("currentUser");
+let currentUser = null;
 
-// Set active nav immediately
 document.addEventListener("DOMContentLoaded", () => {
-    setActiveNav();
-    if (currentUser) {
+    const u = localStorage.getItem("currentUser");
+    if (u) {
+        currentUser = u;
         loadProjectPlanning();
     }
+    setActiveNav();
 });
 
 function setActiveNav() {

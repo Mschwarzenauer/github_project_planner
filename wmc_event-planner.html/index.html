@@ -262,13 +262,9 @@ window.onload = () => {
         loadAll();
     }
     // Set active nav
-    const navLinks = document.querySelectorAll("nav a");
-    navLinks.forEach(link => {
-        link.classList.remove("active");
-        if (link.href.includes("index.html") || link.pathname === window.location.pathname) {
-            link.classList.add("active");
-        }
-    });
+    if (document.querySelector("nav a[href='index.html']")) {
+        document.querySelector("nav a[href='index.html']").classList.add("active");
+    }
 };
 </script>
 
