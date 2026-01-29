@@ -152,20 +152,33 @@ let currentProject = null;
 
 document.addEventListener("DOMContentLoaded", () => {
     const u = localStorage.getItem("currentUser");
-    
+
     if (!u) {
+        // Kein eingeloggter Benutzer -> zurück zum Dashboard/Login
         window.location.href = "index.html";
         return;
     }
-    
+
     currentUser = u;
-    const p = localStorage.getItem("currentProject");
-    
+    let p = localStorage.getItem("currentProject");
+
+    // Wenn ein aktuelles Projekt gesetzt ist und existiert, lade es
     if (p && getProjectById(p)) {
         currentProject = p;
         loadProjectDetail();
     } else {
-        loadProjectList();
+        // Versuch, das erste Projekt des Users als Default zu setzen
+        const users = JSON.parse(localStorage.getItem("users") || "{}");
+        const userProjects = (users[currentUser] && users[currentUser].projects) ? users[currentUser].projects : [];
+        if (userProjects.length > 0) {
+            p = userProjects[0];
+            currentProject = p;
+            localStorage.setItem("currentProject", p);
+            loadProjectDetail();
+        } else {
+            // Keine Projekte vorhanden -> zeige Projektliste (oder Hinweis)
+            loadProjectList();
+        }
     }
     
     setActiveNav();
