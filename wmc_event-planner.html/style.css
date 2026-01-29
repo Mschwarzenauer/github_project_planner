@@ -2,16 +2,16 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     background: #f4f6f9;
-    color: #059448;
+    color: #000000;
 }
 
 /* Navigation */
 nav {
-    background: #059448;
+    background: #026d34;
     padding: 0;
     display: flex;
     gap: 0;
-    border-bottom: 3px solid #059448;
+    border-bottom: 3px solid #037217;
 }
 
 nav a {
@@ -24,11 +24,11 @@ nav a {
 }
 
 nav a:hover {
-    background: rgba(0, 0, 0, 0.1);
+    background: #006425;
 }
 
 nav a.active {
-    background: #0b5ed7;
+    background: #006425;
     border-bottom: 3px solid #fff;
 }
 
