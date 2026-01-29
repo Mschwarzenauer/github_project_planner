@@ -192,137 +192,145 @@ function updateBudgetDisplay() {
 
 /* Storage */
 function saveProjectPlanning() {
-    if (!currentUser) return;
+    if (!currentUser) {
+        console.error("Kein User eingeloggt");
+        return;
+    }
 
-    const users = JSON.parse(localStorage.getItem("users"));
-    
-    // Meilensteine aus Tabelle auslesen
-    const milestones = [];
-    document.querySelectorAll("#milestoneTable tr").forEach(row => {
-        const cells = row.querySelectorAll("td, input");
-        if (cells.length === 3) {
-            milestones.push({
-                name: cells[0].textContent || cells[0].value,
-                date: cells[1].value,
-                status: cells[2].textContent || cells[2].value
-            });
+    try {
+        const users = JSON.parse(localStorage.getItem("users") || "{}");
+        
+        // Stelle sicher, dass data Objekt existiert
+        if (!users[currentUser]) {
+            users[currentUser] = { password: "", data: {} };
         }
-    });
-
-    // Team auslesen
-    const team = [];
-    document.querySelectorAll("#teamTable tr").forEach(row => {
-        const cells = row.querySelectorAll("td");
-        if (cells.length >= 3) {
-            team.push({
-                name: cells[0].textContent,
-                role: cells[1].textContent,
-                availability: cells[2].querySelector("input").value
-            });
+        if (!users[currentUser].data) {
+            users[currentUser].data = {};
         }
-    });
 
-    // Risiken auslesen
-    const risks = [];
-    document.querySelectorAll("#riskTable tr").forEach(row => {
-        const cells = row.querySelectorAll("td");
-        if (cells.length >= 4) {
-            risks.push({
-                name: cells[0].textContent,
-                level: cells[1].textContent.trim(),
-                measures: cells[2].querySelector("input").value,
-                status: cells[3].querySelector("select").value
-            });
-        }
-    });
+        // Team auslesen
+        const team = [];
+        document.querySelectorAll("#teamTable tr").forEach(row => {
+            const cells = row.querySelectorAll("td");
+            if (cells.length >= 3) {
+                team.push({
+                    name: cells[0].textContent.trim(),
+                    role: cells[1].textContent.trim(),
+                    availability: cells[2].querySelector("input")?.value || "100"
+                });
+            }
+        });
 
-    // Speichern in Projekt-Daten
-    users[currentUser].data = users[currentUser].data || {};
-    users[currentUser].data.projectPlanning = {
-        team: team,
-        milestones: milestones,
-        totalBudget: totalBudget.value,
-        spentBudget: spentBudget.value,
-        budgetDetails: budgetDetails.value,
-        timelineEvents: timelineEvents.value,
-        risks: risks,
-        qualityMetrics: qualityMetrics.value,
-        blockers: blockers.value
-    };
+        // Risiken auslesen
+        const risks = [];
+        document.querySelectorAll("#riskTable tr").forEach(row => {
+            const cells = row.querySelectorAll("td");
+            if (cells.length >= 4) {
+                const levelCell = cells[1].textContent.trim();
+                risks.push({
+                    name: cells[0].textContent.trim(),
+                    level: levelCell === "Hoch" ? "Hoch" : levelCell === "Mittel" ? "Mittel" : "Niedrig",
+                    measures: cells[2].querySelector("input")?.value || "",
+                    status: cells[3].querySelector("select")?.value || "Offen"
+                });
+            }
+        });
 
-    localStorage.setItem("users", JSON.stringify(users));
+        // Speichern
+        users[currentUser].data.projectPlanning = {
+            team: team,
+            totalBudget: document.getElementById("totalBudget")?.value || "",
+            spentBudget: document.getElementById("spentBudget")?.value || "",
+            budgetDetails: document.getElementById("budgetDetails")?.value || "",
+            timelineEvents: document.getElementById("timelineEvents")?.value || "",
+            risks: risks,
+            qualityMetrics: document.getElementById("qualityMetrics")?.value || "",
+            blockers: document.getElementById("blockers")?.value || ""
+        };
+
+        localStorage.setItem("users", JSON.stringify(users));
+        console.log("Erfolgreich gespeichert:", users[currentUser].data.projectPlanning);
+    } catch (e) {
+        console.error("Fehler beim Speichern:", e);
+    }
 }
 
 function loadProjectPlanning() {
-    const users = JSON.parse(localStorage.getItem("users"));
-    const data = (users[currentUser].data && users[currentUser].data.projectPlanning) || {};
-
-    // Team laden
-    if (data.team && data.team.length > 0) {
-        data.team.forEach(member => {
-            const row = document.createElement("tr");
-            row.innerHTML = `
-                <td>${member.name}</td>
-                <td>${member.role}</td>
-                <td><input type="number" min="0" max="100" value="${member.availability}" onchange="saveProjectPlanning()" style="width: 80px;"></td>
-                <td><button onclick="this.parentElement.parentElement.remove(); saveProjectPlanning();" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">✕</button></td>
-            `;
-            teamTable.appendChild(row);
-        });
+    if (!currentUser) {
+        console.error("Kein User eingeloggt");
+        return;
     }
 
-    // Budget laden
-    totalBudget.value = data.totalBudget || "";
-    spentBudget.value = data.spentBudget || "";
-    budgetDetails.value = data.budgetDetails || "";
-    updateBudgetDisplay();
+    try {
+        const users = JSON.parse(localStorage.getItem("users") || "{}");
+        const data = (users[currentUser]?.data?.projectPlanning) || {};
+        
+        console.log("Lade Projektplanung:", data);
 
-    // Meilensteine laden
-    if (data.milestones && data.milestones.length > 0) {
-        milestoneTable.innerHTML = "";
-        data.milestones.forEach(m => {
-            const row = document.createElement("tr");
-            row.innerHTML = `
-                <td contenteditable="true" onblur="saveProjectPlanning()">${m.name}</td>
-                <td><input type="date" value="${m.date}" onchange="saveProjectPlanning()"></td>
-                <td contenteditable="true" onblur="saveProjectPlanning()">${m.status}</td>
-            `;
-            milestoneTable.appendChild(row);
-        });
+        // Team laden
+        if (data.team && data.team.length > 0) {
+            const teamTable = document.getElementById("teamTable");
+            teamTable.innerHTML = "";
+            data.team.forEach(member => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${member.name}</td>
+                    <td>${member.role}</td>
+                    <td><input type="number" min="0" max="100" value="${member.availability || 100}" onchange="saveProjectPlanning()" style="width: 80px;"></td>
+                    <td><button onclick="this.parentElement.parentElement.remove(); saveProjectPlanning();" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">✕</button></td>
+                `;
+                teamTable.appendChild(row);
+            });
+        }
+
+        // Budget laden
+        const totalBudget = document.getElementById("totalBudget");
+        const spentBudget = document.getElementById("spentBudget");
+        const budgetDetails = document.getElementById("budgetDetails");
+        
+        if (totalBudget) totalBudget.value = data.totalBudget || "";
+        if (spentBudget) spentBudget.value = data.spentBudget || "";
+        if (budgetDetails) budgetDetails.value = data.budgetDetails || "";
+        updateBudgetDisplay();
+
+        // Timeline laden
+        const timelineEvents = document.getElementById("timelineEvents");
+        if (timelineEvents) timelineEvents.value = data.timelineEvents || "";
+
+        // Risiken laden
+        if (data.risks && data.risks.length > 0) {
+            const riskTable = document.getElementById("riskTable");
+            riskTable.innerHTML = "";
+            data.risks.forEach(risk => {
+                const row = document.createElement("tr");
+                const bgColor = risk.level === "Hoch" ? "#dc3545" : risk.level === "Mittel" ? "#ffc107" : "#28a745";
+                row.innerHTML = `
+                    <td>${risk.name}</td>
+                    <td><span style="padding: 4px 8px; border-radius: 4px; color: white; background: ${bgColor};">${risk.level}</span></td>
+                    <td><input type="text" placeholder="Maßnahmen" value="${risk.measures || ""}" onchange="saveProjectPlanning()" style="width: 100%;"></td>
+                    <td><select onchange="saveProjectPlanning();"><option ${risk.status === "Offen" ? "selected" : ""}>Offen</option><option ${risk.status === "In Arbeit" ? "selected" : ""}>In Arbeit</option><option ${risk.status === "Gelöst" ? "selected" : ""}>Gelöst</option></select></td>
+                `;
+                riskTable.appendChild(row);
+            });
+        }
+
+        // Qualität laden
+        const qualityMetrics = document.getElementById("qualityMetrics");
+        const blockers = document.getElementById("blockers");
+        if (qualityMetrics) qualityMetrics.value = data.qualityMetrics || "";
+        if (blockers) blockers.value = data.blockers || "";
+    } catch (e) {
+        console.error("Fehler beim Laden:", e);
     }
-
-    // Timeline laden
-    timelineEvents.value = data.timelineEvents || "";
-
-    // Risiken laden
-    if (data.risks && data.risks.length > 0) {
-        data.risks.forEach(risk => {
-            const row = document.createElement("tr");
-            row.innerHTML = `
-                <td>${risk.name}</td>
-                <td><span style="padding: 4px 8px; border-radius: 4px; color: white; background: ${risk.level === 'Hoch' ? '#dc3545' : risk.level === 'Mittel' ? '#ffc107' : '#28a745'};">${risk.level}</span></td>
-                <td><input type="text" placeholder="Maßnahmen" value="${risk.measures}" onchange="saveProjectPlanning()" style="width: 100%;"></td>
-                <td><select onchange="saveProjectPlanning();"><option ${risk.status === 'Offen' ? 'selected' : ''}>Offen</option><option ${risk.status === 'In Arbeit' ? 'selected' : ''}>In Arbeit</option><option ${risk.status === 'Gelöst' ? 'selected' : ''}>Gelöst</option></select></td>
-            `;
-            riskTable.appendChild(row);
-        });
-    }
-
-    // Qualität laden
-    qualityMetrics.value = data.qualityMetrics || "";
-    blockers.value = data.blockers || "";
 }
 
 /* Init */
 document.addEventListener("DOMContentLoaded", () => {
     const u = localStorage.getItem("currentUser");
-    if (!u) {
-        // Nicht eingeloggt, zur Login-Seite redirect
-        window.location.href = "index.html";
-        return;
+    if (u) {
+        currentUser = u;
+        loadProjectPlanning();
     }
-    currentUser = u;
-    loadProjectPlanning();
     setActiveNav();
 });
 

@@ -256,23 +256,13 @@
 </footer>
 
 <script>
-// Check if logged in
+// Set active nav
 document.addEventListener("DOMContentLoaded", () => {
-    const u = localStorage.getItem("currentUser");
-    if (!u) {
-        // Nicht eingeloggt, zur Login-Seite redirect
-        window.location.href = "index.html";
-        return;
-    }
-    setActiveNav();
-});
-
-function setActiveNav() {
     document.querySelectorAll("nav a").forEach(link => {
         link.classList.remove("active");
     });
     document.querySelector("nav a[href='info.html']").classList.add("active");
-}
+});
 </script>
 
 </body>
