@@ -5,264 +5,134 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Projektplanung Info</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        .info-card {
-            background: white;
-            border-left: 4px solid #0d6efd;
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 6px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .info-card h3 {
-            margin-top: 0;
-            color: #0d6efd;
-        }
-        .steps {
-            list-style: none;
-            padding: 0;
-            counter-reset: step-counter;
-        }
-        .steps li {
-            counter-increment: step-counter;
-            padding: 10px 0 10px 40px;
-            position: relative;
-        }
-        .steps li:before {
-            content: counter(step-counter);
-            position: absolute;
-            left: 0;
-            top: 10px;
-            background: #0d6efd;
-            color: white;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-        }
-    </style>
 </head>
 <body>
 
 <nav>
-    <a href="index.html">­ƒôï Dashboard</a>
-    <a href="projektplanung.html">­ƒôè Projektplanung</a>
-    <a href="info.html" class="active">Ôä╣´©Å Info</a>
+    <a href="index.html"> Dashboard</a>
+    <a href="projektplanung.html"> Projektplanung</a>
+    <a href="info.html" class="active">ℹ Info</a>
 </nav>
 
 <header>
-    <h1>Ôä╣´©Å Projektplanung Info</h1>
-    <p>Alles Wissenswerte zur erfolgreichen Projektplanung</p>
+    <h1>ℹ Projektplanung - Leitfaden</h1>
+    <p>Bewährte Praktiken und Tipps für erfolgreiches Projektmanagement</p>
 </header>
 
-<div id="app">
-
-<!-- Was ist Projektplanung -->
-<section class="form-section">
-    <h2>Was ist Projektplanung?</h2>
-    <div class="info-card">
-        <h3>Definition</h3>
-        <p>Projektplanung ist der Prozess der Vorbereitung und Planung aller Aspekte eines Projekts. Sie umfasst die Definition von Zielen, Ressourcen, Timeline und Risiken, um das Projekt erfolgreich umzusetzen.</p>
-    </div>
-</section>
-
-<!-- Hauptkomponenten -->
-<section class="form-section">
-    <h2>­ƒÄ» Hauptkomponenten der Projektplanung</h2>
+<div class="form-section">
     
-    <div class="info-card">
-        <h3>1. Ressourcenplanung</h3>
-        <p><strong>Definition:</strong> Identifikation und Zuweisung von Team-Mitgliedern, Materialien und anderen Ressourcen.</p>
-        <p><strong>Wichtig:</strong></p>
-        <ul>
-            <li>Klare Definition von Rollen und Verantwortlichkeiten</li>
-            <li>Verf├╝gbarkeit und Kapazit├ñt der Ressourcen pr├╝fen</li>
-            <li>Skill-Set der Team-Mitglieder ber├╝cksichtigen</li>
-        </ul>
+    <h2> Was ist Projektplanung?</h2>
+    <p>Projektplanung ist der Prozess, in dem die Ziele, Scope, Kosten, Ressourcen und Zeitplan eines Projekts definiert und dokumentiert werden. Sie ist das Fundament für erfolgreiches Projektmanagement.</p>
+
+    <h3> Wichtige Planungselemente</h3>
+    <ul>
+        <li><strong>Scope:</strong> Was gehört zum Projekt und was nicht?</li>
+        <li><strong>Ressourcen:</strong> Welche Menschen, Tools und Materialen werden benötigt?</li>
+        <li><strong>Budget:</strong> Wie viel wird das Projekt kosten?</li>
+        <li><strong>Timeline:</strong> Wann wird es fertig sein?</li>
+        <li><strong>Risiken:</strong> Was könnte schief gehen?</li>
+        <li><strong>Qualität:</strong> Welche Standards müssen erfüllt werden?</li>
+    </ul>
+
+    <h2> 10 Best Practices für Projektplanung</h2>
+    <ol>
+        <li><strong>Ziele klar definieren:</strong> SMART-Kriterien verwenden (Spezifisch, Messbar, Annehmbar, Realistisch, Zeitgebunden)</li>
+        <li><strong>Stakeholder einbeziehen:</strong> Erwartungen und Anforderungen frühzeitig klären</li>
+        <li><strong>Realistisch planen:</strong> Buffer für Unerwartetes einplanen (10-20%)</li>
+        <li><strong>Ressourcen sichern:</strong> Verfügbarkeit des Teams vorher klären</li>
+        <li><strong>Risiken analysieren:</strong> Potenzielle Probleme identifizieren und Gegenmaßnahmen planen</li>
+        <li><strong>Meilensteine setzen:</strong> Klare Checkpoints für Fortschritt</li>
+        <li><strong>Kommunikation planen:</strong> Regelmäßige Updates und Reports einbauen</li>
+        <li><strong>Dokumentation:</strong> Alles schriftlich festhalten</li>
+        <li><strong>Flexible bleiben:</strong> Plan bei Bedarf anpassen können</li>
+        <li><strong>Rückblick halten:</strong> Nach dem Projekt Lessons Learned dokumentieren</li>
+    </ol>
+
+    <h2> Häufige Fehler vermeiden</h2>
+    <ul>
+        <li> Zu optimistische Zeitschätzungen</li>
+        <li> Unklare Anforderungen</li>
+        <li> Fehlende Ressourcenplanung</li>
+        <li> Keine Risikokontingenz eingeplant</li>
+        <li> Scope Creep (unkontrollierte Umfangserweiterung)</li>
+        <li> Mangelnde Kommunikation mit dem Team</li>
+        <li> Budget unrealistisch kalkuliert</li>
+        <li> Abhängigkeiten nicht berücksichtigt</li>
+    </ul>
+
+    <h2> Projektmanagement Methodologien</h2>
+
+    <h3> Waterfall (Wasserfallmodell)</h3>
+    <p>Sequentielle Phasen: Anforderungen  Design  Entwicklung  Test  Deployment</p>
+    <p><strong>Geeignet für:</strong> Projekte mit klaren, stabilen Anforderungen (z.B. Infrastruktur-Projekte)</p>
+    <p><strong>Vorteil:</strong> Klare Struktur, einfaches Tracking</p>
+    <p><strong>Nachteil:</strong> Unflexibel, späte Fehleridentifikation</p>
+
+    <h3> Agile / Scrum</h3>
+    <p>Iterative Sprints (1-4 Wochen) mit regelmäßigen Reviews und Anpassungen</p>
+    <p><strong>Geeignet für:</strong> Projekte mit sich ändernden Anforderungen (z.B. Software-Entwicklung)</p>
+    <p><strong>Vorteil:</strong> Flexibel, schnelles Feedback, Team-Kollaboration</p>
+    <p><strong>Nachteil:</strong> Erfordert aktive Stakeholder, schwerer zu budgetieren</p>
+
+    <h3> Kanban</h3>
+    <p>Kontinuierlicher Fluss mit Visualisierung von Aufgaben (To Do, In Progress, Done)</p>
+    <p><strong>Geeignet für:</strong> Laufende Operations, Support-Teams</p>
+    <p><strong>Vorteil:</strong> Einfach zu verstehen, gute Bottleneck-Identifikation</p>
+    <p><strong>Nachteil:</strong> Weniger strukturiert, schwerer für größere Projekte</p>
+
+    <h3> Hybrid-Ansätze</h3>
+    <p>Kombination von Waterfall und Agile je nach Projektphase oder Komponente</p>
+    <p><strong>Beispiel:</strong> Phase 1 (Design) Waterfall, Phase 2-4 (Development) Agile</p>
+
+    <h2> Quick-Tipps für Ihr nächstes Projekt</h2>
+    <div style="background: #e7f3ff; border-left: 4px solid #0d6efd; padding: 15px; margin: 10px 0; border-radius: 4px;">
+        <p> <strong>Tipp 1:</strong> Schreiben Sie die Ziele des Projekts in 1-2 Sätzen auf. Wenn Sie das nicht können, ist die Planung noch nicht reif.</p>
+        <p> <strong>Tipp 2:</strong> Multiplizieren Sie Ihre Zeitschätzungen mit 1,5x. Zeit ist immer knapper als gedacht.</p>
+        <p> <strong>Tipp 3:</strong> Teilen Sie große Projekte in Meilensteine. Ein großes Ziel ist überwältigend, viele kleine sind motivierend.</p>
+        <p> <strong>Tipp 4:</strong> Kommunizieren Sie Risiken früh. Böse Überraschungen am Ende sind schlecht für alle.</p>
+        <p> <strong>Tipp 5:</strong> Feiern Sie Meilensteine mit dem Team. Motivation ist eine Ressource, die man oft vergisst zu budgetieren.</p>
     </div>
 
-    <div class="info-card">
-        <h3>2. Budget-Planung</h3>
-        <p><strong>Definition:</strong> Festlegung und ├£berwachung aller Projektkosten.</p>
-        <p><strong>Wichtig:</strong></p>
-        <ul>
-            <li>Realistische Kostensch├ñtzung erstellen</li>
-            <li>Puffer f├╝r unerwartete Ausgaben einplanen (10-20%)</li>
-            <li>Regelm├ñ├ƒige Kontrolle von IST vs. SOLL Ausgaben</li>
-        </ul>
-    </div>
+    <h2> FAQ - Häufig gestellte Fragen</h2>
 
-    <div class="info-card">
-        <h3>3. Timeline & Meilensteine</h3>
-        <p><strong>Definition:</strong> Festlegung von Terminen und wichtigen Projektpunkten.</p>
-        <p><strong>Wichtig:</strong></p>
-        <ul>
-            <li>Realistische Zeitsch├ñtzungen</li>
-            <li>Abh├ñngigkeiten zwischen Aufgaben beachten</li>
-            <li>Puffer f├╝r Verz├Âgerungen einplanen</li>
-            <li>Regelm├ñ├ƒige ├£berpr├╝fung und Anpassung</li>
-        </ul>
-    </div>
+    <h3>Wie lange sollte die Planungsphase sein?</h3>
+    <p>Als Daumenregel: 10-15% der Gesamtprojektdauer. Bei einem 10-Wochen-Projekt also 1-1,5 Wochen.</p>
 
-    <div class="info-card">
-        <h3>4. Risikoanalyse</h3>
-        <p><strong>Definition:</strong> Identifikation und Bewertung potenzieller Probleme.</p>
-        <p><strong>Wichtig:</strong></p>
-        <ul>
-            <li>Alle m├Âglichen Risiken identifizieren</li>
-            <li>Wahrscheinlichkeit und Auswirkung bewerten</li>
-            <li>Ma├ƒnahmen zur Risikominderung planen</li>
-            <li>Regelm├ñ├ƒige ├£berpr├╝fung und Anpassung</li>
-        </ul>
-    </div>
+    <h3>Was ist ein kritischer Pfad?</h3>
+    <p>Die Abfolge von Aufgaben, bei denen Verzögerungen die gesamte Projektdauer verlängern würde. Diese Aufgaben haben keine Puffer.</p>
 
-    <div class="info-card">
-        <h3>5. Qualit├ñtskontrolle</h3>
-        <p><strong>Definition:</strong> Sicherung von Qualit├ñtsstandards und Metriken.</p>
-        <p><strong>Wichtig:</strong></p>
-        <ul>
-            <li>Klare Qualit├ñtskriterien definieren</li>
-            <li>Regelm├ñ├ƒige Reviews und Tests durchf├╝hren</li>
-            <li>Feedback-Mechanismen etablieren</li>
-            <li>Abh├ñngigkeiten und Blockaden dokumentieren</li>
-        </ul>
-    </div>
-</section>
+    <h3>Wie oft sollte ich den Plan überprüfen?</h3>
+    <p>Mindestens wöchentlich in aktiven Projektphasen, idealerweise täglich in Agile-Projekten.</p>
 
-<!-- Best Practices -->
-<section class="form-section">
-    <h2>Ô£¿ Best Practices</h2>
-    
-    <div class="info-card">
-        <h3>Schritte zur erfolgreichen Projektplanung</h3>
-        <ol class="steps">
-            <li><strong>Ziele definieren</strong> - Klare und messbare Projektziele festlegen</li>
-            <li><strong>Scope festlegen</strong> - Was ist im Projekt enthalten, was nicht?</li>
-            <li><strong>Team zusammenstellen</strong> - Richtige Leute mit richtigen Skills</li>
-            <li><strong>Ressourcen planen</strong> - Zeit, Budget und Material kalkulieren</li>
-            <li><strong>Timeline erstellen</strong> - Meilensteine und Termine setzen</li>
-            <li><strong>Risiken identifizieren</strong> - Potenzielle Probleme vorhersehen</li>
-            <li><strong>Kommunikation etablieren</strong> - Regelm├ñ├ƒige Updates und Meetings</li>
-            <li><strong>Monitoring durchf├╝hren</strong> - Projektfortschritt ├╝berwachen</li>
-            <li><strong>Anpassungen vornehmen</strong> - Plan bei Bedarf aktualisieren</li>
-            <li><strong>Abschluss durchf├╝hren</strong> - Lessons Learned festhalten</li>
-        </ol>
-    </div>
-</section>
+    <h3>Was ist Scope Creep und wie vermeide ich es?</h3>
+    <p>Scope Creep ist die unkontrollierte Ausweitung des Projektumfangs. Vermeide es durch klare Anforderungsdokumentation und einen Change-Control-Prozess.</p>
 
-<!-- Tipps & Tricks -->
-<section class="form-section">
-    <h2>­ƒÆí Tipps & Tricks</h2>
-    
-    <div class="info-card">
-        <h3>Zeitmanagement</h3>
-        <ul>
-            <li>Verwende die "Planning Poker" Methode f├╝r realistische Zeitsch├ñtzungen</li>
-            <li>Addiere 20-30% Buffer zu Zeitsch├ñtzungen hinzu</li>
-            <li>Nutze ein Kanban-Board f├╝r bessere Visualisierung</li>
-            <li>W├Âchentliche Stand-ups durchf├╝hren</li>
-        </ul>
-    </div>
-
-    <div class="info-card">
-        <h3>Budget-Management</h3>
-        <ul>
-            <li>Nutze eine detaillierte Kostenaufschl├╝sselung</li>
-            <li>├£berwache Ausgaben monatlich</li>
-            <li>Dokumentiere unerwartete Kosten sofort</li>
-            <li>Kommuniziere Budget-├änderungen zeitig</li>
-        </ul>
-    </div>
-
-    <div class="info-card">
-        <h3>Risikomanagement</h3>
-        <ul>
-            <li>F├╝hre regelm├ñ├ƒige Risikoreviews durch</li>
-            <li>Priorisiere Risiken nach Auswirkung</li>
-            <li>Entwickle konkrete Ma├ƒnahmenpl├ñne</li>
-            <li>Designiere einen "Risk Owner" f├╝r jedes Risiko</li>
-        </ul>
-    </div>
-
-    <div class="info-card">
-        <h3>Team-Kommunikation</h3>
-        <ul>
-            <li>Klare und h├ñufige Kommunikation ist essentiell</li>
-            <li>Nutze verschiedene Kommunikationskan├ñle</li>
-            <li>Dokumentiere alle wichtigen Entscheidungen</li>
-            <li>Feedback-Mechanismen etablieren</li>
-        </ul>
-    </div>
-</section>
-
-<!-- H├ñufige Fehler -->
-<section class="form-section">
-    <h2>ÔÜá´©Å H├ñufige Fehler zu vermeiden</h2>
-    
-    <div class="info-card">
-        <h3>Was oft schiefgeht:</h3>
-        <ul>
-            <li>ÔØî <strong>Unklare Ziele</strong> - Leads zu Verwirrung und falsche Priorit├ñten</li>
-            <li>ÔØî <strong>Zu optimistische Zeitsch├ñtzungen</strong> - Verschwommene Deadlines</li>
-            <li>ÔØî <strong>Unzureichendes Budget</strong> - Qualit├ñtsprobleme und Stress</li>
-            <li>ÔØî <strong>Schlechte Risiko-Identifikation</strong> - ├£berraschungen w├ñhrend Projekts</li>
-            <li>ÔØî <strong>Fehlende Kommunikation</strong> - Stakeholder verlieren Vertrauen</li>
-            <li>ÔØî <strong>Keine Monitoring</strong> - Verlust von Kontrolle</li>
-            <li>ÔØî <strong>Starre Planung</strong> - Keine Anpassung an neue Anforderungen</li>
-        </ul>
-    </div>
-</section>
-
-<!-- Ressourcen -->
-<section class="form-section">
-    <h2>­ƒôÜ Weitere Ressourcen</h2>
-    
-    <div class="info-card">
-        <h3>Empfohlene Methoden</h3>
-        <ul>
-            <li><strong>Agile:</strong> Flexibel und iterativ, gut f├╝r sich ├ñndernde Anforderungen</li>
-            <li><strong>Waterfall:</strong> Linear und strukturiert, gut f├╝r komplexe, aber stabile Projekte</li>
-            <li><strong>Hybrid:</strong> Kombination von Agile und traditionellen Methoden</li>
-            <li><strong>Kanban:</strong> Fokus auf Workflow und kontinuierliche Verbesserung</li>
-        </ul>
-    </div>
-
-    <div class="info-card">
-        <h3>Verwendung dieses Tools</h3>
-        <ul>
-            <li>Nutze das <strong>Dashboard</strong> f├╝r dein Kanban-Board und Meilensteine</li>
-            <li>Nutze <strong>Projektplanung</strong> f├╝r detaillierte Planung und Tracking</li>
-            <li>Speichere regelm├ñ├ƒig deine Daten mit dem ­ƒÆ¥ Button</li>
-            <li>Deine Daten sind sicher in deinem Browser gespeichert (localStorage)</li>
-        </ul>
-    </div>
-</section>
-
-<!-- Navigation Footer -->
-<section class="form-section">
-    <div class="button-group">
-        <a href="index.html" class="nav-link">ÔåÉ Dashboard</a>
-        <a href="projektplanung.html" class="nav-link">ÔåÆ Projektplanung</a>
-    </div>
-</section>
+    <h3>Wie plane ich Risiken realistisch ein?</h3>
+    <p>Identifiziere Risiken, bewerte ihre Wahrscheinlichkeit (hoch/mittel/niedrig) und Auswirkung, und füge Buffer oder Mitigation-Pläne hinzu.</p>
 
 </div>
 
 <footer>
-    <p>┬® 2025 Projektplaner ÔÇó Projektplanung Informationen</p>
+    <p> 2025 Projektplaner  Info und Leitfäden</p>
 </footer>
 
 <script>
-// Set active nav
 document.addEventListener("DOMContentLoaded", () => {
+    const currentUser = localStorage.getItem("currentUser");
+    if (!currentUser) {
+        window.location.href = "index.html";
+    }
+    setActiveNav();
+});
+
+function setActiveNav() {
     document.querySelectorAll("nav a").forEach(link => {
         link.classList.remove("active");
+        if (link.href.includes("info.html")) {
+            link.classList.add("active");
+        }
     });
-    document.querySelector("nav a[href='info.html']").classList.add("active");
-});
+}
 </script>
 
 </body>
