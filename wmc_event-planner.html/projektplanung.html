@@ -154,8 +154,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const u = localStorage.getItem("currentUser");
 
     if (!u) {
-        // Kein eingeloggter Benutzer -> zurück zum Dashboard/Login
-        window.location.href = "index.html";
+        // Kein eingeloggter Benutzer: zeige Projekt-Auswahl Hinweis, aber redirect nicht automatisch
+        const selectView = document.getElementById("projectSelectView");
+        if (selectView) {
+            selectView.style.display = "block";
+            selectView.insertAdjacentHTML('afterbegin', '<p style="color:#dc3545;">Nicht angemeldet – bitte zuerst im Dashboard anmelden.</p>');
+        }
         return;
     }
 

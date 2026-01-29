@@ -60,7 +60,8 @@ input, textarea {
     padding: 10px;
     margin: 5px 0 15px;
     border-radius: 6px;
-    border: 1px solid #ccc;
+    border: 1px solid #9ad7a7; /* grüner Rand */
+    background: #e9f7ef; /* hellgrüner Hintergrund statt grau/weiß */
 }
 
 .grid-2 {
@@ -95,21 +96,21 @@ th, td {
 }
 
 .kanban-box {
-    background: #eef2f7;
+    background: #e9f7ef; /* hellgrün für Eingabebereiche */
     min-height: 120px;
     border-radius: 8px;
     padding: 10px;
-    border: 1px solid #c6c9cf;
+    border: 1px solid #bfe6c8; /* dezenter grüner Rand */
     overflow-y: auto;
 }
 
 /* Aufgaben */
 .task {
-    background: white;
+    background: #f8fff9; /* leicht grünlich, bleibt dezent */
     padding: 8px;
     margin-bottom: 8px;
     border-radius: 6px;
-    border: 1px solid #bbb;
+    border: 1px solid #cfead4;
     cursor: grab;
 }
 
