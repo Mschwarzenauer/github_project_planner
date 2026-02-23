@@ -477,7 +477,7 @@ function drop(e) {
     div.draggable = true;
     div.textContent = task;
     div.ondragstart = (e) => e.dataTransfer.setData("text", e.target.textContent);
-
+     
     targetBox.appendChild(div);
     saveProjectData();
 }
