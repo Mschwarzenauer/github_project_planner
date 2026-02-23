@@ -35,7 +35,7 @@
 <!-- APP -->
 <div id="app" style="display:none;">
 
-<!-- Projekt-Wahl -->
+<!-- Projektwahl -->
 <section class="form-section">
     <h2>🎯 Meine Projekte</h2>
     <div id="projectList" style="display: flex; gap: 10px; flex-wrap: wrap; margin: 15px 0;">
@@ -359,7 +359,7 @@ function loadProjectData() {
     document.getElementById("projectDesc").value = p.description || "";
     document.getElementById("startDate").value = p.startDate || "";
     document.getElementById("endDate").value = p.endDate || "";
-
+    
     // Meilensteine laden
     const mRows = document.getElementById("milestoneTable").querySelectorAll("tr");
     p.milestones.forEach((m, i) => {
@@ -477,7 +477,7 @@ function drop(e) {
     div.draggable = true;
     div.textContent = task;
     div.ondragstart = (e) => e.dataTransfer.setData("text", e.target.textContent);
-
+     
     targetBox.appendChild(div);
     saveProjectData();
 }
