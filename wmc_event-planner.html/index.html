@@ -359,7 +359,7 @@ function loadProjectData() {
     document.getElementById("projectDesc").value = p.description || "";
     document.getElementById("startDate").value = p.startDate || "";
     document.getElementById("endDate").value = p.endDate || "";
-
+    
     // Meilensteine laden
     const mRows = document.getElementById("milestoneTable").querySelectorAll("tr");
     p.milestones.forEach((m, i) => {
