@@ -39,6 +39,34 @@
     <button onclick="changeProjekt()" style="margin-top: 10px; background: #6c757d;">← Projekt wechseln</button>
 </section>
 
+<!-- Ziele -->
+<section class="form-section">
+    <h2>🎯 Ziele</h2>
+    
+    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+        <input id="goalText" type="text" placeholder="Ziel eingeben" style="flex: 2;">
+        <input id="goalDeadline" type="date" style="flex: 1;">
+        <button onclick="addGoal()" style="padding: 10px 20px;">Hinzufuegen</button>
+    </div>
+    
+    <div id="goalsList" style="display: flex; flex-direction: column; gap: 10px;">
+    </div>
+</section>
+
+<!-- Meilensteine -->
+<section class="form-section">
+    <h2>🏁 Meilensteine</h2>
+    
+    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+        <input id="milestoneText" type="text" placeholder="Meilenstein eingeben" style="flex: 2;">
+        <input id="milestoneDate" type="date" style="flex: 1;">
+        <button onclick="addMilestone()" style="padding: 10px 20px;">Hinzufuegen</button>
+    </div>
+    
+    <div id="milestonesList" style="display: flex; flex-direction: column; gap: 10px;">
+    </div>
+</section>
+
 <!-- Ressourcenplanung -->
 <section class="form-section">
     <h2>👥 Ressourcenplanung</h2>
@@ -133,6 +161,28 @@
 
 <!-- Navigation Footer -->
 <section class="form-section">
+    <h2>✨ KI-Assistent (Gemini)</h2>
+    
+    <div style="padding: 15px; background: #f0f8ff; border-radius: 8px; border-left: 4px solid #0066cc;">
+        <p style="margin: 0 0 10px 0;">💡 Frag die KI nach Projektideen, Best Practices oder Loesungsansaetze!</p>
+        
+        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+            <input id="geminiApiKey" type="password" placeholder="Gemini API Key (optional, fuer KI-Features)" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" onchange="localStorage.setItem('geminiApiKey', this.value);">
+            <button onclick="testGeminiConnection()" style="padding: 8px 15px; background: #0066cc; color: white; border: none; border-radius: 4px; cursor: pointer;">Test</button>
+        </div>
+        
+        <div style="display: flex; gap: 10px;">
+            <input id="aiQuestion" type="text" placeholder="z.B. 'Welche Risiken sollten wir bei diesem Projekt beachten?'" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            <button onclick="askGemini()" style="padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Fragen</button>
+        </div>
+        
+        <div id="aiResponse" style="margin-top: 15px; padding: 10px; background: white; border-radius: 4px; border: 1px solid #ddd; min-height: 60px; max-height: 200px; overflow-y: auto; display: none;">
+        </div>
+    </div>
+</section>
+
+<!-- Navigation Footer -->
+<section class="form-section">
     <div class="button-group">
         <button onclick="saveProjectPlanning()" class="save-btn">💾 Speichern</button>
     </div>
@@ -148,8 +198,14 @@
 
 <script>
 let currentProject = null;
+let currentProjectData = null;
 
 document.addEventListener("DOMContentLoaded", () => {
+    const savedKey = localStorage.getItem("geminiApiKey");
+    if (savedKey) {
+        document.getElementById("geminiApiKey").value = savedKey;
+    }
+    
     loadProjects();
     setActiveNav();
 });
@@ -199,6 +255,7 @@ function loadProjectDetail() {
         return;
     }
 
+    currentProjectData = project;
     document.getElementById("currentProjectName").textContent = project.name;
 
     if (!project.planning) {
@@ -210,9 +267,14 @@ function loadProjectDetail() {
             timelineEvents: "",
             risks: [],
             qualityMetrics: "",
-            blockers: ""
+            blockers: "",
+            goals: [],
+            milestones: []
         };
     }
+    
+    if (!project.planning.goals) project.planning.goals = [];
+    if (!project.planning.milestones) project.planning.milestones = [];
 
     document.getElementById("totalBudget").value = project.planning.totalBudget || "";
     document.getElementById("spentBudget").value = project.planning.spentBudget || "";
@@ -223,6 +285,8 @@ function loadProjectDetail() {
 
     loadTeamMembers();
     loadRisks();
+    loadGoals();
+    loadMilestones();
     updateBudgetDisplay();
 }
 
@@ -385,12 +449,213 @@ function saveProjectPlanning() {
     project.planning.timelineEvents = document.getElementById("timelineEvents").value;
     project.planning.qualityMetrics = document.getElementById("qualityMetrics").value;
     project.planning.blockers = document.getElementById("blockers").value;
+    
+    // Goals und Milestones sind bereits gespeichert bei add/delete/toggle
+    // aber hier nochmal sicherstellen dass sie existieren
+    if (!project.planning.goals) project.planning.goals = [];
+    if (!project.planning.milestones) project.planning.milestones = [];
 
     const projects = JSON.parse(localStorage.getItem("projects") || "{}");
     projects[currentProject] = project;
     localStorage.setItem("projects", JSON.stringify(projects));
 
     console.log("Planung gespeichert!");
+}
+
+// ========== GOALS ==========
+function addGoal() {
+    if (!currentProject) return alert("Waehle zuerst ein Projekt!");
+    
+    const goalText = document.getElementById("goalText").value.trim();
+    const goalDeadline = document.getElementById("goalDeadline").value;
+    
+    if (!goalText) return alert("Ziel-Text erforderlich");
+    
+    const project = getProjectById(currentProject);
+    if (!project || !project.planning) return;
+    
+    if (!project.planning.goals) project.planning.goals = [];
+    
+    project.planning.goals.push({
+        id: "goal_" + Date.now(),
+        text: goalText,
+        deadline: goalDeadline,
+        completed: false
+    });
+    
+    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    projects[currentProject] = project;
+    localStorage.setItem("projects", JSON.stringify(projects));
+    
+    document.getElementById("goalText").value = "";
+    document.getElementById("goalDeadline").value = "";
+    loadGoals();
+}
+
+function loadGoals() {
+    if (!currentProject) return;
+    
+    const project = getProjectById(currentProject);
+    if (!project || !project.planning) return;
+    
+    const goalsList = document.getElementById("goalsList");
+    goalsList.innerHTML = "";
+    
+    (project.planning.goals || []).forEach(goal => {
+        const goalDiv = document.createElement("div");
+        goalDiv.style.cssText = "padding: 10px; background: #fff9e6; border: 1px solid #ffc107; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;";
+        
+        const icon = goal.completed ? "✅" : "🎯";
+        const dateStr = goal.deadline ? `(${goal.deadline})` : "";
+        
+        goalDiv.innerHTML = `<div>
+            <input type="checkbox" ${goal.completed ? "checked" : ""} onchange="toggleGoal('${goal.id}', this.checked)" style="margin-right: 8px;">
+            <span style="text-decoration: ${goal.completed ? "line-through" : "none"};">${icon} ${goal.text} ${dateStr}</span>
+        </div>
+        <button onclick="deleteGoal('${goal.id}')" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer;">Löschen</button>`;
+        
+        goalsList.appendChild(goalDiv);
+    });
+}
+
+function toggleGoal(goalId, completed) {
+    const project = getProjectById(currentProject);
+    if (!project || !project.planning) return;
+    
+    const goal = project.planning.goals.find(g => g.id === goalId);
+    if (goal) {
+        goal.completed = completed;
+        const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+        projects[currentProject] = project;
+        localStorage.setItem("projects", JSON.stringify(projects));
+        loadGoals();
+    }
+}
+
+function deleteGoal(goalId) {
+    const project = getProjectById(currentProject);
+    if (!project || !project.planning) return;
+    
+    project.planning.goals = project.planning.goals.filter(g => g.id !== goalId);
+    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    projects[currentProject] = project;
+    localStorage.setItem("projects", JSON.stringify(projects));
+    loadGoals();
+}
+
+// ========== MILESTONES ==========
+function addMilestone() {
+    if (!currentProject) return alert("Waehle zuerst ein Projekt!");
+    
+    const milestoneText = document.getElementById("milestoneText").value.trim();
+    const milestoneDate = document.getElementById("milestoneDate").value;
+    
+    if (!milestoneText) return alert("Meilenstein-Text erforderlich");
+    
+    const project = getProjectById(currentProject);
+    if (!project || !project.planning) return;
+    
+    if (!project.planning.milestones) project.planning.milestones = [];
+    
+    project.planning.milestones.push({
+        id: "milestone_" + Date.now(),
+        name: milestoneText,
+        date: milestoneDate
+    });
+    
+    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    projects[currentProject] = project;
+    localStorage.setItem("projects", JSON.stringify(projects));
+    
+    document.getElementById("milestoneText").value = "";
+    document.getElementById("milestoneDate").value = "";
+    loadMilestones();
+}
+
+function loadMilestones() {
+    if (!currentProject) return;
+    
+    const project = getProjectById(currentProject);
+    if (!project || !project.planning) return;
+    
+    const milestonesList = document.getElementById("milestonesList");
+    milestonesList.innerHTML = "";
+    
+    (project.planning.milestones || []).forEach(milestone => {
+        const milestoneDiv = document.createElement("div");
+        milestoneDiv.style.cssText = "padding: 10px; background: #fff3e0; border: 1px solid #ff9800; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;";
+        
+        const dateStr = milestone.date ? `(${milestone.date})` : "";
+        
+        milestoneDiv.innerHTML = `<div>
+            🏁 <span>${milestone.name} ${dateStr}</span>
+        </div>
+        <button onclick="deleteMilestone('${milestone.id}')" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer;">Löschen</button>`;
+        
+        milestonesList.appendChild(milestoneDiv);
+    });
+}
+
+function deleteMilestone(milestoneId) {
+    const project = getProjectById(currentProject);
+    if (!project || !project.planning) return;
+    
+    project.planning.milestones = project.planning.milestones.filter(m => m.id !== milestoneId);
+    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    projects[currentProject] = project;
+    localStorage.setItem("projects", JSON.stringify(projects));
+    loadMilestones();
+}
+
+// ========== GEMINI AI ==========
+function testGeminiConnection() {
+    const apiKey = document.getElementById("geminiApiKey").value.trim();
+    if (!apiKey) return alert("Bitte API-Key eingeben!");
+    
+    alert("API-Key gespeichert! Du kannst jetzt Fragen stellen.");
+}
+
+async function askGemini() {
+    const apiKey = document.getElementById("geminiApiKey").value.trim();
+    if (!apiKey) return alert("Bitte zuerst API-Key eingeben!");
+    
+    const question = document.getElementById("aiQuestion").value.trim();
+    if (!question) return alert("Bitte eine Frage eingeben!");
+    
+    const responseDiv = document.getElementById("aiResponse");
+    responseDiv.innerHTML = "🔄 Nachricht wird gesendet...";
+    responseDiv.style.display = "block";
+    
+    try {
+        // Format context from current project
+        let context = "Du bist ein hilfreicher Projektmanagement-Assistent. ";
+        if (currentProjectData) {
+            context += `Aktuelles Projekt: ${currentProjectData.name}. `;
+            if (currentProjectData.description) context += `Beschreibung: ${currentProjectData.description}. `;
+        }
+        
+        const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{ text: context + "Frage: " + question }]
+                }]
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error("API-Fehler: " + response.status);
+        }
+        
+        const data = await response.json();
+        const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Keine Antwort erhalten";
+        
+        responseDiv.innerHTML = `<strong>Antwort:</strong><br>${aiText}`;
+        document.getElementById("aiQuestion").value = "";
+    } catch (error) {
+        responseDiv.innerHTML = `<span style="color: red;">Fehler: ${error.message || "Unbekannter Fehler"}</span>`;
+    }
 }
 
 function setActiveNav() {
