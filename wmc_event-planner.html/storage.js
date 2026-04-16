@@ -249,8 +249,6 @@ window.storageInitPromise = new Promise(async (resolve) => {
 window.waitForStorage = function() {
     // Nutze das Promise, nicht irgendwelche Callbacks
     return window.storageInitPromise;
-}
-    });
 };
 
 console.log("✓ Storage.js geladen (IndexedDB + localStorage hybrid mit GlobalCache)");
