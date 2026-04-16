@@ -155,6 +155,102 @@
     </div>
 </section>
 
+<!-- Ziele & Meilensteine -->
+<section class="form-section">
+    <h2>🎯 Ziele & Planung</h2>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <div>
+            <h3>🎯 Ziele</h3>
+            <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+                <input id="goalText" type="text" placeholder="Ziel eingeben" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                <input id="goalDeadline" type="date" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                <button onclick="addGoal()" style="padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">➕</button>
+            </div>
+            <div id="goalsList" style="display: flex; flex-direction: column; gap: 8px;"></div>
+        </div>
+        
+        <div>
+            <h3>🏁 Meilensteine</h3>
+            <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+                <input id="milestoneTextPlanning" type="text" placeholder="Meilenstein eingeben" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                <input id="milestoneDatePlanning" type="date" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                <button onclick="addMilestonePlanning()" style="padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">➕</button>
+            </div>
+            <div id="milestonesListPlanning" style="display: flex; flex-direction: column; gap: 8px;"></div>
+        </div>
+    </div>
+</section>
+
+<!-- Budget & Team -->
+<section class="form-section">
+    <h2>💰 Budget & Team</h2>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <!-- Budget -->
+        <div>
+            <h3>💰 Budget-Planung</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                <div>
+                    <label>Gesamtbudget (€)</label>
+                    <input id="totalBudget" type="number" min="0" onchange="updateBudgetDisplay(); saveProjectData();" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+                <div>
+                    <label>Ausgegeben (€)</label>
+                    <input id="spentBudget" type="number" min="0" onchange="updateBudgetDisplay(); saveProjectData();" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+            </div>
+            <div style="padding: 10px; background: #f0f0f0; border-radius: 4px;">
+                <p style="margin: 5px 0;"><strong>Verbleibend:</strong> <span id="budgetRemaining">0</span> €</p>
+                <p style="margin: 5px 0;"><strong>Auslastung:</strong> <span id="budgetUsage">0</span>%</p>
+            </div>
+        </div>
+        
+        <!-- Team -->
+        <div>
+            <h3>👥 Team-Mitglieder</h3>
+            <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+                <input id="memberName" type="text" placeholder="Name" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                <input id="memberRole" type="text" placeholder="Rolle" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                <button onclick="addTeamMember()" style="padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">➕</button>
+            </div>
+            <table style="width: 100%; border-collapse: collapse;">
+                <tr style="background: #f0f0f0;">
+                    <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Name</th>
+                    <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Rolle</th>
+                    <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Aktion</th>
+                </tr>
+                <tbody id="teamTable"></tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- Risikoanalyse -->
+<section class="form-section">
+    <h2>⚠️ Risikoanalyse</h2>
+    
+    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+        <input id="riskName" type="text" placeholder="Risiko-Beschreibung" style="flex: 2; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+        <select id="riskLevel" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="Niedrig">Niedrig</option>
+            <option value="Mittel" selected>Mittel</option>
+            <option value="Hoch">Hoch</option>
+        </select>
+        <button onclick="addRisk()" style="padding: 8px 15px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">➕</button>
+    </div>
+    
+    <table style="width: 100%; border-collapse: collapse;">
+        <tr style="background: #ffe5e5;">
+            <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Risiko</th>
+            <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Stufe</th>
+            <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Status</th>
+            <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Aktion</th>
+        </tr>
+        <tbody id="riskTable"></tbody>
+    </table>
+</section>
+
 <!-- Navigation Footer -->
 <section class="form-section">
     <div class="button-group">
@@ -377,7 +473,7 @@ async function deleteProject() {
 
 // ========== DATEN LADEN/SPEICHERN ==========
 async function loadProjectData() {
-    const p = await getProjectById(currentProject);
+    const p = getProjectById(currentProject);
     if (!p) {
         alert("Projekt nicht gefunden");
         goBack();
@@ -390,9 +486,20 @@ async function loadProjectData() {
     document.getElementById("startDate").value = p.startDate || "";
     document.getElementById("endDate").value = p.endDate || "";
 
+    // Budget laden
+    document.getElementById("totalBudget").value = p.planning?.totalBudget || "";
+    document.getElementById("spentBudget").value = p.planning?.spentBudget || "";
+    updateBudgetDisplay();
+
     // Aufgaben und Meilensteine laden
     loadTasks();
     loadMilestones();
+    
+    // Planungs-Features laden
+    loadGoals();
+    loadMilestonesPlanning();
+    loadTeamMembers();
+    loadRisks();
 }
 
 async function saveProjectData() {
@@ -407,6 +514,11 @@ async function saveProjectData() {
     p.description = document.getElementById("projectDesc").value;
     p.startDate = document.getElementById("startDate").value;
     p.endDate = document.getElementById("endDate").value;
+
+    // Planungs-Daten speichern
+    if (!p.planning) p.planning = {};
+    p.planning.totalBudget = parseFloat(document.getElementById("totalBudget").value) || 0;
+    p.planning.spentBudget = parseFloat(document.getElementById("spentBudget").value) || 0;
 
     await saveProjectsData(projects);
     console.log("Projekt gespeichert");
@@ -893,6 +1005,198 @@ function escapeHtml(text) {
         "'": '&#039;'
     };
     return text.replace(/[&<>"']/g, m => map[m]);
+}
+
+// ========== ZIELE ==========
+function addGoal() {
+    if (!currentProject) return;
+    const text = document.getElementById("goalText").value.trim();
+    const deadline = document.getElementById("goalDeadline").value;
+    if (!text) return;
+    
+    const p = getProjectById(currentProject);
+    if (!p.planning) p.planning = {};
+    if (!p.planning.goals) p.planning.goals = [];
+    
+    p.planning.goals.push({ id: "goal_" + Date.now(), text, deadline, completed: false });
+    saveProjectData();
+    document.getElementById("goalText").value = "";
+    document.getElementById("goalDeadline").value = "";
+    loadGoals();
+}
+
+function loadGoals() {
+    const p = getProjectById(currentProject);
+    const goals = p?.planning?.goals || [];
+    const list = document.getElementById("goalsList");
+    list.innerHTML = goals.map(g => `
+        <div style="padding: 8px; background: #fff9e6; border: 1px solid #ffc107; border-radius: 4px; display: flex; gap: 10px; align-items: center;">
+            <input type="checkbox" ${g.completed ? "checked" : ""} onchange="toggleGoal('${g.id}', this.checked)" style="cursor: pointer;">
+            <span style="flex: 1; text-decoration: ${g.completed ? 'line-through' : 'none'};">${escapeHtml(g.text)}${g.deadline ? ` (${g.deadline})` : ''}</span>
+            <button onclick="deleteGoal('${g.id}')" style="padding: 4px 8px; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 0.85rem;">✕</button>
+        </div>
+    `).join("");
+}
+
+function toggleGoal(goalId, completed) {
+    const p = getProjectById(currentProject);
+    const goal = p?.planning?.goals?.find(g => g.id === goalId);
+    if (goal) { goal.completed = completed; saveProjectData(); loadGoals(); }
+}
+
+function deleteGoal(goalId) {
+    const p = getProjectById(currentProject);
+    if (p?.planning?.goals) {
+        p.planning.goals = p.planning.goals.filter(g => g.id !== goalId);
+        saveProjectData();
+        loadGoals();
+    }
+}
+
+// ========== MEILENSTEINE ==========
+function addMilestonePlanning() {
+    if (!currentProject) return;
+    const text = document.getElementById("milestoneTextPlanning").value.trim();
+    const date = document.getElementById("milestoneDatePlanning").value;
+    if (!text) return;
+    
+    const p = getProjectById(currentProject);
+    if (!p.planning) p.planning = {};
+    if (!p.planning.milestones) p.planning.milestones = [];
+    
+    p.planning.milestones.push({ id: "milestone_" + Date.now(), name: text, date });
+    saveProjectData();
+    document.getElementById("milestoneTextPlanning").value = "";
+    document.getElementById("milestoneDatePlanning").value = "";
+    loadMilestonesPlanning();
+}
+
+function loadMilestonesPlanning() {
+    const p = getProjectById(currentProject);
+    const milestones = p?.planning?.milestones || [];
+    const list = document.getElementById("milestonesListPlanning");
+    list.innerHTML = milestones.map(m => `
+        <div style="padding: 8px; background: #fff3e0; border: 1px solid #ff9800; border-radius: 4px; display: flex; gap: 10px; align-items: center;">
+            <span style="flex: 1;">🏁 ${escapeHtml(m.name)}${m.date ? ` (${m.date})` : ''}</span>
+            <button onclick="deleteMilestonePlanning('${m.id}')" style="padding: 4px 8px; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 0.85rem;">✕</button>
+        </div>
+    `).join("");
+}
+
+function deleteMilestonePlanning(milestoneId) {
+    const p = getProjectById(currentProject);
+    if (p?.planning?.milestones) {
+        p.planning.milestones = p.planning.milestones.filter(m => m.id !== milestoneId);
+        saveProjectData();
+        loadMilestonesPlanning();
+    }
+}
+
+// ========== TEAM-MITGLIEDER ==========
+function addTeamMember() {
+    if (!currentProject) return;
+    const name = document.getElementById("memberName").value.trim();
+    const role = document.getElementById("memberRole").value.trim();
+    if (!name || !role) return;
+    
+    const p = getProjectById(currentProject);
+    if (!p.planning) p.planning = {};
+    if (!p.planning.team) p.planning.team = [];
+    
+    p.planning.team.push({ id: "member_" + Date.now(), name, role, availability: 100 });
+    saveProjectData();
+    document.getElementById("memberName").value = "";
+    document.getElementById("memberRole").value = "";
+    loadTeamMembers();
+}
+
+function loadTeamMembers() {
+    const p = getProjectById(currentProject);
+    const team = p?.planning?.team || [];
+    const tbody = document.getElementById("teamTable");
+    tbody.innerHTML = team.map(m => `
+        <tr>
+            <td style="padding: 8px; border: 1px solid #ddd;">${escapeHtml(m.name)}</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">${escapeHtml(m.role)}</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">
+                <button onclick="removeTeamMember('${m.id}')" style="padding: 4px 8px; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 0.85rem;">Löschen</button>
+            </td>
+        </tr>
+    `).join("");
+}
+
+function removeTeamMember(memberId) {
+    const p = getProjectById(currentProject);
+    if (p?.planning?.team) {
+        p.planning.team = p.planning.team.filter(m => m.id !== memberId);
+        saveProjectData();
+        loadTeamMembers();
+    }
+}
+
+// ========== BUDGET ==========
+function updateBudgetDisplay() {
+    const total = parseFloat(document.getElementById("totalBudget").value) || 0;
+    const spent = parseFloat(document.getElementById("spentBudget").value) || 0;
+    const remaining = total - spent;
+    const percentage = total === 0 ? 0 : (spent / total) * 100;
+    document.getElementById("budgetRemaining").textContent = remaining.toFixed(2);
+    document.getElementById("budgetUsage").textContent = percentage.toFixed(0);
+}
+
+// ========== RISIKEN ==========
+function addRisk() {
+    if (!currentProject) return;
+    const name = document.getElementById("riskName").value.trim();
+    const level = document.getElementById("riskLevel").value;
+    if (!name) return;
+    
+    const p = getProjectById(currentProject);
+    if (!p.planning) p.planning = {};
+    if (!p.planning.risks) p.planning.risks = [];
+    
+    p.planning.risks.push({ id: "risk_" + Date.now(), name, level, status: "Offen" });
+    saveProjectData();
+    document.getElementById("riskName").value = "";
+    document.getElementById("riskLevel").value = "Mittel";
+    loadRisks();
+}
+
+function loadRisks() {
+    const p = getProjectById(currentProject);
+    const risks = p?.planning?.risks || [];
+    const tbody = document.getElementById("riskTable");
+    tbody.innerHTML = risks.map(r => `
+        <tr>
+            <td style="padding: 8px; border: 1px solid #ddd;">${escapeHtml(r.name)}</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">${r.level}</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">
+                <select onchange="updateRiskStatus('${r.id}', this.value)" style="padding: 4px;">
+                    <option ${r.status === "Offen" ? "selected" : ""}>Offen</option>
+                    <option ${r.status === "Mitigiert" ? "selected" : ""}>Mitigiert</option>
+                    <option ${r.status === "Gelöst" ? "selected" : ""}>Gelöst</option>
+                </select>
+            </td>
+            <td style="padding: 8px; border: 1px solid #ddd;">
+                <button onclick="deleteRisk('${r.id}')" style="padding: 4px 8px; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 0.85rem;">Löschen</button>
+            </td>
+        </tr>
+    `).join("");
+}
+
+function updateRiskStatus(riskId, status) {
+    const p = getProjectById(currentProject);
+    const risk = p?.planning?.risks?.find(r => r.id === riskId);
+    if (risk) { risk.status = status; saveProjectData(); }
+}
+
+function deleteRisk(riskId) {
+    const p = getProjectById(currentProject);
+    if (p?.planning?.risks) {
+        p.planning.risks = p.planning.risks.filter(r => r.id !== riskId);
+        saveProjectData();
+        loadRisks();
+    }
 }
 
 </script>
