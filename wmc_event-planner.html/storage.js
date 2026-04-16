@@ -160,6 +160,9 @@ async function loadProjectsData() {
 
 // Projekt-Getter (SYNCHRON aus Cache)
 function getProjectById(projectId) {
+    if (Object.keys(GLOBAL_CACHE).length === 0) {
+        getAllProjectsSync();
+    }
     return GLOBAL_CACHE[projectId] || null;
 }
 
@@ -169,13 +172,27 @@ function getAllProjectsSync() {
     if (Object.keys(GLOBAL_CACHE).length === 0) {
         try {
             const fallback = JSON.parse(localStorage.getItem("projects") || "{}");
-            GLOBAL_CACHE = fallback;
-            console.log("✓ Cache aus localStorage geladen:", Object.keys(GLOBAL_CACHE).length, "Projekte");
+            if (Object.keys(fallback).length > 0) {
+                GLOBAL_CACHE = fallback;
+                console.log("✓ Cache aus localStorage geladen:", Object.keys(GLOBAL_CACHE).length, "Projekte");
+            }
         } catch (e) {
             console.warn("localStorage Fallback fehlgeschlagen:", e);
-            return {};
         }
     }
+
+    if (Object.keys(GLOBAL_CACHE).length === 0) {
+        try {
+            const fallback = JSON.parse(window.name || "{}");
+            if (Object.keys(fallback).length > 0) {
+                GLOBAL_CACHE = fallback;
+                console.log("✓ Cache aus window.name geladen:", Object.keys(GLOBAL_CACHE).length, "Projekte");
+            }
+        } catch (e) {
+            console.warn("window.name Fallback fehlgeschlagen:", e);
+        }
+    }
+
     return GLOBAL_CACHE;
 }
 

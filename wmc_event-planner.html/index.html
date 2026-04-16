@@ -10,7 +10,7 @@
 
 <nav>
     <a href="index.html" class="active">📋 Dashboard</a>
-    <a href="projektplanung.html">📊 Projektplanung</a>
+    <a href="projektplanung.html" onclick="syncProjectsToWindowName()">📊 Projektplanung</a>
     <a href="info.html">ℹ️ Info</a>
 </nav>
 
@@ -323,6 +323,17 @@ async function createProject() {
     
     // Projekte neu laden
     await loadProjectList();
+    syncProjectsToWindowName();
+}
+
+function syncProjectsToWindowName() {
+    try {
+        const projects = getAllProjectsSync();
+        window.name = JSON.stringify(projects || {});
+        console.log("✓ window.name für Projektplanung synchronisiert");
+    } catch (e) {
+        console.warn("window.name Sync fehlgeschlagen:", e);
+    }
 }
 
 async function deleteProject() {
