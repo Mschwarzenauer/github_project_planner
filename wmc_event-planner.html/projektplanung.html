@@ -239,14 +239,19 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.getElementById("geminiApiKey").value = savedGeminiKey;
     }
     
-    // Warte auf IndexedDB Initialisierung
-    await new Promise(resolve => {
-        setTimeout(() => {
-            loadProjects();
-            setActiveNav();
-            resolve();
-        }, 500); // Gebe IndexedDB Zeit zu laden
-    });
+    // Warte auf IndexedDB Initialisierung und lade Projektdaten
+    console.log("🔄 Initialisiere storage.js...");
+    if (typeof loadProjectsData === 'function') {
+        try {
+            await loadProjectsData();
+            console.log("✓ IndexedDB Cache gefüllt, lade Projekte...");
+        } catch (e) {
+            console.error("Fehler beim Laden von IndexedDB:", e);
+        }
+    }
+    
+    loadProjects();
+    setActiveNav();
 });
 
 function loadProjects() {
