@@ -602,7 +602,7 @@ async function testApiKeys() {
     if (geminiKey) {
         try {
             // Versuche mehrere Modelle
-            const testModels = ['gemini-pro', 'gemini-1.5-flash'];
+            const testModels = ['gemini-pro'];
             
             for (const model of testModels) {
                 try {
@@ -1961,7 +1961,7 @@ Frage: ${question}
 Bitte antworte hilfreich und bezugnehmend auf das Projekt.`;
     
     // Versuche verschiedene Modelle in dieser Reihenfolge
-    const models = ['gemini-pro', 'gemini-1.5-flash'];
+    const models = ['gemini-pro'];
     let lastError = null;
     
     for (let i = 0; i < models.length; i++) {
@@ -2000,7 +2000,7 @@ Bitte antworte hilfreich und bezugnehmend auf das Projekt.`;
                     continue;
                 }
                 
-                throw new Error(`Gemini API (${model}) Fehler: ${errorData.error?.message || response.status}`);
+                throw new Error(`Gemini API (${model}) Fehler: ${errorData.error?.message || response.status}. Überprüfe deinen API-Key auf https://makersuite.google.com/app/apikey`);
             }
             
             const data = await response.json();
