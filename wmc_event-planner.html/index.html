@@ -220,7 +220,7 @@ async function loadProjectList() {
             projects = {};
         }
     }
-    if (!projects || Object.keys(projects).length === 0 && window.name) {
+    if ((!projects || Object.keys(projects).length === 0) && window.name) {
         try {
             const nameData = JSON.parse(window.name || "{}");
             if (Object.keys(nameData).length > 0) {
@@ -298,6 +298,17 @@ async function createProject() {
 
     try {
         await saveProjectsData(projects);
+        try {
+            localStorage.setItem("projects", JSON.stringify(projects));
+        } catch (localError) {
+            console.warn("Dashboard: localStorage nach Projekt-Erstellung fehlgeschlagen:", localError);
+        }
+        try {
+            window.name = JSON.stringify(projects);
+        } catch (nameError) {
+            console.warn("Dashboard: window.name nach Projekt-Erstellung fehlgeschlagen:", nameError);
+        }
+        console.log("✓ Projekt erstellt und Fallback-Daten gespeichert");
     } catch (e) {
         console.error("Projekt speichern fehlgeschlagen:", e);
         return alert("Projekt konnte nicht erstellt werden. Bitte Seite neu laden und erneut versuchen.");
