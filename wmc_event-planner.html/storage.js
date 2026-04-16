@@ -71,9 +71,16 @@ async function saveProjectsData(projects) {
     } catch (e) {
         console.warn("localStorage write failed:", e);
     }
+
+    // window.name als cross-origin/fallback Speicher
+    try {
+        window.name = JSON.stringify(projects);
+    } catch (e) {
+        console.warn("window.name write failed:", e);
+    }
 }
 
-// Projekte laden (GlobalCache → IndexedDB → localStorage)
+// Projekte laden (GlobalCache → IndexedDB → localStorage → window.name)
 async function loadProjectsData() {
     // Wenn GlobalCache vorhanden, sofort nutzen
     if (Object.keys(GLOBAL_CACHE).length > 0) {
@@ -85,13 +92,27 @@ async function loadProjectsData() {
     const fallbackFromLocal = () => {
         try {
             const fallback = JSON.parse(localStorage.getItem("projects") || "{}");
-            GLOBAL_CACHE = JSON.parse(JSON.stringify(fallback));
-            return fallback;
+            if (Object.keys(fallback).length > 0) {
+                GLOBAL_CACHE = JSON.parse(JSON.stringify(fallback));
+                return fallback;
+            }
         } catch (e) {
             console.warn("localStorage Fallback fehlgeschlagen:", e);
-            GLOBAL_CACHE = {};
-            return {};
         }
+
+        try {
+            const windowFallback = JSON.parse(window.name || "{}");
+            if (Object.keys(windowFallback).length > 0) {
+                GLOBAL_CACHE = JSON.parse(JSON.stringify(windowFallback));
+                console.log("✓ Projekte aus window.name geladen");
+                return windowFallback;
+            }
+        } catch (e) {
+            console.warn("window.name Fallback fehlgeschlagen:", e);
+        }
+
+        GLOBAL_CACHE = {};
+        return {};
     };
 
     // Versuche IndexedDB zuerst

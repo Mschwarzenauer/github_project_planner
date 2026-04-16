@@ -196,9 +196,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     setActiveNav();
 });
 
-window.addEventListener('beforeunload', async () => {
+window.addEventListener('beforeunload', () => {
     try {
-        const projects = await getAllProjects();
+        const projects = getAllProjectsSync();
         window.name = JSON.stringify(projects || {});
     } catch (e) {
         console.warn('window.name Fallback konnte Projekte nicht speichern:', e);
@@ -220,16 +220,15 @@ async function loadProjectList() {
             projects = {};
         }
     }
-    if (!projects || Object.keys(projects).length === 0) {
+    if (!projects || Object.keys(projects).length === 0 && window.name) {
         try {
-            const fallback = JSON.parse(localStorage.getItem("projects") || "{}");
-            projects = fallback;
-            if (Object.keys(projects).length > 0) {
-                console.log("✓ Dashboard: localStorage-Fallback fand Projekte");
+            const nameData = JSON.parse(window.name || "{}");
+            if (Object.keys(nameData).length > 0) {
+                projects = nameData;
+                console.log("✓ Dashboard: window.name-Fallback fand Projekte");
             }
         } catch (e) {
-            console.warn("Dashboard: localStorage-Fallback fehlgeschlagen:", e);
-            projects = {};
+            console.warn("Dashboard: window.name-Fallback fehlgeschlagen:", e);
         }
     }
     const projectIds = Object.keys(projects);
