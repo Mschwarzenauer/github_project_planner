@@ -379,7 +379,6 @@
             <div style="margin-bottom: 15px;">
                 <label style="display: block; margin-bottom: 5px; font-weight: bold;">🤖 KI-Modell auswählen</label>
                 <select id="aiModelSelect" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                    <option value="huggingface">🤗 Hugging Face (Kostenlos) - Nur auf Webserver</option>
                     <option value="gemini">🤖 Gemini (Google) ✅ Empfohlen</option>
                     <option value="deepseek">🧠 DeepSeek (Bezahlt)</option>
                 </select>
@@ -564,7 +563,6 @@ async function testApiKeys() {
     
     let geminiOk = false;
     let deepseekOk = false;
-    let huggingfaceOk = false;
     
     // Teste Hugging Face API
     if (huggingfaceToken) {
@@ -596,8 +594,6 @@ async function testApiKeys() {
         } catch (e) {
             console.warn('Hugging Face API Test fehlgeschlagen:', e);
         }
-    }
-    
     // Teste Gemini API
     if (geminiKey) {
         try {
@@ -672,7 +668,6 @@ async function testApiKeys() {
     // Ergebnis anzeigen
     let message = '';
     const results = [];
-    if (huggingfaceOk) results.push('✅ Hugging Face (Kostenlos)');
     if (geminiOk) results.push('✅ Gemini API');
     if (deepseekOk) results.push('✅ DeepSeek API');
     
@@ -1897,13 +1892,7 @@ async function askAI() {
     if (model === 'gemini') {
         apiKey = localStorage.getItem('gemini_api_key');
         if (!apiKey) {
-            showApiStatus(`❌ Kein Gemini API Key gespeichert. Gib ihn oben ein oder nutze Hugging Face (kostenlos)!`, 'error');
-            return;
-        }
-    } else if (model === 'huggingface') {
-        apiKey = localStorage.getItem('huggingface_token');
-        if (!apiKey) {
-            showApiStatus(`❌ Kein Hugging Face Token gespeichert. Gib ihn oben ein!`, 'error');
+            showApiStatus(`❌ Kein Gemini API Key gespeichert. Gib ihn oben ein!`, 'error');
             return;
         }
     } else if (model === 'deepseek') {
@@ -1923,8 +1912,6 @@ async function askAI() {
         
         if (model === 'gemini') {
             response = await callGeminiAPI(question, apiKey);
-        } else if (model === 'huggingface') {
-            response = await callHuggingFaceAPI(question, apiKey);
         } else {
             response = await callDeepSeekAPI(question, apiKey);
         }
@@ -1982,7 +1969,7 @@ Bitte antworte hilfreich und bezugnehmend auf das Projekt.`;
                     }],
                     generationConfig: {
                         temperature: 0.7,
-                        maxOutputTokens: 2048,
+                        maxOutputTokens: 1000,
                     }
                 })
             });
