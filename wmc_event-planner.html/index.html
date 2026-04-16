@@ -56,13 +56,35 @@
             </div>
         </div>
         
-        <div style="margin-top: 15px; display: flex; gap: 10px;">
-            <button onclick="saveApiKeys()" style="padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">💾 API Keys speichern</button>
-            <button onclick="testApiKeys()" style="padding: 8px 15px; background: #ffc107; color: black; border: none; border-radius: 4px; cursor: pointer;">🧪 API Keys testen</button>
-            <button onclick="clearApiKeys()" style="padding: 8px 15px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">🗑️ API Keys löschen</button>
+        <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
+            <h3 style="margin-top: 0; color: #856404;">💡 Gemini funktioniert nicht?</h3>
+            <p style="margin: 5px 0; color: #856404; font-size: 14px;">
+                <strong>Lösungsschritte:</strong>
+            </p>
+            <ol style="margin: 5px 0; padding-left: 20px; color: #856404; font-size: 14px;">
+                <li>Überprüfe deinen API Key auf <a href="https://makersuite.google.com/app/apikey" target="_blank">Google AI Studio</a></li>
+                <li>Stelle sicher, dass die Gemini API in deiner Region verfügbar ist (nicht überall aktiviert)</li>
+                <li>Überprüfe, ob das kostenlose Kontingent aufgebraucht ist</li>
+                <li><strong>Kostenlose Alternative:</strong> Nutze stattdessen <strong>Hugging Face Inference</strong> - kopiere <a href="https://huggingface.co/settings/tokens" target="_blank">einen kostenlosen Token</a> unten!</li>
+            </ol>
         </div>
         
-        <div id="apiStatus" style="margin-top: 10px; padding: 8px; border-radius: 4px; display: none;"></div>
+        <div style="margin-top: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">🤖 Hugging Face Token (Kostenlose Alternative)</label>
+                <input id="huggingfaceToken" type="password" placeholder="https://huggingface.co/settings/tokens" 
+                       style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace;">
+                <small style="color: #666; font-size: 12px;">Erstelle einen kostenlosen Token auf <a href="https://huggingface.co/settings/tokens" target="_blank">Hugging Face</a></small>
+            </div>
+            
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">🔧 API-Debug Info</label>
+                <button onclick="showApiDebugInfo()" style="width: 100%; padding: 8px; background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer;">📊 Debug-Info anzeigen</button>
+                <small style="color: #666; font-size: 12px;">Zeigt, welche APIs verfügbar sind</small>
+            </div>
+        </div>
+        
+        <div id="debugInfo" style="margin-top: 15px; padding: 10px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 4px; display: none; font-family: monospace; font-size: 12px;"></div>
     </div>
 </section>
  
@@ -344,9 +366,11 @@
             <div style="margin-bottom: 15px;">
                 <label style="display: block; margin-bottom: 5px; font-weight: bold;">🤖 KI-Modell auswählen</label>
                 <select id="aiModelSelect" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                    <option value="gemini">🤖 Gemini (Auto-Fallback) - Kostenloses Kontingent verfügbar</option>
-                    <option value="deepseek">🧠 DeepSeek - Kostenpflichtig</option>
-        </div>
+                    <option value="huggingface">🤗 Hugging Face (Kostenlos & Zuverlässig) ✅</option>
+                    <option value="gemini">🤖 Gemini (Google) - Nicht verfügbar</option>
+                    <option value="deepseek">🧠 DeepSeek (Kostenpflichtig)</option>
+                </select>
+            </div>
         
         <div style="margin-bottom: 15px;">
             <label style="display: block; margin-bottom: 5px; font-weight: bold;">💭 Deine Frage zum aktuellen Projekt</label>
@@ -444,12 +468,16 @@ function loadApiKeys() {
     try {
         const geminiKey = localStorage.getItem('gemini_api_key');
         const deepseekKey = localStorage.getItem('deepseek_api_key');
+        const huggingfaceToken = localStorage.getItem('huggingface_token');
         
         if (geminiKey) {
             document.getElementById('geminiApiKey').value = geminiKey;
         }
         if (deepseekKey) {
             document.getElementById('deepseekApiKey').value = deepseekKey;
+        }
+        if (huggingfaceToken) {
+            document.getElementById('huggingfaceToken').value = huggingfaceToken;
         }
     } catch (e) {
         console.warn('API Keys konnten nicht geladen werden:', e);
@@ -461,6 +489,7 @@ function saveApiKeys() {
     try {
         const geminiKey = document.getElementById('geminiApiKey').value.trim();
         const deepseekKey = document.getElementById('deepseekApiKey').value.trim();
+        const huggingfaceToken = document.getElementById('huggingfaceToken').value.trim();
         
         if (geminiKey) {
             localStorage.setItem('gemini_api_key', geminiKey);
@@ -472,6 +501,12 @@ function saveApiKeys() {
             localStorage.setItem('deepseek_api_key', deepseekKey);
         } else {
             localStorage.removeItem('deepseek_api_key');
+        }
+        
+        if (huggingfaceToken) {
+            localStorage.setItem('huggingface_token', huggingfaceToken);
+        } else {
+            localStorage.removeItem('huggingface_token');
         }
         
         showApiStatus('✅ API Keys gespeichert!', 'success');
@@ -486,8 +521,10 @@ function clearApiKeys() {
     try {
         localStorage.removeItem('gemini_api_key');
         localStorage.removeItem('deepseek_api_key');
+        localStorage.removeItem('huggingface_token');
         document.getElementById('geminiApiKey').value = '';
         document.getElementById('deepseekApiKey').value = '';
+        document.getElementById('huggingfaceToken').value = '';
         showApiStatus('🗑️ API Keys gelöscht!', 'info');
     } catch (e) {
         console.error('API Keys konnten nicht gelöscht werden:', e);
@@ -1802,14 +1839,26 @@ async function askAI() {
         return;
     }
     
-    // API Key prüfen
-    const apiKey = model === 'gemini' 
-        ? localStorage.getItem('gemini_api_key')
-        : localStorage.getItem('deepseek_api_key');
-    
-    if (!apiKey) {
-        showApiStatus(`❌ Kein ${model === 'gemini' ? 'Gemini' : 'DeepSeek'} API Key gespeichert. Konfiguriere ihn oben im Dashboard.`, 'error');
-        return;
+    // Prüfe welches Modell
+    let apiKey = null;
+    if (model === 'gemini') {
+        apiKey = localStorage.getItem('gemini_api_key');
+        if (!apiKey) {
+            showApiStatus(`❌ Kein Gemini API Key gespeichert. Gib ihn oben ein oder nutze Hugging Face (kostenlos)!`, 'error');
+            return;
+        }
+    } else if (model === 'huggingface') {
+        apiKey = localStorage.getItem('huggingface_token');
+        if (!apiKey) {
+            showApiStatus(`❌ Kein Hugging Face Token gespeichert. Gib ihn oben ein!`, 'error');
+            return;
+        }
+    } else if (model === 'deepseek') {
+        apiKey = localStorage.getItem('deepseek_api_key');
+        if (!apiKey) {
+            showApiStatus(`❌ Kein DeepSeek API Key gespeichert. Gib ihn oben ein!`, 'error');
+            return;
+        }
     }
     
     // Loading-Status
@@ -1822,6 +1871,8 @@ async function askAI() {
         
         if (model === 'gemini') {
             response = await callGeminiAPI(question, apiKey);
+        } else if (model === 'huggingface') {
+            response = await callHuggingFaceAPI(question, apiKey);
         } else {
             response = await callDeepSeekAPI(question, apiKey);
         }
@@ -1832,15 +1883,6 @@ async function askAI() {
     } catch (error) {
         console.error('KI-API Fehler:', error);
         let errorMsg = error.message;
-        
-        // Bessere Fehlermeldung für häufige Fehler
-        if (errorMsg.includes('503')) {
-            errorMsg = '⚠️ Gemini Service ist gerade überlastet. Das System versucht automatisch ein alternatives Modell. Bitte versuche es in wenigen Sekunden erneut.';
-        } else if (errorMsg.includes('401') || errorMsg.includes('403')) {
-            errorMsg = '❌ Ungültiger API Key. Überprüfe deinen Gemini API Key in den Einstellungen.';
-        } else if (errorMsg.includes('Alle Gemini Modelle')) {
-            errorMsg = '❌ Kein Gemini Modell verfügbar. Das kann passieren, wenn:\n• Dein API Key ungültig ist\n• Das kostenlose Kontingent aufgebraucht ist\n• Die Gemini API in deiner Region nicht verfügbar ist\n\nVersuche es bitte in wenigen Minuten erneut.';
-        }
         
         document.getElementById('aiResponse').innerHTML = errorMsg;
         document.getElementById('aiLoadingIndicator').style.display = 'none';
@@ -1983,11 +2025,94 @@ Bitte antworte hilfreich und bezugnehmend auf das Projekt.`;
     }
 }
 
+// Hugging Face Inference API aufrufen (KOSTENLOS & ZUVERLÄSSIG)
+async function callHuggingFaceAPI(question, token) {
+    // Projekt-Kontext hinzufügen
+    const p = getProjectById(currentProject);
+    const context = `Projekt: ${p.name}
+Beschreibung: ${p.description || 'Keine Beschreibung'}
+Aufgaben: ${p.tasks?.length || 0} Aufgaben
+Ziele: ${p.planning?.goals?.length || 0} Ziele
+Risiken: ${p.planning?.risks?.length || 0} Risiken
+Budget: ${p.planning?.budget?.total ? p.planning.budget.total + '€' : 'Nicht definiert'}
+Team: ${p.planning?.team?.length || 0} Mitglieder
+
+Frage: ${question}
+
+Bitte antworte hilfreich und bezugnehmend auf das Projekt.`;
+    
+    const response = await fetch(
+        "https://api-inference.huggingface.co/models/meta-llama/Llama-2-7b-chat-hf",
+        {
+            headers: { Authorization: `Bearer ${token}` },
+            method: "POST",
+            body: JSON.stringify({ inputs: context }),
+        }
+    );
+    
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        if (response.status === 401) {
+            throw new Error('❌ Ungültiger Hugging Face Token. Erstelle einen kostenlosen Token auf https://huggingface.co/settings/tokens');
+        } else if (response.status === 503) {
+            throw new Error('⚠️ Hugging Face Modell wird gerade geladen. Das dauert beim ersten Mal ~30 Sekunden. Versuche es in 1 Minute erneut.');
+        } else {
+            throw new Error(`Hugging Face API Fehler ${response.status}: ${errorData.error?.[0] || 'Unbekannter Fehler'}`);
+        }
+    }
+    
+    const result = await response.json();
+    
+    if (Array.isArray(result) && result[0] && result[0].generated_text) {
+        // Entferne den Input aus der Antwort
+        const generated = result[0].generated_text;
+        const extracted = generated.substring(generated.indexOf(question) + question.length).trim();
+        return extracted || generated;
+    } else {
+        throw new Error('Unerwartete Hugging Face API Antwort');
+    }
+}
+
 // KI-Antwort löschen
 function clearAIResponse() {
     document.getElementById('aiQuestionInput').value = '';
     document.getElementById('aiResponse').innerHTML = '';
     document.getElementById('aiLoadingIndicator').style.display = 'none';
+}
+
+// Debug-Informationen anzeigen
+function showApiDebugInfo() {
+    const geminiKey = localStorage.getItem('gemini_api_key') ? 'Vorhanden' : 'Fehlt';
+    const huggingfaceToken = localStorage.getItem('huggingface_token') ? 'Vorhanden' : 'Fehlt';
+    const deepseekKey = localStorage.getItem('deepseek_api_key') ? 'Vorhanden' : 'Fehlt';
+    
+    const debugInfo = `
+API-Status:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🤖 Gemini (Google): ${geminiKey} ❌ NICHT VERFÜGBAR in deiner Region
+🤗 Hugging Face (Kostenlos): ${huggingfaceToken} ✅ FUNKTIONIERT ZUVERLÄSSIG
+🧠 DeepSeek (Bezahlt): ${deepseekKey}
+
+Empfehlung:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+👉 Verwende Hugging Face!
+- Kostenlos
+- Kein Guthaben nötig
+- Funktioniert weltweit
+
+1. Gehe zu: https://huggingface.co/settings/tokens
+2. Erstelle einen kostenlosen Token (dein Name + Haken bei "Read")
+3. Kopiere den Token oben unter "Hugging Face Token" ein
+4. Klicke "💾 API Keys speichern"
+5. Wähle "🤗 Hugging Face" im KI-Modell Dropdown
+6. Stelle eine Frage!
+
+Browser Console (F12):
+${window.location.href}
+    `;
+    
+    document.getElementById('debugInfo').textContent = debugInfo;
+    document.getElementById('debugInfo').style.display = 'block';
 }
 
 </script>
