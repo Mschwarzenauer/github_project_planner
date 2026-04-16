@@ -47,12 +47,18 @@ async function saveProjectsData(projects) {
     // IndexedDB speichern
     if (DB) {
         try {
-            const tx = DB.transaction(["projects"], "readwrite");
-            const store = tx.objectStore("projects");
-            store.clear();
+            await new Promise((resolve, reject) => {
+                const tx = DB.transaction(["projects"], "readwrite");
+                const store = tx.objectStore("projects");
 
-            Object.entries(projects).forEach(([key, item]) => {
-                store.put({ id: key, data: item });
+                tx.oncomplete = () => resolve();
+                tx.onerror = () => reject(tx.error || new Error("IndexedDB transaction failed"));
+                tx.onabort = () => reject(tx.error || new Error("IndexedDB transaction aborted"));
+
+                store.clear();
+                Object.entries(projects).forEach(([key, item]) => {
+                    store.put({ id: key, data: item });
+                });
             });
         } catch (e) {
             console.warn("IndexedDB write failed:", e);
@@ -76,10 +82,22 @@ async function loadProjectsData() {
 
     await initDB();
 
+    const fallbackFromLocal = () => {
+        try {
+            const fallback = JSON.parse(localStorage.getItem("projects") || "{}");
+            GLOBAL_CACHE = JSON.parse(JSON.stringify(fallback));
+            return fallback;
+        } catch (e) {
+            console.warn("localStorage Fallback fehlgeschlagen:", e);
+            GLOBAL_CACHE = {};
+            return {};
+        }
+    };
+
     // Versuche IndexedDB zuerst
     if (DB) {
         try {
-            return new Promise((resolve) => {
+            return await new Promise((resolve) => {
                 const tx = DB.transaction(["projects"], "readonly");
                 const store = tx.objectStore("projects");
                 const request = store.getAll();
@@ -90,50 +108,31 @@ async function loadProjectsData() {
                         projects[item.id] = item.data;
                     });
 
-                    GLOBAL_CACHE = JSON.parse(JSON.stringify(projects));
-
                     if (Object.keys(projects).length > 0) {
+                        GLOBAL_CACHE = JSON.parse(JSON.stringify(projects));
                         console.log("✓ Projekte aus IndexedDB geladen (" + Object.keys(projects).length + " Stück)");
                         resolve(projects);
                     } else {
-                        // Fallback zu localStorage
-                        const fallback = JSON.parse(
-                            localStorage.getItem("projects") || "{}"
-                        );
-                        GLOBAL_CACHE = JSON.parse(JSON.stringify(fallback));
+                        const fallback = fallbackFromLocal();
                         console.log("✓ Projekte aus localStorage geladen (" + Object.keys(fallback).length + " Stück)");
-                        
-                        // localStorage zu IndexedDB synchronisieren
                         if (Object.keys(fallback).length > 0) {
                             saveProjectsData(fallback).catch(e => console.warn("Sync failed:", e));
                         }
-                        
                         resolve(fallback);
                     }
                 };
 
                 request.onerror = () => {
-                    const fallback = JSON.parse(
-                        localStorage.getItem("projects") || "{}"
-                    );
-                    GLOBAL_CACHE = JSON.parse(JSON.stringify(fallback));
-                    resolve(fallback);
+                    resolve(fallbackFromLocal());
                 };
             });
         } catch (e) {
             console.warn("IndexedDB read failed:", e);
-            const fallback = JSON.parse(
-                localStorage.getItem("projects") || "{}"
-            );
-            GLOBAL_CACHE = JSON.parse(JSON.stringify(fallback));
-            return fallback;
+            return fallbackFromLocal();
         }
     }
 
-    // Nur localStorage wenn IndexedDB nicht verfügbar
-    const fallback = JSON.parse(localStorage.getItem("projects") || "{}");
-    GLOBAL_CACHE = JSON.parse(JSON.stringify(fallback));
-    return fallback;
+    return fallbackFromLocal();
 }
 
 // ========== SYNCHRONE CONVENIENCE FUNCTIONS ==========

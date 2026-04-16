@@ -196,9 +196,42 @@ document.addEventListener("DOMContentLoaded", async () => {
     setActiveNav();
 });
 
+window.addEventListener('beforeunload', async () => {
+    try {
+        const projects = await getAllProjects();
+        window.name = JSON.stringify(projects || {});
+    } catch (e) {
+        console.warn('window.name Fallback konnte Projekte nicht speichern:', e);
+    }
+});
+
 // ========== PROJEKT-VERWALTUNG ==========
 async function loadProjectList() {
-    const projects = await getAllProjects();
+    let projects = await getAllProjects();
+    if (!projects || Object.keys(projects).length === 0) {
+        try {
+            const fallback = JSON.parse(localStorage.getItem("projects") || "{}");
+            projects = fallback;
+            if (Object.keys(projects).length > 0) {
+                console.log("✓ Dashboard: localStorage-Fallback fand Projekte");
+            }
+        } catch (e) {
+            console.warn("Dashboard: localStorage-Fallback fehlgeschlagen:", e);
+            projects = {};
+        }
+    }
+    if (!projects || Object.keys(projects).length === 0) {
+        try {
+            const fallback = JSON.parse(localStorage.getItem("projects") || "{}");
+            projects = fallback;
+            if (Object.keys(projects).length > 0) {
+                console.log("✓ Dashboard: localStorage-Fallback fand Projekte");
+            }
+        } catch (e) {
+            console.warn("Dashboard: localStorage-Fallback fehlgeschlagen:", e);
+            projects = {};
+        }
+    }
     const projectIds = Object.keys(projects);
 
     const html = projectIds.map((pid) => {

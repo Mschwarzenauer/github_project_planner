@@ -258,8 +258,31 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 async function loadProjects() {
-    // Nutze asynchrone Datenladung für Browser-Umgebungen
-    const projects = await getAllProjects() || {};
+    let projects = await getAllProjects() || {};
+    if (Object.keys(projects).length === 0) {
+        try {
+            const fallback = JSON.parse(localStorage.getItem("projects") || "{}");
+            projects = fallback;
+            if (Object.keys(projects).length > 0) {
+                console.log("✓ Projektplanung: localStorage-Fallback fand Projekte");
+            }
+        } catch (e) {
+            console.warn("Projektplanung: localStorage-Fallback fehlgeschlagen:", e);
+        }
+    }
+
+    if (Object.keys(projects).length === 0 && window.name) {
+        try {
+            const nameData = JSON.parse(window.name || "{}");
+            if (Object.keys(nameData).length > 0) {
+                projects = nameData;
+                console.log("✓ Projektplanung: window.name-Fallback fand Projekte");
+            }
+        } catch (e) {
+            console.warn("Projektplanung: window.name-Fallback fehlgeschlagen:", e);
+        }
+    }
+
     const projectList = document.getElementById("projectList");
     projectList.innerHTML = "";
 
