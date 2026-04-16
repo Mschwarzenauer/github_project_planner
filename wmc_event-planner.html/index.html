@@ -251,6 +251,43 @@
     </table>
 </section>
 
+<!-- KI-Assistent -->
+<section class="form-section">
+    <h2>🤖 KI-Assistent</h2>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <!-- KI-Aufgaben-Vorschläge -->
+        <div>
+            <h3>💡 KI-Aufgaben-Vorschläge</h3>
+            <button onclick="generateTaskSuggestions()" style="padding: 10px 15px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 10px;">🎯 Aufgaben generieren</button>
+            <div id="taskSuggestions" style="display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto;"></div>
+        </div>
+        
+        <!-- KI-Risiko-Analyse -->
+        <div>
+            <h3>🔍 KI-Risiko-Analyse</h3>
+            <button onclick="analyzeRisksAI()" style="padding: 10px 15px; background: #ffc107; color: black; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 10px;">⚠️ Risiken analysieren</button>
+            <div id="riskAnalysis" style="padding: 10px; background: #f8f9fa; border-radius: 4px; min-height: 100px;"></div>
+        </div>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+        <!-- KI-Budget-Optimierung -->
+        <div>
+            <h3>💰 KI-Budget-Optimierung</h3>
+            <button onclick="optimizeBudgetAI()" style="padding: 10px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 10px;">📊 Budget optimieren</button>
+            <div id="budgetOptimization" style="padding: 10px; background: #f8f9fa; border-radius: 4px; min-height: 100px;"></div>
+        </div>
+        
+        <!-- KI-Zeitplan-Optimierung -->
+        <div>
+            <h3>⏰ KI-Zeitplan-Optimierung</h3>
+            <button onclick="optimizeScheduleAI()" style="padding: 10px 15px; background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 10px;">📅 Zeitplan optimieren</button>
+            <div id="scheduleOptimization" style="padding: 10px; background: #f8f9fa; border-radius: 4px; min-height: 100px;"></div>
+        </div>
+    </div>
+</section>
+
 <!-- Navigation Footer -->
 <section class="form-section">
     <div class="button-group">
@@ -1197,6 +1234,284 @@ function deleteRisk(riskId) {
         saveProjectData();
         loadRisks();
     }
+}
+
+// ========== KI-FUNKTIONEN ==========
+
+// KI-Aufgaben-Vorschläge generieren
+function generateTaskSuggestions() {
+    if (!currentProject) return;
+    
+    const p = getProjectById(currentProject);
+    const suggestions = [];
+    
+    // Basierend auf Projekt-Typ und bestehenden Aufgaben intelligente Vorschläge generieren
+    const projectType = p.name.toLowerCase();
+    const existingTasks = p.tasks || [];
+    const existingTaskNames = existingTasks.map(t => t.title.toLowerCase());
+    
+    // Allgemeine Projekt-Aufgaben
+    if (!existingTaskNames.some(name => name.includes('planung') || name.includes('planning'))) {
+        suggestions.push("📋 Projektplanung erstellen");
+    }
+    if (!existingTaskNames.some(name => name.includes('budget') || name.includes('kosten'))) {
+        suggestions.push("💰 Budget planen und genehmigen");
+    }
+    if (!existingTaskNames.some(name => name.includes('team') || name.includes('mitarbeiter'))) {
+        suggestions.push("👥 Team zusammenstellen");
+    }
+    
+    // Spezifische Vorschläge basierend auf Projekt-Typ
+    if (projectType.includes('event') || projectType.includes('veranstaltung')) {
+        if (!existingTaskNames.some(name => name.includes('location') || name.includes('ort'))) {
+            suggestions.push("📍 Veranstaltungsort buchen");
+        }
+        if (!existingTaskNames.some(name => name.includes('catering') || name.includes('essen'))) {
+            suggestions.push("🍽️ Catering organisieren");
+        }
+        if (!existingTaskNames.some(name => name.includes('marketing') || name.includes('werbung'))) {
+            suggestions.push("📢 Marketing und Werbung planen");
+        }
+    }
+    
+    if (projectType.includes('web') || projectType.includes('website')) {
+        if (!existingTaskNames.some(name => name.includes('design'))) {
+            suggestions.push("🎨 UI/UX Design erstellen");
+        }
+        if (!existingTaskNames.some(name => name.includes('entwicklung') || name.includes('development'))) {
+            suggestions.push("💻 Frontend Entwicklung");
+        }
+        if (!existingTaskNames.some(name => name.includes('test'))) {
+            suggestions.push("🧪 Testing und Qualitätssicherung");
+        }
+    }
+    
+    // Zusätzliche intelligente Vorschläge
+    if (p.planning?.goals && p.planning.goals.length > 0) {
+        suggestions.push("🎯 Ziele überprüfen und anpassen");
+    }
+    if (p.planning?.milestones && p.planning.milestones.length > 0) {
+        suggestions.push("🏁 Meilensteine überwachen");
+    }
+    if (p.planning?.risks && p.planning.risks.length > 0) {
+        suggestions.push("⚠️ Risiken mitigieren");
+    }
+    
+    // Anzeige der Vorschläge
+    const container = document.getElementById("taskSuggestions");
+    container.innerHTML = suggestions.map(suggestion => `
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background: #e9ecef; border-radius: 4px;">
+            <span>${suggestion}</span>
+            <button onclick="addSuggestedTask('${suggestion.replace(/'/g, "\\'")}')" style="padding: 4px 8px; background: #28a745; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 12px;">+</button>
+        </div>
+    `).join("");
+}
+
+// Vorgeschlagene Aufgabe hinzufügen
+function addSuggestedTask(taskText) {
+    if (!currentProject) return;
+    
+    const p = getProjectById(currentProject);
+    if (!p.tasks) p.tasks = [];
+    
+    // Erstelle neue Aufgabe
+    const newTask = {
+        id: "task_" + Date.now(),
+        title: taskText,
+        description: "KI-generierte Aufgabe",
+        status: "todo",
+        priority: "medium",
+        created: new Date().toISOString()
+    };
+    
+    p.tasks.push(newTask);
+    saveProjectData();
+    loadProjectData();
+    
+    // Entferne den Vorschlag aus der Liste
+    const container = document.getElementById("taskSuggestions");
+    const suggestions = Array.from(container.children);
+    const suggestionToRemove = suggestions.find(s => s.textContent.includes(taskText));
+    if (suggestionToRemove) {
+        suggestionToRemove.remove();
+    }
+}
+
+// KI-Risiko-Analyse
+function analyzeRisksAI() {
+    if (!currentProject) return;
+    
+    const p = getProjectById(currentProject);
+    const risks = p?.planning?.risks || [];
+    const tasks = p?.tasks || [];
+    
+    let analysis = "<h4>🤖 KI-Risiko-Bewertung</h4>";
+    
+    if (risks.length === 0) {
+        analysis += "<p>✅ Keine Risiken identifiziert - gut!</p>";
+    } else {
+        const highRisks = risks.filter(r => r.level === 'Hoch');
+        const mediumRisks = risks.filter(r => r.level === 'Mittel');
+        
+        analysis += `<p><strong>Risiko-Übersicht:</strong></p>
+        <ul>
+            <li>Hohe Risiken: ${highRisks.length}</li>
+            <li>Mittlere Risiken: ${mediumRisks.length}</li>
+            <li>Offene Risiken: ${risks.filter(r => r.status === 'Offen').length}</li>
+        </ul>`;
+        
+        if (highRisks.length > 0) {
+            analysis += "<p>⚠️ <strong>Empfehlung:</strong> Hohe Risiken priorisieren und sofort mitigieren.</p>";
+        }
+        
+        if (tasks.length > 10) {
+            analysis += "<p>📊 <strong>Projekt-Komplexität:</strong> Hohe Aufgabenzahl erhöht Risiko von Verzögerungen.</p>";
+        }
+    }
+    
+    // Zusätzliche KI-Empfehlungen
+    analysis += "<p><strong>💡 KI-Empfehlungen:</strong></p><ul>";
+    if (!p.planning?.budget || p.planning.budget.total <= 0) {
+        analysis += "<li>Budget-Risiko: Budget definieren um finanzielle Risiken zu minimieren</li>";
+    }
+    if (!p.planning?.team || p.planning.team.length < 2) {
+        analysis += "<li>Team-Risiko: Mehr Team-Mitglieder für bessere Risiko-Verteilung</li>";
+    }
+    if (tasks.filter(t => t.status === 'todo').length > tasks.length * 0.7) {
+        analysis += "<li>Fortschritts-Risiko: Zu viele offene Aufgaben - Prioritäten setzen</li>";
+    }
+    analysis += "</ul>";
+    
+    document.getElementById("riskAnalysis").innerHTML = analysis;
+}
+
+// KI-Budget-Optimierung
+function optimizeBudgetAI() {
+    if (!currentProject) return;
+    
+    const p = getProjectById(currentProject);
+    const budget = p?.planning?.budget || {};
+    const tasks = p?.tasks || [];
+    const team = p?.planning?.team || [];
+    
+    let optimization = "<h4>🤖 KI-Budget-Analyse</h4>";
+    
+    if (!budget.total || budget.total <= 0) {
+        optimization += "<p>❌ Kein Budget definiert - Budget zuerst festlegen!</p>";
+        document.getElementById("budgetOptimization").innerHTML = optimization;
+        return;
+    }
+    
+    const spent = budget.spent || 0;
+    const remaining = budget.total - spent;
+    const usagePercent = (spent / budget.total) * 100;
+    
+    optimization += `<p><strong>Aktuelle Budget-Situation:</strong></p>
+    <ul>
+        <li>Gesamtbudget: ${budget.total}€</li>
+        <li>Ausgegeben: ${spent}€ (${usagePercent.toFixed(1)}%)</li>
+        <li>Verbleibend: ${remaining}€</li>
+    </ul>`;
+    
+    // KI-basierte Empfehlungen
+    optimization += "<p><strong>💡 KI-Optimierungsvorschläge:</strong></p><ul>";
+    
+    if (usagePercent > 80) {
+        optimization += "<li>⚠️ Budget-Alarm: Über 80% verbraucht - Ausgaben überprüfen!</li>";
+    }
+    
+    if (team.length > 0) {
+        const avgCostPerMember = budget.total / team.length;
+        optimization += `<li>👥 Team-Kosten: ~${avgCostPerMember.toFixed(0)}€ pro Team-Mitglied budgetiert</li>`;
+    }
+    
+    if (tasks.length > 0) {
+        const avgCostPerTask = budget.total / tasks.length;
+        optimization += `<li>📋 Aufgaben-Kosten: ~${avgCostPerTask.toFixed(0)}€ pro Aufgabe budgetiert</li>`;
+    }
+    
+    if (remaining > budget.total * 0.3) {
+        optimization += "<li>💰 Sparpotenzial: Noch 30%+ Budget verfügbar - für unerwartete Kosten reservieren</li>";
+    }
+    
+    if (p.planning?.risks && p.planning.risks.some(r => r.level === 'Hoch')) {
+        optimization += "<li>⚠️ Risiko-Puffer: Hohe Risiken erfordern Budget-Reserven</li>";
+    }
+    
+    optimization += "</ul>";
+    
+    document.getElementById("budgetOptimization").innerHTML = optimization;
+}
+
+// KI-Zeitplan-Optimierung
+function optimizeScheduleAI() {
+    if (!currentProject) return;
+    
+    const p = getProjectById(currentProject);
+    const tasks = p?.tasks || [];
+    const milestones = p?.planning?.milestones || [];
+    const goals = p?.planning?.goals || [];
+    
+    let optimization = "<h4>🤖 KI-Zeitplan-Analyse</h4>";
+    
+    if (tasks.length === 0) {
+        optimization += "<p>❌ Keine Aufgaben definiert - Aufgaben zuerst erstellen!</p>";
+        document.getElementById("scheduleOptimization").innerHTML = optimization;
+        return;
+    }
+    
+    const todoTasks = tasks.filter(t => t.status === 'todo');
+    const inProgressTasks = tasks.filter(t => t.status === 'in-progress');
+    const doneTasks = tasks.filter(t => t.status === 'done');
+    
+    optimization += `<p><strong>Aktueller Projekt-Status:</strong></p>
+    <ul>
+        <li>Offene Aufgaben: ${todoTasks.length}</li>
+        <li>In Bearbeitung: ${inProgressTasks.length}</li>
+        <li>Abgeschlossen: ${doneTasks.length}</li>
+        <li>Gesamtfortschritt: ${((doneTasks.length / tasks.length) * 100).toFixed(1)}%</li>
+    </ul>`;
+    
+    // KI-basierte Zeitplan-Empfehlungen
+    optimization += "<p><strong>💡 KI-Zeitplan-Optimierungen:</strong></p><ul>";
+    
+    if (todoTasks.length > inProgressTasks.length * 3) {
+        optimization += "<li>⚡ Bottleneck: Zu viele offene Aufgaben - mehr parallel bearbeiten</li>";
+    }
+    
+    if (inProgressTasks.length > 3) {
+        optimization += "<li>🔄 Überlastung: Zu viele Aufgaben gleichzeitig - Prioritäten setzen</li>";
+    }
+    
+    if (milestones.length > 0) {
+        const upcomingMilestones = milestones.filter(m => new Date(m.date) > new Date());
+        if (upcomingMilestones.length > 0) {
+            optimization += `<li>🏁 Meilensteine: ${upcomingMilestones.length} anstehende Meilensteine überwachen</li>`;
+        }
+    }
+    
+    if (goals.length > 0) {
+        const upcomingGoals = goals.filter(g => g.deadline && new Date(g.deadline) > new Date());
+        if (upcomingGoals.length > 0) {
+            optimization += `<li>🎯 Ziele: ${upcomingGoals.length} Ziele mit Deadline - Fortschritt prüfen</li>`;
+        }
+    }
+    
+    // Kritische Pfad Analyse (vereinfacht)
+    const highPriorityTasks = tasks.filter(t => t.priority === 'high' && t.status !== 'done');
+    if (highPriorityTasks.length > 0) {
+        optimization += `<li>🚨 Kritisch: ${highPriorityTasks.length} hohe Priorität Aufgaben noch offen</li>`;
+    }
+    
+    // Zeitbasierte Empfehlungen
+    const overdueTasks = tasks.filter(t => t.dueDate && new Date(t.dueDate) < new Date() && t.status !== 'done');
+    if (overdueTasks.length > 0) {
+        optimization += `<li>⏰ Überfällig: ${overdueTasks.length} Aufgaben überschreiten Deadline</li>`;
+    }
+    
+    optimization += "</ul>";
+    
+    document.getElementById("scheduleOptimization").innerHTML = optimization;
 }
 
 </script>
