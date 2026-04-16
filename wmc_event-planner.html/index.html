@@ -135,8 +135,10 @@
     <div class="kanban">
         <div class="col">
             <h3>To Do</h3>
-            <input id="newTask" placeholder="Neue Aufgabe erstellen"
-                onkeydown="if(event.key==='Enter'){addTask()}">
+            <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+                <input id="newTask" placeholder="Aufgabe..." style="flex: 1; width: auto;">
+                <button onclick="showTaskModal()" style="padding: 8px 12px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">➕</button>
+            </div>
             <div class="kanban-box" id="todo"
                 ondrop="drop(event)" ondragover="allowDrop(event)"></div>
         </div>
@@ -169,6 +171,26 @@
         <button onclick="goBack()" style="background: #6c757d;">← Zurück</button>
     </div>
 </section>
+
+<!-- Task Modal für Details -->
+<div id="taskModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center;">
+    <div style="background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 450px; box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
+        <h3 style="margin-top: 0; color: #028641;">➕ Neue Aufgabe erstellen</h3>
+        
+        <label>Aufgabe<span style="color: red;">*</span></label>
+        <input id="modalTaskText" type="text" placeholder="z.B. Design fertigstellen"
+            onkeydown="if(event.key==='Enter') addTaskFromModal(); if(event.key==='Escape') hideTaskModal();">
+        
+        <label>Beschreibung (wird beim Hovern angezeigt)</label>
+        <textarea id="modalTaskDesc" rows="4" placeholder="z.B. Desktop und Mobile Designs, Farbpalette anpassen..."
+            onkeydown="if(event.key==='Escape') hideTaskModal();"></textarea>
+        
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button onclick="addTaskFromModal()" class="save-btn" style="flex: 1; border: none; padding: 12px; cursor: pointer;">✓ Hinzufügen</button>
+            <button onclick="hideTaskModal()" style="flex: 1; background: #6c757d; color: white; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">✕ Abbrechen</button>
+        </div>
+    </div>
+</div>
 
 </div><!-- end projectDetail -->
 
@@ -409,8 +431,22 @@ function saveProjectData() {
     const kanban = {};
     ["todo", "progress", "review", "done"].forEach(col => {
         const tasks = [];
-        document.getElementById(col).querySelectorAll(".task").forEach(task => {
-            tasks.push(task.textContent.trim());
+        document.getElementById(col).querySelectorAll(".task").forEach(taskEl => {
+            const existingTask = (p.kanban[col] || []).find(t => {
+                if (typeof t === "object" && t.id === taskEl.id) return true;
+                return false;
+            });
+            
+            if (existingTask) {
+                tasks.push(existingTask);
+            } else {
+                // Fallback für alte String-Format-Tasks
+                tasks.push({
+                    id: taskEl.id,
+                    text: taskEl.textContent.trim(),
+                    description: taskEl.title || ""
+                });
+            }
         });
         kanban[col] = tasks;
     });
@@ -421,6 +457,62 @@ function saveProjectData() {
 }
 
 // ========== KANBAN ==========
+function showTaskModal() {
+    document.getElementById("taskModal").style.display = "flex";
+    document.getElementById("modalTaskText").focus();
+}
+
+function hideTaskModal() {
+    document.getElementById("taskModal").style.display = "none";
+    document.getElementById("modalTaskText").value = "";
+    document.getElementById("modalTaskDesc").value = "";
+    document.getElementById("taskModal").dataset.editingId = "";
+    
+    const button = document.querySelector("#taskModal button[onclick='addTaskFromModal()']");
+    button.textContent = "✓ Hinzufügen";
+}
+
+function addTaskFromModal() {
+    const text = document.getElementById("modalTaskText").value.trim();
+    const desc = document.getElementById("modalTaskDesc").value.trim();
+    const editingId = document.getElementById("taskModal").dataset.editingId;
+    
+    if (!text) {
+        alert("Aufgabe erforderlich");
+        return;
+    }
+    
+    const p = getProjectById(currentProject);
+    if (!p || !p.kanban) {
+        hideTaskModal();
+        return;
+    }
+    
+    if (editingId) {
+        // Bearbeitung: finde und aktualisiere Aufgabe
+        let found = false;
+        ["todo", "progress", "review", "done"].forEach(col => {
+            (p.kanban[col] || []).forEach(t => {
+                if (typeof t === "object" && t.id === editingId) {
+                    t.text = text;
+                    t.description = desc;
+                    found = true;
+                }
+            });
+        });
+        if (found) {
+            delete document.getElementById("taskModal").dataset.editingId;
+            saveProjectData();
+            loadKanbanBoard();
+        }
+    } else {
+        // Neue Aufgabe
+        addTask(text, desc);
+    }
+    
+    hideTaskModal();
+}
+
 function loadKanbanBoard() {
     const p = getProjectById(currentProject);
     if (!p || !p.kanban) return;
@@ -429,28 +521,93 @@ function loadKanbanBoard() {
         const box = document.getElementById(col);
         box.innerHTML = "";
         (p.kanban[col] || []).forEach(task => {
-            const div = document.createElement("div");
-            div.className = "task";
-            div.draggable = true;
-            div.textContent = task;
-            div.ondragstart = (e) => e.dataTransfer.setData("text", e.target.textContent);
-            box.appendChild(div);
+            createTaskElement(box, task);
         });
     });
 }
 
-function addTask() {
-    const task = document.getElementById("newTask").value.trim();
-    if (!task) return;
-
+function createTaskElement(container, task) {
+    const taskId = task.id || "task_" + Date.now();
+    const taskText = typeof task === "string" ? task : (task.text || "");
+    const taskDesc = typeof task === "string" ? "" : (task.description || "");
+    
     const div = document.createElement("div");
     div.className = "task";
     div.draggable = true;
-    div.textContent = task;
-    div.ondragstart = (e) => e.dataTransfer.setData("text", e.target.textContent);
+    div.id = taskId;
+    div.title = taskDesc || "Keine Beschreibung";
+    div.style.position = "relative";
+    
+    div.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: start; gap: 5px;">
+            <span style="flex: 1; word-break: break-word;">${escapeHtml(taskText)}</span>
+            <div style="display: flex; gap: 3px; flex-shrink: 0;">
+                <button onclick="event.stopPropagation(); editTask('${taskId}')" class="edit-task-btn" style="background: #0d6efd; color: white; border: none; padding: 2px 5px; border-radius: 3px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">✎</button>
+                <button onclick="event.stopPropagation(); deleteTask('${taskId}')" class="delete-task-btn" style="background: #dc3545; color: white; border: none; padding: 2px 5px; border-radius: 3px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">✕</button>
+            </div>
+        </div>
+    `;
+    
+    div.ondragstart = (e) => {
+        e.dataTransfer.setData("taskId", taskId);
+    };
+    
+    container.appendChild(div);
+}
 
-    document.getElementById("todo").appendChild(div);
-    document.getElementById("newTask").value = "";
+function deleteTask(taskId) {
+    if (!confirm("Aufgabe wirklich löschen?")) return;
+    
+    const p = getProjectById(currentProject);
+    if (!p || !p.kanban) return;
+    
+    ["todo", "progress", "review", "done"].forEach(col => {
+        p.kanban[col] = (p.kanban[col] || []).filter(t => {
+            if (typeof t === "string") return true;
+            return t.id !== taskId;
+        });
+    });
+    
+    saveProjectData();
+    loadKanbanBoard();
+}
+
+function editTask(taskId) {
+    const p = getProjectById(currentProject);
+    if (!p || !p.kanban) return;
+    
+    let taskToEdit = null;
+    ["todo", "progress", "review", "done"].forEach(col => {
+        (p.kanban[col] || []).forEach(t => {
+            if (typeof t === "object" && t.id === taskId) {
+                taskToEdit = t;
+            }
+        });
+    });
+    
+    if (!taskToEdit) return;
+    
+    document.getElementById("modalTaskText").value = taskToEdit.text || "";
+    document.getElementById("modalTaskDesc").value = taskToEdit.description || "";
+    document.getElementById("taskModal").dataset.editingId = taskId;
+    
+    const button = document.querySelector("#taskModal button[onclick='addTaskFromModal()']");
+    button.textContent = "✓ Aktualisieren";
+    
+    showTaskModal();
+}
+
+function addTask(text, desc = "") {
+    if (!text.trim()) return;
+
+    const taskObj = {
+        id: "task_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9),
+        text: text,
+        description: desc
+    };
+
+    const box = document.getElementById("todo");
+    createTaskElement(box, taskObj);
     saveProjectData();
 }
 
@@ -460,26 +617,47 @@ function allowDrop(e) {
 
 function drop(e) {
     e.preventDefault();
-    const task = e.dataTransfer.getData("text");
+    const taskId = e.dataTransfer.getData("taskId");
     const targetBox = e.target.closest(".kanban-box");
 
-    if (!targetBox) return;
+    if (!targetBox || !taskId) return;
 
-    const allTasks = document.querySelectorAll(".task");
-    allTasks.forEach(t => {
-        if (t.textContent === task) {
-            t.remove();
-        }
+    // Task aus allen Spalten entfernen
+    const p = getProjectById(currentProject);
+    if (!p || !p.kanban) return;
+    
+    let movedTask = null;
+    ["todo", "progress", "review", "done"].forEach(col => {
+        const filtered = [];
+        (p.kanban[col] || []).forEach(t => {
+            if ((typeof t === "object" && t.id === taskId)) {
+                movedTask = t;
+            } else {
+                filtered.push(t);
+            }
+        });
+        p.kanban[col] = filtered;
     });
-
-    const div = document.createElement("div");
-    div.className = "task";
-    div.draggable = true;
-    div.textContent = task;
-    div.ondragstart = (e) => e.dataTransfer.setData("text", e.target.textContent);
-     
-    targetBox.appendChild(div);
+    
+    // Task in neue Spalte hinzufügen
+    const colId = targetBox.id;
+    if (movedTask && p.kanban[colId]) {
+        p.kanban[colId].push(movedTask);
+    }
+    
     saveProjectData();
+    loadKanbanBoard();
+}
+
+function escapeHtml(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, m => map[m]);
 }
 
 // ========== TEAM-MITGLIEDER ==========
