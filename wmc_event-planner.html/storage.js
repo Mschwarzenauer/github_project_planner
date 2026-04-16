@@ -171,11 +171,15 @@ async function deleteProjectData(projectId) {
 
 // ========== INITIALIZATION ==========
 
-// On page load, synchronisiere alle Daten
-document.addEventListener("DOMContentLoaded", async () => {
-    console.log("🔄 Storage.js: Synchronisiere Projektdaten...");
-    await loadProjectsData();
-    console.log("✓ Storage.js bereit - " + Object.keys(GLOBAL_CACHE).length + " Projekte in Cache");
-});
+// Automatische Initialisierung beim Laden
+(async function initStorage() {
+    console.log("🔄 Storage.js: Initialisiere automatisch...");
+    try {
+        await loadProjectsData();
+        console.log("✓ Storage.js bereit - " + Object.keys(GLOBAL_CACHE).length + " Projekte in Cache");
+    } catch (e) {
+        console.error("Storage.js Initialisierung fehlgeschlagen:", e);
+    }
+})();
 
 console.log("✓ Storage.js geladen (IndexedDB + localStorage hybrid mit GlobalCache)");
