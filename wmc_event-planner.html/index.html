@@ -395,6 +395,9 @@ function loadTasks() {
     });
 
     // Status-Spalten aktualisieren
+    const statusIcons = { 'todo': '📋', 'progress': '⚙️', 'review': '👀', 'done': '✅' };
+    const priorityMap = { 'priority-high': '🔴', 'priority-medium': '🟡', 'priority-low': '🟢' };
+    
     ["todo", "progress", "review", "done"].forEach(status => {
         const statusBox = document.querySelector(`.property-box[data-property="${status}"] .property-items`);
         statusBox.innerHTML = "";
@@ -405,10 +408,12 @@ function loadTasks() {
             div.draggable = true;
             div.id = task.id + "_status";
             
-            const priorityIcon = task.priority === 'priority-high' ? '🔴' : task.priority === 'priority-low' ? '🟢' : '🟡';
+            const statusIcon = statusIcons[status];
+            const priorityIcon = priorityMap[task.priority] || '🟡';
+            const milestoneText = task.milestone ? ` | 🏁 ${escapeHtml(task.milestone)}` : '';
             
             div.innerHTML = `<div style="display: flex; justify-content: space-between; gap: 5px; align-items: center;">
-                <span title="Klick zum Inspizieren" style="cursor: pointer; flex: 1;">${priorityIcon} ${escapeHtml(task.text)}</span>
+                <span title="Klick zum Inspizieren" style="cursor: pointer; flex: 1;">${statusIcon} ${priorityIcon} ${escapeHtml(task.text)}${milestoneText}</span>
                 <button onclick="event.stopPropagation(); deleteTask('${task.id}')" style="background: #dc3545; color: white; border: none; padding: 2px 4px; border-radius: 2px; cursor: pointer; font-size: 0.7rem;">✕</button>
             </div>`;
 
@@ -424,30 +429,37 @@ function loadTasks() {
         });
     });
 
-    // Meilenstein-Zuordnungen
+    // Meilensteine anzeigen (alle aus list, nicht nur zugeordnete)
     const milestoneBox = document.getElementById("milestonesList");
     milestoneBox.innerHTML = "";
 
-    p.tasks.filter(t => t.milestone).forEach(task => {
-        const div = document.createElement("div");
-        div.className = "property-item";
-        div.draggable = true;
-        div.id = task.id + "_milestone";
-        
-        div.innerHTML = `<div style="display: flex; justify-content: space-between; gap: 5px; align-items: center;">
-            <span title="Klick zum Inspizieren" style="cursor: pointer; flex: 1;">${escapeHtml(task.text)}</span>
-            <button onclick="event.stopPropagation(); clearTaskProperty('${task.id}', 'milestone')" style="background: #dc3545; color: white; border: none; padding: 2px 4px; border-radius: 2px; cursor: pointer; font-size: 0.7rem;">✕</button>
-        </div>`;
-
-        div.ondragstart = (e) => {
-            e.dataTransfer.effectAllowed = "move";
-            e.dataTransfer.setData("taskId", task.id);
-        };
-        
-        div.addEventListener("click", () => inspectTaskById(task.id));
-
-        milestoneBox.appendChild(div);
-    });
+    if (!p.milestones || p.milestones.length === 0) {
+        milestoneBox.innerHTML = "<p style='color: #999; font-size: 0.9rem; text-align: center; padding: 20px;'>Keine Meilensteine. Füge einen hinzu!</p>";
+    } else {
+        p.milestones.forEach(milestone => {
+            const tasksWithMilestone = p.tasks.filter(t => t.milestone === milestone.name);
+            
+            const milestoneDiv = document.createElement("div");
+            milestoneDiv.style.cssText = "margin-bottom: 12px; padding: 10px; background: #fff3e0; border: 2px solid #ff9800; border-radius: 6px; cursor: pointer;";
+            milestoneDiv.title = `${tasksWithMilestone.length} Aufgabe(n)`;
+            
+            const header = document.createElement("div");
+            header.style.cssText = "font-weight: bold; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;";
+            header.innerHTML = `<span>🏁 ${escapeHtml(milestone.name)}</span><small style="font-weight: normal; color: #666;">${tasksWithMilestone.length}</small>`;
+            milestoneDiv.appendChild(header);
+            
+            const tasksList = document.createElement("div");
+            tasksList.style.cssText = "font-size: 0.85rem; color: #555;";
+            if (tasksWithMilestone.length === 0) {
+                tasksList.textContent = "Keine Aufgaben";
+            } else {
+                tasksList.innerHTML = tasksWithMilestone.map(t => `<div style="padding: 3px 0;">• ${escapeHtml(t.text)}</div>`).join("");
+            }
+            milestoneDiv.appendChild(tasksList);
+            
+            milestoneBox.appendChild(milestoneDiv);
+        });
+    }
 }
 
 function loadMilestones() {
@@ -530,30 +542,70 @@ function displayTaskInspector(task) {
     const statusMap = { 'todo': '📋 To Do', 'progress': '⚙️ In Progress', 'review': '👀 Review', 'done': '✅ Done' };
     
     const inspector = document.getElementById("propertyInspector");
+    const p = getProjectById(currentProject);
+    const milestones = (p && p.milestones) ? p.milestones : [];
+    
+    let milestoneButtonsHtml = '';
+    if (milestones.length === 0) {
+        milestoneButtonsHtml = '<p style="color: #999; font-size: 0.85rem; margin-top: 8px;">Keine Meilensteine. Erstelle zuerst einen!</p>';
+    } else {
+        milestoneButtonsHtml = '<div style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px;">';
+        milestones.forEach((m, idx) => {
+            const isSelected = task.milestone === m.name;
+            const btnId = 'ms_' + task.id + '_' + idx;
+            milestoneButtonsHtml += `<button id="${btnId}" style="flex: 1; padding: 8px; background: ${isSelected ? '#ff9800' : '#fff3e0'}; border: 2px ${isSelected ? 'solid' : 'dashed'} #ff9800; border-radius: 3px; cursor: pointer; font-weight: ${isSelected ? 'bold' : 'normal'};text-align: left;">🏁 ${escapeHtml(m.name)}</button>`;
+        });
+        milestoneButtonsHtml += `<button id="ms_remove_${task.id}" style="flex: 1; padding: 8px; background: #f0f0f0; border: 2px dashed #999; border-radius: 3px; cursor: pointer; margin-top: 6px; font-size: 0.85rem;">❌ Meilenstein entfernen</button></div>`;
+    }
     
     inspector.innerHTML = `
-        <div style="width: 100%; padding: 10px; background: #f9fffe; border-radius: 6px;">
+        <div style="width: 100%; padding: 10px; background: #f9fffe; border-radius: 6px; overflow-y: auto; max-height: 350px;">
             <h5 style="margin-top: 0; color: #028641;">📌 ${escapeHtml(task.text)}</h5>
             
             <div style="margin: 10px 0; padding: 10px; background: white; border-left: 4px solid #028641; border-radius: 4px;">
                 <strong>Status:</strong> ${statusMap[task.status] || task.status}
+                <div style="margin-top: 8px; display: flex; gap: 4px; flex-wrap: wrap;">
+                    <button id="st_todo_${task.id}" style="flex: 1; min-width: 50px; padding: 6px; background: ${task.status === 'todo' ? '#fff3e0' : '#f0f0f0'}; border: 1px solid #ddd; border-radius: 3px; cursor: pointer; font-weight: ${task.status === 'todo' ? 'bold' : 'normal'}; font-size: 0.85rem;">📋 To Do</button>
+                    <button id="st_progress_${task.id}" style="flex: 1; min-width: 50px; padding: 6px; background: ${task.status === 'progress' ? '#fff3e0' : '#f0f0f0'}; border: 1px solid #ddd; border-radius: 3px; cursor: pointer; font-weight: ${task.status === 'progress' ? 'bold' : 'normal'}; font-size: 0.85rem;">⚙️ Work</button>
+                    <button id="st_review_${task.id}" style="flex: 1; min-width: 50px; padding: 6px; background: ${task.status === 'review' ? '#fff3e0' : '#f0f0f0'}; border: 1px solid #ddd; border-radius: 3px; cursor: pointer; font-weight: ${task.status === 'review' ? 'bold' : 'normal'}; font-size: 0.85rem;">👀 Review</button>
+                    <button id="st_done_${task.id}" style="flex: 1; min-width: 50px; padding: 6px; background: ${task.status === 'done' ? '#e5ffe5' : '#f0f0f0'}; border: 1px solid #ddd; border-radius: 3px; cursor: pointer; font-weight: ${task.status === 'done' ? 'bold' : 'normal'}; font-size: 0.85rem;">✅ Done</button>
+                </div>
             </div>
             
             <div style="margin: 10px 0; padding: 10px; background: white; border-left: 4px solid #ffc107; border-radius: 4px;">
                 <strong>Priorität:</strong> ${priorityMap[task.priority] || 'Unbekannt'}
                 <div style="margin-top: 8px; display: flex; gap: 5px;">
-                    <button onclick="changeTaskPriority('${task.id}', 'priority-high')" style="flex: 1; padding: 6px; background: #ffe5e5; border: 1px solid #dc3545; border-radius: 3px; cursor: pointer;">🔴 Hoch</button>
-                    <button onclick="changeTaskPriority('${task.id}', 'priority-medium')" style="flex: 1; padding: 6px; background: #fff9e5; border: 1px solid #ffc107; border-radius: 3px; cursor: pointer;">🟡 Mittel</button>
-                    <button onclick="changeTaskPriority('${task.id}', 'priority-low')" style="flex: 1; padding: 6px; background: #e5f9ff; border: 1px solid #17a2b8; border-radius: 3px; cursor: pointer;">🟢 Niedrig</button>
+                    <button id="pr_high_${task.id}" style="flex: 1; padding: 6px; background: ${task.priority === 'priority-high' ? '#ff9999' : '#ffe5e5'}; border: 1px solid #dc3545; border-radius: 3px; cursor: pointer; font-weight: ${task.priority === 'priority-high' ? 'bold' : 'normal'};">🔴 Hoch</button>
+                    <button id="pr_med_${task.id}" style="flex: 1; padding: 6px; background: ${task.priority === 'priority-medium' ? '#ffe680' : '#fff9e5'}; border: 1px solid #ffc107; border-radius: 3px; cursor: pointer; font-weight: ${task.priority === 'priority-medium' ? 'bold' : 'normal'};">🟡 Mittel</button>
+                    <button id="pr_low_${task.id}" style="flex: 1; padding: 6px; background: ${task.priority === 'priority-low' ? '#80d4ff' : '#e5f9ff'}; border: 1px solid #17a2b8; border-radius: 3px; cursor: pointer; font-weight: ${task.priority === 'priority-low' ? 'bold' : 'normal'};">🟢 Niedrig</button>
                 </div>
             </div>
             
-            <div style="margin: 10px 0; padding: 10px; background: white; border-left: 4px solid #17a2b8; border-radius: 4px;">
-                <strong>Meilenstein:</strong> ${task.milestone || 'Keine'}
-                ${task.milestone ? `<br><button onclick="clearTaskProperty('${task.id}', 'milestone')" style="margin-top: 8px; padding: 6px 10px; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 0.9rem;">Meilenstein entfernen</button>` : ''}
+            <div style="margin: 10px 0; padding: 10px; background: white; border-left: 4px solid #ff9800; border-radius: 4px;">
+                <strong>📌 Meilenstein:</strong> ${task.milestone ? '<em>' + escapeHtml(task.milestone) + '</em>' : '<em style="color: #999;">Kein Meilenstein</em>'}
+                ${milestoneButtonsHtml}
             </div>
         </div>
     `;
+    
+    // Status Buttons Event-Listener
+    ['todo', 'progress', 'review', 'done'].forEach(st => {
+        const btn = document.getElementById('st_' + st + '_' + task.id);
+        if (btn) btn.onclick = () => changeTaskStatus(task.id, st);
+    });
+    
+    // Priority Buttons Event-Listener
+    document.getElementById('pr_high_' + task.id)?.addEventListener('click', () => changeTaskPriority(task.id, 'priority-high'));
+    document.getElementById('pr_med_' + task.id)?.addEventListener('click', () => changeTaskPriority(task.id, 'priority-medium'));
+    document.getElementById('pr_low_' + task.id)?.addEventListener('click', () => changeTaskPriority(task.id, 'priority-low'));
+    
+    // Milestone Buttons Event-Listener
+    milestones.forEach((m, idx) => {
+        const btn = document.getElementById('ms_' + task.id + '_' + idx);
+        if (btn) btn.onclick = () => changeTaskMilestone(task.id, m.name);
+    });
+    const removeBtn = document.getElementById('ms_remove_' + task.id);
+    if (removeBtn) removeBtn.onclick = () => changeTaskMilestone(task.id, null);
 }
 
 function changeTaskPriority(taskId, newPriority) {
@@ -564,6 +616,42 @@ function changeTaskPriority(taskId, newPriority) {
     if (!task) return;
     
     task.priority = newPriority;
+    
+    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    projects[currentProject] = p;
+    localStorage.setItem("projects", JSON.stringify(projects));
+    
+    displayTaskInspector(task);
+    loadTasks();
+    saveProjectData();
+}
+
+function changeTaskStatus(taskId, newStatus) {
+    const p = getProjectById(currentProject);
+    if (!p || !p.tasks) return;
+    
+    const task = p.tasks.find(t => t.id === taskId);
+    if (!task) return;
+    
+    task.status = newStatus;
+    
+    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    projects[currentProject] = p;
+    localStorage.setItem("projects", JSON.stringify(projects));
+    
+    displayTaskInspector(task);
+    loadTasks();
+    saveProjectData();
+}
+
+function changeTaskMilestone(taskId, milestoneName) {
+    const p = getProjectById(currentProject);
+    if (!p || !p.tasks) return;
+    
+    const task = p.tasks.find(t => t.id === taskId);
+    if (!task) return;
+    
+    task.milestone = milestoneName;
     
     const projects = JSON.parse(localStorage.getItem("projects") || "{}");
     projects[currentProject] = p;
