@@ -323,10 +323,6 @@ async function deleteProject() {
     goBack();
 }
 
-async function getProjectById(projectId) {
-    return await loadProjectsData().then(projects => projects[projectId] || null);
-}
-
 // ========== DATEN LADEN/SPEICHERN ==========
 async function loadProjectData() {
     const p = await getProjectById(currentProject);
