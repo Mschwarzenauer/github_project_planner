@@ -19,21 +19,8 @@
     <p>Projektplanung zur besseren Organisation</p>
 </header>
 
-<!-- LOGIN -->
-<section id="loginBox" class="form-section">
-    <h2>Login</h2>
-
-    <label>Benutzername</label>
-    <input id="username" type="text">
-
-    <label>Passwort</label>
-    <input id="password" type="password">
-
-    <button onclick="login()">Login</button>
-</section>
-
 <!-- APP -->
-<div id="app" style="display:none;">
+<div id="app">
 
 <!-- Projektwahl -->
 <section class="form-section">
@@ -89,76 +76,69 @@
     </div> 
 </section>
 
-<!-- Team-Mitglieder einladen -->
 <section class="form-section">
-    <h2>👥 Team-Mitglieder</h2>
-    
-    <label>Benutzer hinzufügen (müssen registriert sein)</label>
-    <div style="display: flex; gap: 10px;">
-        <input id="memberToAdd" type="text" placeholder="Benutzername eingeben" style="flex: 1;">
-        <button onclick="addMemberToProject()" style="padding: 10px 20px;">Hinzufügen</button>
+    <h2>🎯 Aufgaben & Meilensteine</h2>
+
+    <!-- Aufgaben Input -->
+    <div style="margin-bottom: 20px;">
+        <label>Neue Aufgabe hinzufügen</label>
+        <div style="display: flex; gap: 5px;">
+            <input id="newTask" placeholder="z.B. Design fertigstellen" style="flex: 1;">
+            <button onclick="addTask()" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">➕ Hinzufügen</button>
+        </div>
     </div>
 
-    <div id="teamList" style="margin-top: 15px;">
-        <h4>Aktuelle Mitglieder:</h4>
-        <ul id="teamMembers" style="list-style: none; padding: 0;">
-        </ul>
-    </div>
-</section>
-
-<section class="form-section">
-    <h2>Meilensteine</h2>
-    <table>
-        <tr>   
-            <th>Meilenstein</th>
-            <th>Fälligkeitsdatum</th>
-            <th>Status</th>
-        </tr>
-        <tbody id="milestoneTable">
-            <tr>
-                <td contenteditable="true" onblur="saveProjectData()">MVP</td>
-                <td><input type="date" onchange="saveProjectData()"></td>
-                <td contenteditable="true" onblur="saveProjectData()">In Planung</td>
-            </tr>
-            <tr>
-                <td contenteditable="true" onblur="saveProjectData()">Release 1.0</td>
-                <td><input type="date" onchange="saveProjectData()"></td>
-                <td contenteditable="true" onblur="saveProjectData()">Offen</td>
-            </tr>
-        </tbody>
-    </table>
-</section>
-
-<section class="form-section">
-    <h2>Kanban Board</h2>
-
-    <div class="kanban">
-        <div class="col">
-            <h3>To Do</h3>
-            <div style="display: flex; gap: 5px; margin-bottom: 10px;">
-                <input id="newTask" placeholder="Aufgabe..." style="flex: 1; width: auto;">
-                <button onclick="showTaskModal()" style="padding: 8px 12px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">➕</button>
+    <!-- Aufgabenliste & Eigenschaften-Felder -->
+    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 20px; margin-top: 20px;">
+        
+        <!-- Linke Seite: Aufgabenliste -->
+        <div style="border: 2px solid #028641; border-radius: 8px; padding: 15px; background: #f9fffe;">
+            <h4 style="margin-top: 0; color: #028641;">📝 Alle Aufgaben</h4>
+            <div id="tasksList" style="min-height: 300px; max-height: 600px; overflow-y: auto;">
             </div>
-            <div class="kanban-box" id="todo"
-                ondrop="drop(event)" ondragover="allowDrop(event)"></div>
         </div>
 
-        <div class="col">
-            <h3>In Progress</h3>
-            <div class="kanban-box" id="progress"
-                ondrop="drop(event)" ondragover="allowDrop(event)"></div>
-        </div>
+        <!-- Rechte Seite: Status & Eigenschaften -->
+        <div>
+            <!-- Status Spalten -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+                <div class="property-box" data-property="todo">
+                    <h4>📋 To Do</h4>
+                    <div class="property-items" ondrop="dropTask(event, 'todo')" ondragover="allowDrop(event)"></div>
+                </div>
+                <div class="property-box" data-property="progress">
+                    <h4>⚙️ In Progress</h4>
+                    <div class="property-items" ondrop="dropTask(event, 'progress')" ondragover="allowDrop(event)"></div>
+                </div>
+                <div class="property-box" data-property="review">
+                    <h4>👀 Review</h4>
+                    <div class="property-items" ondrop="dropTask(event, 'review')" ondragover="allowDrop(event)"></div>
+                </div>
+                <div class="property-box" data-property="done">
+                    <h4>✅ Done</h4>
+                    <div class="property-items" ondrop="dropTask(event, 'done')" ondragover="allowDrop(event)"></div>
+                </div>
+            </div>
 
-        <div class="col">
-            <h3>Review</h3>
-            <div class="kanban-box" id="review"
-                ondrop="drop(event)" ondragover="allowDrop(event)"></div>
-        </div>
+            <!-- Meilensteine -->
+            <div class="property-box">
+                <h4>🏁 Meilensteine</h4>
+                <div style="margin-bottom: 10px;">
+                    <input id="newMilestone" type="text" placeholder="Meilenstein hinzufügen" style="width: 100%; margin-bottom: 5px;">
+                    <button onclick="addMilestone()" style="width: 100%; padding: 8px; background: #0d6efd; color: white; border: none; border-radius: 4px; cursor: pointer;">➕</button>
+                </div>
+                <div id="milestonesList" class="property-items" ondrop="dropTask(event, 'milestone')" ondragover="allowDrop(event)"></div>
+            </div>
 
-        <div class="col">
-            <h3>Done</h3>
-            <div class="kanban-box" id="done"
-                ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            <!-- Priorität -->
+            <div class="property-box" style="margin-top: 10px;">
+                <h4>⭐ Priorität</h4>
+                <div id="priorityList" class="property-items">
+                    <div class="property-item" ondrop="dropTask(event, 'priority-high')" ondragover="allowDrop(event)" style="background: #ffe5e5; border: 2px dashed #dc3545;">🔴 Hoch</div>
+                    <div class="property-item" ondrop="dropTask(event, 'priority-medium')" ondragover="allowDrop(event)" style="background: #fff9e5; border: 2px dashed #ffc107;">🟡 Mittel</div>
+                    <div class="property-item" ondrop="dropTask(event, 'priority-low')" ondragover="allowDrop(event)" style="background: #e5f9ff; border: 2px dashed #17a2b8;">🟢 Niedrig</div>
+                </div>
+            </div>
         </div>
     </div>
 </section>
@@ -172,115 +152,39 @@
     </div>
 </section>
 
-<!-- Task Modal für Details -->
-<div id="taskModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center;">
-    <div style="background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 450px; box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
-        <h3 style="margin-top: 0; color: #028641;">➕ Neue Aufgabe erstellen</h3>
-        
-        <label>Aufgabe<span style="color: red;">*</span></label>
-        <input id="modalTaskText" type="text" placeholder="z.B. Design fertigstellen"
-            onkeydown="if(event.key==='Enter') addTaskFromModal(); if(event.key==='Escape') hideTaskModal();">
-        
-        <label>Beschreibung (wird beim Hovern angezeigt)</label>
-        <textarea id="modalTaskDesc" rows="4" placeholder="z.B. Desktop und Mobile Designs, Farbpalette anpassen..."
-            onkeydown="if(event.key==='Escape') hideTaskModal();"></textarea>
-        
-        <div style="display: flex; gap: 10px; margin-top: 20px;">
-            <button onclick="addTaskFromModal()" class="save-btn" style="flex: 1; border: none; padding: 12px; cursor: pointer;">✓ Hinzufügen</button>
-            <button onclick="hideTaskModal()" style="flex: 1; background: #6c757d; color: white; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">✕ Abbrechen</button>
-        </div>
-    </div>
-</div>
-
 </div><!-- end projectDetail -->
-
-<section class="form-section" style="margin-top: 20px;">
-    <div class="button-group">
-        <button onclick="showUserInfo()" class="info-btn">👤 Benutzerinfo</button>
-        <button onclick="logout()" class="logout-btn">🚪 Logout</button>
-    </div>
-</section>
 
 </div><!-- end app -->
 
 <footer>
-    <p>© 2025 Projektplaner • Multi-User & Multi-Project Management</p>
+    <p>© 2025 Projektplaner • Projektmanagement & Task-Verwaltung</p>
 </footer>
 
 <script>
-let currentUser = null;
+let currentUser = "default";
 let currentProject = null;
 
 // Initialisierung
 document.addEventListener("DOMContentLoaded", () => {
-    const u = localStorage.getItem("currentUser");
-    if (u) {
-        currentUser = u;
-        showApp();
-        loadProjectList();
-    }
+    loadProjectList();
     setActiveNav();
 });
 
-// ========== LOGIN & LOGOUT ==========
-function login() {
-    const user = document.getElementById("username").value.trim();
-    const pass = document.getElementById("password").value.trim();
-
-    if (!user || !pass) return alert("Benutzername und Passwort erforderlich");
-
-    const users = JSON.parse(localStorage.getItem("users") || "{}");
-
-    if (users[user] && users[user].password === pass) {
-        currentUser = user;
-        localStorage.setItem("currentUser", user);
-        document.getElementById("loginBox").style.display = "none";
-        showApp();
-        loadProjectList();
-    } else if (!users[user]) {
-        users[user] = { password: pass, projects: [] };
-        localStorage.setItem("users", JSON.stringify(users));
-        currentUser = user;
-        localStorage.setItem("currentUser", user);
-        document.getElementById("loginBox").style.display = "none";
-        showApp();
-        loadProjectList();
-    } else {
-        alert("Falsches Passwort");
-    }
-}
-
-function logout() {
-    if (confirm("Wirklich abmelden?")) {
-        currentUser = null;
-        currentProject = null;
-        localStorage.removeItem("currentUser");
-        localStorage.removeItem("currentProject");
-        document.getElementById("loginBox").style.display = "block";
-        document.getElementById("app").style.display = "none";
-        document.getElementById("username").value = "";
-        document.getElementById("password").value = "";
-    }
-}
-
 // ========== PROJEKT-VERWALTUNG ==========
 function loadProjectList() {
-    const users = JSON.parse(localStorage.getItem("users") || "{}");
-    const userData = users[currentUser] || { password: "", projects: [] };
-    const projects = userData.projects || [];
+    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    const projectIds = Object.keys(projects);
 
-    const html = projects.map((pid) => {
-        const p = getProjectById(pid);
-        const name = p ? p.name : "Gelöschtes Projekt";
-        return `<button onclick="selectProject('${pid}')" style="padding: 10px 20px; background: #0d6efd; color: white; border: none; border-radius: 4px; cursor: pointer;">${name}</button>`;
+    const html = projectIds.map((pid) => {
+        const p = projects[pid];
+        return `<button onclick="selectProject('${pid}')" style="padding: 10px 20px; background: #0d6efd; color: white; border: none; border-radius: 4px; cursor: pointer;">${p.name}</button>`;
     }).join("");
 
-    document.getElementById("projectList").innerHTML = html;
+    document.getElementById("projectList").innerHTML = html || "<p>Noch keine Projekte. Erstelle dein erstes Projekt!</p>";
 }
 
 function selectProject(projectId) {
     currentProject = projectId;
-    localStorage.setItem("currentProject", projectId);
     loadProjectData();
     document.getElementById("projectList").parentElement.style.display = "none";
     document.getElementById("projectDetail").style.display = "block";
@@ -317,21 +221,13 @@ function createProject() {
         id: projectId,
         name: name,
         description: desc,
-        owner: currentUser,
-        members: [currentUser],
         startDate: "",
         endDate: "",
         milestones: [],
-        kanban: { todo: [], progress: [], review: [], done: [] },
-        projectPlanning: {}
+        tasks: []
     };
 
     localStorage.setItem("projects", JSON.stringify(projects));
-
-    const users = JSON.parse(localStorage.getItem("users") || "{}");
-    if (!users[currentUser].projects) users[currentUser].projects = [];
-    users[currentUser].projects.push(projectId);
-    localStorage.setItem("users", JSON.stringify(users));
 
     hideNewProjectForm();
     loadProjectList();
@@ -342,24 +238,10 @@ function deleteProject() {
     if (!confirm("Projekt wirklich löschen?")) return;
 
     const projects = JSON.parse(localStorage.getItem("projects") || "{}");
-    const p = projects[currentProject];
+    delete projects[currentProject];
+    localStorage.setItem("projects", JSON.stringify(projects));
 
-    if (p && p.owner === currentUser) {
-        delete projects[currentProject];
-        localStorage.setItem("projects", JSON.stringify(projects));
-
-        const users = JSON.parse(localStorage.getItem("users") || "{}");
-        Object.keys(users).forEach(u => {
-            if (users[u].projects) {
-                users[u].projects = users[u].projects.filter(id => id !== currentProject);
-            }
-        });
-        localStorage.setItem("users", JSON.stringify(users));
-
-        goBack();
-    } else {
-        alert("Nur der Projekt-Owner kann löschen");
-    }
+    goBack();
 }
 
 function getProjectById(projectId) {
@@ -381,22 +263,10 @@ function loadProjectData() {
     document.getElementById("projectDesc").value = p.description || "";
     document.getElementById("startDate").value = p.startDate || "";
     document.getElementById("endDate").value = p.endDate || "";
-    
-    // Meilensteine laden
-    const mRows = document.getElementById("milestoneTable").querySelectorAll("tr");
-    p.milestones.forEach((m, i) => {
-        if (mRows[i + 1]) {
-            mRows[i + 1].querySelectorAll("td")[0].textContent = m.name;
-            mRows[i + 1].querySelectorAll("input")[0].value = m.date;
-            mRows[i + 1].querySelectorAll("td")[2].textContent = m.status;
-        }
-    });
 
-    // Kanban laden
-    loadKanbanBoard();
-
-    // Team-Mitglieder laden
-    loadTeamMembers();
+    // Aufgaben und Meilensteine laden
+    loadTasks();
+    loadMilestones();
 }
 
 function saveProjectData() {
@@ -412,243 +282,228 @@ function saveProjectData() {
     p.startDate = document.getElementById("startDate").value;
     p.endDate = document.getElementById("endDate").value;
 
-    // Meilensteine speichern
-    const milestones = [];
-    document.getElementById("milestoneTable").querySelectorAll("tr").forEach((row, idx) => {
-        if (idx > 0) {
-            const cells = row.querySelectorAll("td");
-            const input = row.querySelector("input");
-            milestones.push({
-                name: cells[0]?.textContent || "",
-                date: input?.value || "",
-                status: cells[2]?.textContent || ""
-            });
-        }
-    });
-    p.milestones = milestones;
-
-    // Kanban speichern
-    const kanban = {};
-    ["todo", "progress", "review", "done"].forEach(col => {
-        const tasks = [];
-        document.getElementById(col).querySelectorAll(".task").forEach(taskEl => {
-            const existingTask = (p.kanban[col] || []).find(t => {
-                if (typeof t === "object" && t.id === taskEl.id) return true;
-                return false;
-            });
-            
-            if (existingTask) {
-                tasks.push(existingTask);
-            } else {
-                // Fallback für alte String-Format-Tasks
-                tasks.push({
-                    id: taskEl.id,
-                    text: taskEl.textContent.trim(),
-                    description: taskEl.title || ""
-                });
-            }
-        });
-        kanban[col] = tasks;
-    });
-    p.kanban = kanban;
-
     localStorage.setItem("projects", JSON.stringify(projects));
     console.log("Projekt gespeichert");
 }
 
-// ========== KANBAN ==========
-function showTaskModal() {
-    document.getElementById("taskModal").style.display = "flex";
-    document.getElementById("modalTaskText").focus();
-}
+// ========== AUFGABEN-VERWALTUNG ==========
+function addTask() {
+    const taskText = document.getElementById("newTask").value.trim();
+    if (!taskText) return;
 
-function hideTaskModal() {
-    document.getElementById("taskModal").style.display = "none";
-    document.getElementById("modalTaskText").value = "";
-    document.getElementById("modalTaskDesc").value = "";
-    document.getElementById("taskModal").dataset.editingId = "";
-    
-    const button = document.querySelector("#taskModal button[onclick='addTaskFromModal()']");
-    button.textContent = "✓ Hinzufügen";
-}
-
-function addTaskFromModal() {
-    const text = document.getElementById("modalTaskText").value.trim();
-    const desc = document.getElementById("modalTaskDesc").value.trim();
-    const editingId = document.getElementById("taskModal").dataset.editingId;
-    
-    if (!text) {
-        alert("Aufgabe erforderlich");
-        return;
-    }
-    
     const p = getProjectById(currentProject);
-    if (!p || !p.kanban) {
-        hideTaskModal();
-        return;
-    }
-    
-    if (editingId) {
-        // Bearbeitung: finde und aktualisiere Aufgabe
-        let found = false;
-        ["todo", "progress", "review", "done"].forEach(col => {
-            (p.kanban[col] || []).forEach(t => {
-                if (typeof t === "object" && t.id === editingId) {
-                    t.text = text;
-                    t.description = desc;
-                    found = true;
-                }
-            });
-        });
-        if (found) {
-            delete document.getElementById("taskModal").dataset.editingId;
-            saveProjectData();
-            loadKanbanBoard();
-        }
-    } else {
-        // Neue Aufgabe
-        addTask(text, desc);
-    }
-    
-    hideTaskModal();
-}
+    if (!p) return;
 
-function loadKanbanBoard() {
-    const p = getProjectById(currentProject);
-    if (!p || !p.kanban) return;
-
-    ["todo", "progress", "review", "done"].forEach(col => {
-        const box = document.getElementById(col);
-        box.innerHTML = "";
-        (p.kanban[col] || []).forEach(task => {
-            createTaskElement(box, task);
-        });
-    });
-}
-
-function createTaskElement(container, task) {
-    const taskId = task.id || "task_" + Date.now();
-    const taskText = typeof task === "string" ? task : (task.text || "");
-    const taskDesc = typeof task === "string" ? "" : (task.description || "");
-    
-    const div = document.createElement("div");
-    div.className = "task";
-    div.draggable = true;
-    div.id = taskId;
-    div.title = taskDesc || "Keine Beschreibung";
-    div.style.position = "relative";
-    
-    div.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: start; gap: 5px;">
-            <span style="flex: 1; word-break: break-word;">${escapeHtml(taskText)}</span>
-            <div style="display: flex; gap: 3px; flex-shrink: 0;">
-                <button onclick="event.stopPropagation(); editTask('${taskId}')" class="edit-task-btn" style="background: #0d6efd; color: white; border: none; padding: 2px 5px; border-radius: 3px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">✎</button>
-                <button onclick="event.stopPropagation(); deleteTask('${taskId}')" class="delete-task-btn" style="background: #dc3545; color: white; border: none; padding: 2px 5px; border-radius: 3px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">✕</button>
-            </div>
-        </div>
-    `;
-    
-    div.ondragstart = (e) => {
-        e.dataTransfer.setData("taskId", taskId);
+    const task = {
+        id: "task_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9),
+        text: taskText,
+        status: "todo",
+        milestone: null,
+        priority: "priority-medium"
     };
+
+    if (!p.tasks) p.tasks = [];
+    p.tasks.push(task);
+
+    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    projects[currentProject] = p;
+    localStorage.setItem("projects", JSON.stringify(projects));
     
-    container.appendChild(div);
+    document.getElementById("newTask").value = "";
+    loadTasks();
+    saveProjectData();
 }
 
 function deleteTask(taskId) {
     if (!confirm("Aufgabe wirklich löschen?")) return;
-    
+
     const p = getProjectById(currentProject);
-    if (!p || !p.kanban) return;
-    
-    ["todo", "progress", "review", "done"].forEach(col => {
-        p.kanban[col] = (p.kanban[col] || []).filter(t => {
-            if (typeof t === "string") return true;
-            return t.id !== taskId;
+    if (!p || !p.tasks) return;
+
+    p.tasks = p.tasks.filter(t => t.id !== taskId);
+
+    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    projects[currentProject] = p;
+    localStorage.setItem("projects", JSON.stringify(projects));
+
+    loadTasks();
+}
+
+function loadTasks() {
+    const p = getProjectById(currentProject);
+    if (!p || !p.tasks) return;
+
+    // Aufgabenliste links
+    const tasksList = document.getElementById("tasksList");
+    tasksList.innerHTML = "";
+
+    p.tasks.forEach(task => {
+        const div = document.createElement("div");
+        div.className = "task-item";
+        div.draggable = true;
+        div.id = task.id;
+        
+        let taskInfo = `<strong>${escapeHtml(task.text)}</strong>`;
+        if (task.milestone) taskInfo += `<br><small>🏁 ${escapeHtml(task.milestone)}</small>`;
+        
+        const priorityMap = { 'priority-high': '🔴', 'priority-medium': '🟡', 'priority-low': '🟢' };
+        taskInfo += `<br><small>${priorityMap[task.priority] || '🟡'} ${["todo", "progress", "review", "done"].indexOf(task.status) >= 0 ? "Status: " + (task.status === "todo" ? "📋" : task.status === "progress" ? "⚙️" : task.status === "review" ? "👀" : "✅") : ""}</small>`;
+
+        div.innerHTML = `<div style="display: flex; justify-content: space-between; align-items: start; gap: 10px; padding: 10px; background: white; border-radius: 6px; border: 1px solid #ddd; margin-bottom: 8px;">
+            <div style="flex: 1;">${taskInfo}</div>
+            <button onclick="event.stopPropagation(); deleteTask('${task.id}')" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 0.8rem;">✕</button>
+        </div>`;
+
+        div.ondragstart = (e) => {
+            e.dataTransfer.setData("taskId", task.id);
+        };
+
+        tasksList.appendChild(div);
+    });
+
+    // Status-Spalten aktualisieren
+    ["todo", "progress", "review", "done"].forEach(status => {
+        const statusBox = document.querySelector(`.property-box[data-property="${status}"] .property-items`);
+        statusBox.innerHTML = "";
+
+        p.tasks.filter(t => t.status === status).forEach(task => {
+            const div = document.createElement("div");
+            div.className = "property-item";
+            div.draggable = true;
+            div.id = task.id + "_status";
+            
+            div.innerHTML = `<div style="display: flex; justify-content: space-between; gap: 5px;">
+                <span>${escapeHtml(task.text)}</span>
+                <button onclick="event.stopPropagation(); deleteTask('${task.id}')" style="background: #dc3545; color: white; border: none; padding: 2px 5px; border-radius: 3px; cursor: pointer; font-size: 0.7rem;">✕</button>
+            </div>`;
+
+            div.ondragstart = (e) => {
+                e.dataTransfer.setData("taskId", task.id);
+            };
+
+            statusBox.appendChild(div);
         });
     });
-    
-    saveProjectData();
-    loadKanbanBoard();
-}
 
-function editTask(taskId) {
-    const p = getProjectById(currentProject);
-    if (!p || !p.kanban) return;
-    
-    let taskToEdit = null;
-    ["todo", "progress", "review", "done"].forEach(col => {
-        (p.kanban[col] || []).forEach(t => {
-            if (typeof t === "object" && t.id === taskId) {
-                taskToEdit = t;
-            }
-        });
+    // Meilenstein-Zuordnungen
+    const milestoneBox = document.getElementById("milestonesList");
+    milestoneBox.innerHTML = "";
+
+    p.tasks.filter(t => t.milestone).forEach(task => {
+        const div = document.createElement("div");
+        div.className = "property-item";
+        div.draggable = true;
+        div.id = task.id + "_milestone";
+        
+        div.innerHTML = `<div style="display: flex; justify-content: space-between; gap: 5px; align-items: center;">
+            <span>${escapeHtml(task.text)}</span>
+            <button onclick="event.stopPropagation(); clearTaskProperty('${task.id}', 'milestone')" style="background: #dc3545; color: white; border: none; padding: 2px 5px; border-radius: 3px; cursor: pointer; font-size: 0.7rem;">✕</button>
+        </div>`;
+
+        div.ondragstart = (e) => {
+            e.dataTransfer.setData("taskId", task.id);
+        };
+
+        milestoneBox.appendChild(div);
     });
-    
-    if (!taskToEdit) return;
-    
-    document.getElementById("modalTaskText").value = taskToEdit.text || "";
-    document.getElementById("modalTaskDesc").value = taskToEdit.description || "";
-    document.getElementById("taskModal").dataset.editingId = taskId;
-    
-    const button = document.querySelector("#taskModal button[onclick='addTaskFromModal()']");
-    button.textContent = "✓ Aktualisieren";
-    
-    showTaskModal();
 }
 
-function addTask(text, desc = "") {
-    if (!text.trim()) return;
+function loadMilestones() {
+    const p = getProjectById(currentProject);
+    if (!p) return;
 
-    const taskObj = {
-        id: "task_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9),
-        text: text,
-        description: desc
-    };
-
-    const box = document.getElementById("todo");
-    createTaskElement(box, taskObj);
-    saveProjectData();
+    if (!p.milestones) p.milestones = [];
 }
 
+function addMilestone() {
+    const milestoneName = document.getElementById("newMilestone").value.trim();
+    if (!milestoneName) return;
+
+    const p = getProjectById(currentProject);
+    if (!p) return;
+
+    if (!p.milestones) p.milestones = [];
+    
+    if (p.milestones.some(m => m.name === milestoneName)) {
+        alert("Diesen Meilenstein gibt es bereits!");
+        return;
+    }
+
+    p.milestones.push({
+        id: "m_" + Date.now(),
+        name: milestoneName
+    });
+
+    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    projects[currentProject] = p;
+    localStorage.setItem("projects", JSON.stringify(projects));
+
+    document.getElementById("newMilestone").value = "";
+    loadTasks();
+}
+
+function clearTaskProperty(taskId, property) {
+    const p = getProjectById(currentProject);
+    if (!p || !p.tasks) return;
+
+    const task = p.tasks.find(t => t.id === taskId);
+    if (task) {
+        if (property === "milestone") task.milestone = null;
+        if (property === "priority") task.priority = "priority-medium";
+
+        const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+        projects[currentProject] = p;
+        localStorage.setItem("projects", JSON.stringify(projects));
+
+        loadTasks();
+    }
+}
+
+// ========== DRAG & DROP ==========
 function allowDrop(e) {
     e.preventDefault();
 }
 
-function drop(e) {
+function dropTask(e, target) {
     e.preventDefault();
     const taskId = e.dataTransfer.getData("taskId");
-    const targetBox = e.target.closest(".kanban-box");
 
-    if (!targetBox || !taskId) return;
-
-    // Task aus allen Spalten entfernen
     const p = getProjectById(currentProject);
-    if (!p || !p.kanban) return;
-    
-    let movedTask = null;
-    ["todo", "progress", "review", "done"].forEach(col => {
-        const filtered = [];
-        (p.kanban[col] || []).forEach(t => {
-            if ((typeof t === "object" && t.id === taskId)) {
-                movedTask = t;
-            } else {
-                filtered.push(t);
-            }
-        });
-        p.kanban[col] = filtered;
-    });
-    
-    // Task in neue Spalte hinzufügen
-    const colId = targetBox.id;
-    if (movedTask && p.kanban[colId]) {
-        p.kanban[colId].push(movedTask);
+    if (!p || !p.tasks) return;
+
+    const task = p.tasks.find(t => t.id === taskId);
+    if (!task) return;
+
+    // Status-Änderung
+    if (["todo", "progress", "review", "done"].includes(target)) {
+        task.status = target;
     }
-    
+
+    // Meilenstein-Zuordnung
+    if (target === "milestone") {
+        const milestones = p.milestones || [];
+        const unassignedMilestone = milestones.find(m => !p.tasks.some(t => t.milestone === m.name && t.id !== taskId));
+        if (unassignedMilestone) {
+            task.milestone = unassignedMilestone.name;
+        } else if (milestones.length > 0) {
+            task.milestone = milestones[0].name;
+        }
+    }
+
+    // Priorität-Zuordnung
+    if (target.startsWith("priority-")) {
+        task.priority = target;
+    }
+
+    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    projects[currentProject] = p;
+    localStorage.setItem("projects", JSON.stringify(projects));
+
+    loadTasks();
     saveProjectData();
-    loadKanbanBoard();
 }
 
+// ========== HELPERS ==========
 function escapeHtml(text) {
     const map = {
         '&': '&amp;',
@@ -660,88 +515,10 @@ function escapeHtml(text) {
     return text.replace(/[&<>"']/g, m => map[m]);
 }
 
-// ========== TEAM-MITGLIEDER ==========
-function loadTeamMembers() {
-    const p = getProjectById(currentProject);
-    if (!p) return;
-
-    const list = document.getElementById("teamMembers");
-    list.innerHTML = (p.members || []).map(m => {
-        const isOwner = m === p.owner;
-        const isMe = m === currentUser;
-        let action = "";
-        if (isMe && !isOwner && p.owner === currentUser) {
-            action = `<button onclick="removeMember('${m}')" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; margin-left: 10px;">✕</button>`;
-        }
-        return `<li style="padding: 8px; border-bottom: 1px solid #ddd;">${m} ${isOwner ? "(Owner)" : ""} ${action}</li>`;
-    }).join("");
-}
-
-function addMemberToProject() {
-    const p = getProjectById(currentProject);
-    if (!p) return;
-    if (p.owner !== currentUser) return alert("Nur der Owner kann Mitglieder hinzufügen");
-
-    const username = document.getElementById("memberToAdd").value.trim();
-    if (!username) return alert("Benutzername erforderlich");
-
-    const users = JSON.parse(localStorage.getItem("users") || "{}");
-    if (!users[username]) return alert("Benutzer nicht gefunden");
-
-    if (p.members.includes(username)) return alert("Benutzer ist bereits Mitglied");
-
-    p.members.push(username);
-
-    if (!users[username].projects) users[username].projects = [];
-    if (!users[username].projects.includes(currentProject)) {
-        users[username].projects.push(currentProject);
-    }
-
-    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
-    projects[currentProject] = p;
-    localStorage.setItem("projects", JSON.stringify(projects));
-    localStorage.setItem("users", JSON.stringify(users));
-
-    document.getElementById("memberToAdd").value = "";
-    loadTeamMembers();
-}
-
-function removeMember(username) {
-    if (!confirm(`${username} wirklich entfernen?`)) return;
-
-    const p = getProjectById(currentProject);
-    if (!p || p.owner !== currentUser) return;
-
-    p.members = p.members.filter(m => m !== username);
-
-    const users = JSON.parse(localStorage.getItem("users") || "{}");
-    if (users[username].projects) {
-        users[username].projects = users[username].projects.filter(id => id !== currentProject);
-    }
-
-    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
-    projects[currentProject] = p;
-    localStorage.setItem("projects", JSON.stringify(projects));
-    localStorage.setItem("users", JSON.stringify(users));
-
-    loadTeamMembers();
-}
-
-// ========== UI HELPERS ==========
-function showApp() {
-    document.getElementById("app").style.display = "block";
-}
-
-function showUserInfo() {
-    const users = JSON.parse(localStorage.getItem("users") || "{}");
-    const allUsers = Object.keys(users).map(u => `${u} ${u === currentUser ? "(Sie)" : ""}`).join(", ");
-    alert(`Angemeldet als: ${currentUser}\n\nAlle Benutzer: ${allUsers}`);
-}
-
 function setActiveNav() {
     document.querySelectorAll("nav a").forEach(link => {
         link.classList.remove("active");
-        if (link.href.includes("index.html")) {
+        if (link.href.includes("index.html") || link.href.endsWith("/")) {
             link.classList.add("active");
         }
     });

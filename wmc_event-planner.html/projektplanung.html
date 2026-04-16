@@ -147,44 +147,10 @@
 </footer>
 
 <script>
-let currentUser = null;
 let currentProject = null;
 
 document.addEventListener("DOMContentLoaded", () => {
-    const u = localStorage.getItem("currentUser");
-
-    if (!u) {
-        // Kein eingeloggter Benutzer: zeige Projekt-Auswahl Hinweis, aber redirect nicht automatisch
-        const selectView = document.getElementById("projectSelectView");
-        if (selectView) {
-            selectView.style.display = "block";
-            selectView.insertAdjacentHTML('afterbegin', '<p style="color:#dc3545;">Nicht angemeldet – bitte zuerst im Dashboard anmelden.</p>');
-        }
-        return;
-    }
-
-    currentUser = u;
-    let p = localStorage.getItem("currentProject");
-
-    // Wenn ein aktuelles Projekt gesetzt ist und existiert, lade es
-    if (p && getProjectById(p)) {
-        currentProject = p;
-        loadProjectDetail();
-    } else {
-        // Versuch, das erste Projekt des Users als Default zu setzen
-        const users = JSON.parse(localStorage.getItem("users") || "{}");
-        const userProjects = (users[currentUser] && users[currentUser].projects) ? users[currentUser].projects : [];
-        if (userProjects.length > 0) {
-            p = userProjects[0];
-            currentProject = p;
-            localStorage.setItem("currentProject", p);
-            loadProjectDetail();
-        } else {
-            // Keine Projekte vorhanden -> zeige Projektliste (oder Hinweis)
-            loadProjectList();
-        }
-    }
-    
+    loadProjects();
     setActiveNav();
 });
 
@@ -193,191 +159,244 @@ function getProjectById(projectId) {
     return projects[projectId] || null;
 }
 
-function loadProjectList() {
-    const users = JSON.parse(localStorage.getItem("users") || "{}");
-    const userData = users[currentUser] || { password: "", projects: [] };
-    const projects = userData.projects || [];
+function loadProjects() {
+    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    const projectList = document.getElementById("projectList");
+    projectList.innerHTML = "";
 
-    const html = projects.map((pid) => {
-        const p = getProjectById(pid);
-        const name = p ? p.name : "Gelöschtes Projekt";
-        return `<button onclick="selectProject('${pid}')" style="padding: 10px 20px; background: #0d6efd; color: white; border: none; border-radius: 4px; cursor: pointer;">${name}</button>`;
-    }).join("");
+    Object.keys(projects).forEach(projectId => {
+        const project = projects[projectId];
+        const btn = document.createElement("button");
+        btn.textContent = project.name;
+        btn.onclick = () => selectProject(projectId);
+        btn.style.cssText = "padding: 10px 20px; background: #0d6efd; color: white; border: none; border-radius: 4px; cursor: pointer;";
+        projectList.appendChild(btn);
+    });
 
-    document.getElementById("projectList").innerHTML = html || "<p>Keine Projekte. Bitte erstelle eines im Dashboard.</p>";
-    document.getElementById("projectSelectView").style.display = "block";
-    document.getElementById("projectDetailView").style.display = "none";
+    if (Object.keys(projects).length === 0) {
+        projectList.innerHTML = "<p>Noch keine Projekte. Erstelle ein Projekt auf dem Dashboard!</p>";
+    }
 }
 
 function selectProject(projectId) {
     currentProject = projectId;
-    localStorage.setItem("currentProject", projectId);
     loadProjectDetail();
+    document.getElementById("projectSelectView").style.display = "none";
+    document.getElementById("projectDetailView").style.display = "block";
 }
 
 function changeProjekt() {
     currentProject = null;
-    localStorage.removeItem("currentProject");
-    loadProjectList();
+    document.getElementById("projectSelectView").style.display = "block";
+    document.getElementById("projectDetailView").style.display = "none";
+    loadProjects();
 }
 
 function loadProjectDetail() {
-    const p = getProjectById(currentProject);
-    if (!p) {
+    const project = getProjectById(currentProject);
+    if (!project) {
         alert("Projekt nicht gefunden");
-        loadProjectList();
         return;
     }
 
-    document.getElementById("currentProjectName").textContent = p.name;
-    document.getElementById("projectSelectView").style.display = "none";
-    document.getElementById("projectDetailView").style.display = "block";
+    document.getElementById("currentProjectName").textContent = project.name;
 
-    const data = p.projectPlanning || {};
-    
-    if (data.team && data.team.length > 0) {
-        document.getElementById("teamTable").innerHTML = "";
-        data.team.forEach(member => {
-            const row = document.createElement("tr");
-            row.innerHTML = `
-                <td>${member.name}</td>
-                <td>${member.role}</td>
-                <td><input type="number" min="0" max="100" value="${member.availability || 100}" onchange="saveProjectPlanning()" style="width: 80px;"></td>
-                <td><button onclick="this.parentElement.parentElement.remove(); saveProjectPlanning();" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">✕</button></td>
-            `;
-            document.getElementById("teamTable").appendChild(row);
-        });
+    if (!project.planning) {
+        project.planning = {
+            team: [],
+            totalBudget: 0,
+            spentBudget: 0,
+            budgetDetails: "",
+            timelineEvents: "",
+            risks: [],
+            qualityMetrics: "",
+            blockers: ""
+        };
     }
 
-    document.getElementById("totalBudget").value = data.totalBudget || "";
-    document.getElementById("spentBudget").value = data.spentBudget || "";
-    document.getElementById("budgetDetails").value = data.budgetDetails || "";
+    document.getElementById("totalBudget").value = project.planning.totalBudget || "";
+    document.getElementById("spentBudget").value = project.planning.spentBudget || "";
+    document.getElementById("budgetDetails").value = project.planning.budgetDetails || "";
+    document.getElementById("timelineEvents").value = project.planning.timelineEvents || "";
+    document.getElementById("qualityMetrics").value = project.planning.qualityMetrics || "";
+    document.getElementById("blockers").value = project.planning.blockers || "";
+
+    loadTeamMembers();
+    loadRisks();
     updateBudgetDisplay();
-
-    document.getElementById("timelineEvents").value = data.timelineEvents || "";
-
-    if (data.risks && data.risks.length > 0) {
-        document.getElementById("riskTable").innerHTML = "";
-        data.risks.forEach(risk => {
-            const row = document.createElement("tr");
-            const bgColor = risk.level === "Hoch" ? "#dc3545" : risk.level === "Mittel" ? "#ffc107" : "#28a745";
-            row.innerHTML = `
-                <td>${risk.name}</td>
-                <td><span style="padding: 4px 8px; border-radius: 4px; color: white; background: ${bgColor};">${risk.level}</span></td>
-                <td><input type="text" placeholder="Maßnahmen" value="${risk.measures || ""}" onchange="saveProjectPlanning()" style="width: 100%;"></td>
-                <td><select onchange="saveProjectPlanning();"><option${risk.status === "Offen" ? " selected" : ""}>Offen</option><option${risk.status === "In Arbeit" ? " selected" : ""}>In Arbeit</option><option${risk.status === "Gelöst" ? " selected" : ""}>Gelöst</option></select></td>
-            `;
-            document.getElementById("riskTable").appendChild(row);
-        });
-    }
-
-    document.getElementById("qualityMetrics").value = data.qualityMetrics || "";
-    document.getElementById("blockers").value = data.blockers || "";
 }
 
 function addTeamMember() {
     const name = document.getElementById("memberName").value.trim();
     const role = document.getElementById("memberRole").value.trim();
-    if (!name || !role) return alert("Bitte Name und Rolle eintragen");
 
-    const row = document.createElement("tr");
-    row.innerHTML = `
-        <td>${name}</td>
-        <td>${role}</td>
-        <td><input type="number" min="0" max="100" value="100" onchange="saveProjectPlanning()" style="width: 80px;"></td>
-        <td><button onclick="this.parentElement.parentElement.remove(); saveProjectPlanning();" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">✕</button></td>
-    `;
-    document.getElementById("teamTable").appendChild(row);
+    if (!name || !role) return alert("Name und Rolle erforderlich");
+
+    const project = getProjectById(currentProject);
+    if (!project) return;
+
+    if (!project.planning) project.planning = {};
+    if (!project.planning.team) project.planning.team = [];
+
+    project.planning.team.push({
+        id: "member_" + Date.now(),
+        name: name,
+        role: role,
+        availability: 100
+    });
+
+    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    projects[currentProject] = project;
+    localStorage.setItem("projects", JSON.stringify(projects));
+
     document.getElementById("memberName").value = "";
     document.getElementById("memberRole").value = "";
-    saveProjectPlanning();
+    loadTeamMembers();
 }
 
-function addRisk() {
-    const name = document.getElementById("riskName").value.trim();
-    const level = document.getElementById("riskLevel").value;
-    if (!name) return alert("Bitte Risiko-Beschreibung eintragen");
+function loadTeamMembers() {
+    const project = getProjectById(currentProject);
+    if (!project || !project.planning) return;
 
-    const row = document.createElement("tr");
-    const bgColor = level === "Hoch" ? "#dc3545" : level === "Mittel" ? "#ffc107" : "#28a745";
-    row.innerHTML = `
-        <td>${name}</td>
-        <td><span style="padding: 4px 8px; border-radius: 4px; color: white; background: ${bgColor};">${level}</span></td>
-        <td><input type="text" placeholder="Maßnahmen" onchange="saveProjectPlanning()" style="width: 100%;"></td>
-        <td><select onchange="saveProjectPlanning();"><option>Offen</option><option>In Arbeit</option><option>Gelöst</option></select></td>
-    `;
-    document.getElementById("riskTable").appendChild(row);
-    document.getElementById("riskName").value = "";
-    saveProjectPlanning();
+    const teamTable = document.getElementById("teamTable");
+    teamTable.innerHTML = "";
+
+    (project.planning.team || []).forEach(member => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${member.name}</td>
+            <td>${member.role}</td>
+            <td><input type="number" value="${member.availability || 100}" min="0" max="100" style="width: 60px;" onchange="updateTeamMember('${member.id}', this.value)"> %</td>
+            <td><button onclick="removeTeamMember('${member.id}')" style="background: #dc3545; color: white; padding: 4px 8px; border: none; border-radius: 3px; cursor: pointer;">Löschen</button></td>
+        `;
+        teamTable.appendChild(row);
+    });
+}
+
+function updateTeamMember(memberId, availability) {
+    const project = getProjectById(currentProject);
+    if (!project || !project.planning) return;
+
+    const member = project.planning.team.find(m => m.id === memberId);
+    if (member) {
+        member.availability = parseInt(availability) || 0;
+        saveProjectPlanning();
+    }
+}
+
+function removeTeamMember(memberId) {
+    const project = getProjectById(currentProject);
+    if (!project || !project.planning) return;
+
+    project.planning.team = project.planning.team.filter(m => m.id !== memberId);
+
+    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    projects[currentProject] = project;
+    localStorage.setItem("projects", JSON.stringify(projects));
+
+    loadTeamMembers();
 }
 
 function updateBudgetDisplay() {
-    const total = parseInt(document.getElementById("totalBudget").value) || 0;
-    const spent = parseInt(document.getElementById("spentBudget").value) || 0;
+    const total = parseFloat(document.getElementById("totalBudget").value) || 0;
+    const spent = parseFloat(document.getElementById("spentBudget").value) || 0;
     const remaining = total - spent;
-    const usage = total > 0 ? Math.round((spent / total) * 100) : 0;
+    const percentage = total === 0 ? 0 : (spent / total) * 100;
 
-    document.getElementById("budgetRemaining").textContent = remaining;
-    document.getElementById("budgetUsage").textContent = usage;
+    document.getElementById("budgetRemaining").textContent = remaining.toFixed(2);
+    document.getElementById("budgetUsage").textContent = percentage.toFixed(0);
+}
+
+function addRisk() {
+    const riskName = document.getElementById("riskName").value.trim();
+    const riskLevel = document.getElementById("riskLevel").value;
+
+    if (!riskName) return alert("Risiko-Beschreibung erforderlich");
+
+    const project = getProjectById(currentProject);
+    if (!project || !project.planning) return;
+
+    if (!project.planning.risks) project.planning.risks = [];
+
+    project.planning.risks.push({
+        id: "risk_" + Date.now(),
+        name: riskName,
+        level: riskLevel,
+        measures: "",
+        status: "Offen"
+    });
+
+    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    projects[currentProject] = project;
+    localStorage.setItem("projects", JSON.stringify(projects));
+
+    document.getElementById("riskName").value = "";
+    document.getElementById("riskLevel").value = "Mittel";
+    loadRisks();
+}
+
+function loadRisks() {
+    const project = getProjectById(currentProject);
+    if (!project || !project.planning) return;
+
+    const riskTable = document.getElementById("riskTable");
+    riskTable.innerHTML = "";
+
+    (project.planning.risks || []).forEach(risk => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${risk.name}</td>
+            <td>${risk.level}</td>
+            <td><input type="text" value="${risk.measures || ''}" placeholder="Maßnahmen" style="width: 100%;" onchange="updateRisk('${risk.id}', 'measures', this.value)"></td>
+            <td>
+                <select onchange="updateRisk('${risk.id}', 'status', this.value)" style="padding: 4px;">
+                    <option ${risk.status === "Offen" ? "selected" : ""}>Offen</option>
+                    <option ${risk.status === "Mitigiert" ? "selected" : ""}>Mitigiert</option>
+                    <option ${risk.status === "Gelöst" ? "selected" : ""}>Gelöst</option>
+                </select>
+            </td>
+        `;
+        riskTable.appendChild(row);
+    });
+}
+
+function updateRisk(riskId, field, value) {
+    const project = getProjectById(currentProject);
+    if (!project || !project.planning) return;
+
+    const risk = project.planning.risks.find(r => r.id === riskId);
+    if (risk) {
+        risk[field] = value;
+        saveProjectPlanning();
+    }
 }
 
 function saveProjectPlanning() {
     if (!currentProject) return;
 
-    try {
-        const projects = JSON.parse(localStorage.getItem("projects") || "{}");
-        const p = projects[currentProject];
-        
-        if (!p) return;
-        if (!p.projectPlanning) p.projectPlanning = {};
+    const project = getProjectById(currentProject);
+    if (!project) return;
 
-        const team = [];
-        document.querySelectorAll("#teamTable tr").forEach(row => {
-            const cells = row.querySelectorAll("td");
-            if (cells.length >= 3) {
-                team.push({
-                    name: cells[0].textContent.trim(),
-                    role: cells[1].textContent.trim(),
-                    availability: cells[2].querySelector("input")?.value || "100"
-                });
-            }
-        });
+    if (!project.planning) project.planning = {};
 
-        const risks = [];
-        document.querySelectorAll("#riskTable tr").forEach(row => {
-            const cells = row.querySelectorAll("td");
-            if (cells.length >= 4) {
-                risks.push({
-                    name: cells[0].textContent.trim(),
-                    level: cells[1].textContent.trim(),
-                    measures: cells[2].querySelector("input")?.value || "",
-                    status: cells[3].querySelector("select")?.value || "Offen"
-                });
-            }
-        });
+    project.planning.totalBudget = parseFloat(document.getElementById("totalBudget").value) || 0;
+    project.planning.spentBudget = parseFloat(document.getElementById("spentBudget").value) || 0;
+    project.planning.budgetDetails = document.getElementById("budgetDetails").value;
+    project.planning.timelineEvents = document.getElementById("timelineEvents").value;
+    project.planning.qualityMetrics = document.getElementById("qualityMetrics").value;
+    project.planning.blockers = document.getElementById("blockers").value;
 
-        p.projectPlanning = {
-            team: team,
-            totalBudget: document.getElementById("totalBudget").value || "",
-            spentBudget: document.getElementById("spentBudget").value || "",
-            budgetDetails: document.getElementById("budgetDetails").value || "",
-            timelineEvents: document.getElementById("timelineEvents").value || "",
-            risks: risks,
-            qualityMetrics: document.getElementById("qualityMetrics").value || "",
-            blockers: document.getElementById("blockers").value || ""
-        };
+    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    projects[currentProject] = project;
+    localStorage.setItem("projects", JSON.stringify(projects));
 
-        localStorage.setItem("projects", JSON.stringify(projects));
-        console.log("Projektplanung gespeichert");
-    } catch (e) {
-        console.error("Fehler beim Speichern:", e);
-    }
+    console.log("Planung gespeichert!");
 }
 
 function setActiveNav() {
     document.querySelectorAll("nav a").forEach(link => {
         link.classList.remove("active");
-        if (link.href.includes("projektplanung.html")) {
+        if (link.href.includes("projektplanung")) {
             link.classList.add("active");
         }
     });
