@@ -1067,9 +1067,11 @@ function generateProjectOverview(project) {
 
 💡 **Status:** ${tasks.filter(t => t.status === "done").length === tasks.length && tasks.length > 0 ? "✅ Alle Aufgaben abgeschlossen!" : "🔄 Projekt in Arbeit"}`;
 }
+
+function testGeminiConnection() {
     const apiKey = document.getElementById("geminiApiKey").value.trim();
     if (!apiKey) return alert("Bitte API-Key eingeben!");
-    
+
     alert("API-Key gespeichert! Du kannst jetzt Fragen stellen.");
 }
 
