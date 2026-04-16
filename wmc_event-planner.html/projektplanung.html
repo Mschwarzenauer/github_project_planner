@@ -336,14 +336,23 @@ function loadProjectsOld() {
 }
 
 function selectProject(projectId) {
-    // Lade Daten sofort aus Cache
-    const project = getProjectById(projectId);
+    // Lade Daten sicher aus GlobalCache oder localStorage
+    let project = getProjectById(projectId);
+    
+    // Fallback: Wenn nicht im Cache, laden aus localStorage
+    if (!project) {
+        const allProjectsSync = getAllProjectsSync();
+        project = allProjectsSync[projectId];
+    }
+    
     if (!project) {
         console.error("Projekt nicht gefunden:", projectId);
+        alert("Fehler: Projekt konnte nicht geladen werden. Bitte aktualisiere die Seite.");
         return;
     }
     
     currentProject = projectId;
+    currentProjectData = project;
     loadProjectDetail();
     document.getElementById("projectSelectView").style.display = "none";
     document.getElementById("projectDetailView").style.display = "block";
@@ -882,36 +891,32 @@ function generateLocalAnalysis(question, project) {
 }
 
 function generateBudgetAnalysis(project) {
-    if (!project.planning || !project.planning.budget) {
-        return "Keine Budget-Informationen vorhanden. Füge Budget-Items in der Budget-Sektion hinzu.";
+    if (!project.planning) {
+        return "Keine Budget-Informationen vorhanden. Konfiguriere das Budget in der Budget-Sektion.";
     }
     
-    const budget = project.planning.budget;
-    const items = budget.items || [];
+    const totalBudget = project.planning.totalBudget || 0;
+    const spentBudget = project.planning.spentBudget || 0;
+    const remaining = totalBudget - spentBudget;
+    const budgetDetails = project.planning.budgetDetails || "Keine Details eingegeben";
     
-    let totalIncome = 0;
-    let totalExpenses = 0;
+    const usage = totalBudget === 0 ? 0 : (spentBudget / totalBudget) * 100;
     
-    items.forEach(item => {
-        if (item.type === "income") {
-            totalIncome += item.amount;
-        } else {
-            totalExpenses += item.amount;
-        }
-    });
-    
-    const balance = totalIncome - totalExpenses;
-    
-    return `📊 **Budget-Analyse für "${project.name}"**
+    return `💰 **Budget-Management für "${project.name}"**
 
-💰 **Einnahmen:** ${totalIncome.toFixed(2)}€
-💸 **Ausgaben:** ${totalExpenses.toFixed(2)}€
-⚖️ **Saldo:** ${balance.toFixed(2)}€ ${balance >= 0 ? "✅ (im Plus)" : "❌ (Defizit)"}
+📊 **Budget-Übersicht:**
+• Gesamtbudget: ${totalBudget.toFixed(2)}€
+• Bisher ausgegeben: ${spentBudget.toFixed(2)}€
+• Verbleibend: ${remaining.toFixed(2)}€ ${remaining >= 0 ? "✅" : "❌"}
+• Auslastung: ${usage.toFixed(1)}%
 
-📋 **Budget-Items:**
-${items.map(item => `• ${item.name}: ${item.amount}€ (${item.type})`).join('\n')}
+📋 **Budget-Details:**
+${budgetDetails}
 
-💡 **Empfehlung:** ${balance < 0 ? "Budget-Defizit! Überprüfe Ausgaben oder erhöhe Einnahmen." : "Budget ist ausgeglichen. Gut gemacht!"}`;
+💡 **Status:** ${remaining < 0 ? "⚠️ WARNUNG: Budget überschritten!" : remaining < (totalBudget * 0.2) ? "⚠️ Vorsicht: Nur noch 20% Budget verfügbar" : "✅ Budget ausreichend verfügbar"}
+
+🎯 **Empfehlung:**
+${remaining < 0 ? "Sofort Maßnahmen zur Kosteneinsparung ergreifen!" : usage > 80 ? "Plant bereits die nächsten Schritte für verbleibendes Budget" : "Budget ist gut geplant. Fortfahren mit aktuellem Kurs."}`;
 }
 
 function generateTimelineAnalysis(project) {
@@ -954,22 +959,42 @@ function generateRiskAnalysis(project) {
     const risks = project.planning?.risks || [];
     
     if (risks.length === 0) {
-        return "Keine Risiken identifiziert. Füge potenzielle Risiken in der Risiko-Sektion hinzu.";
+        return "⚠️ Keine Risiken identifiziert. Warnung: Ein Projekt ohne identifizierte Risiken ist unrealistisch! Füge potenzielle Risiken in der Risiko-Sektion hinzu.";
     }
     
-    const highRisks = risks.filter(r => r.probability === "high" || r.impact === "high");
-    const mediumRisks = risks.filter(r => r.probability === "medium" || r.impact === "medium");
+    const highRisks = risks.filter(r => r.level === "Hoch" || r.level === "high");
+    const mediumRisks = risks.filter(r => r.level === "Mittel" || r.level === "medium");
+    const lowRisks = risks.filter(r => r.level === "Niedrig" || r.level === "low");
     
-    return `⚠️ **Risiko-Analyse für "${project.name}"**
+    const openRisks = risks.filter(r => r.status === "Offen");
+    const mitigatedRisks = risks.filter(r => r.status === "Mitigiert");
+    const resolvedRisks = risks.filter(r => r.status === "Gelöst");
+    
+    return `⚠️ **Risiko-Management für "${project.name}"**
 
-🔴 **Hohe Risiken:** ${highRisks.length}
-🟡 **Mittlere Risiken:** ${mediumRisks.length}
-🟢 **Niedrige Risiken:** ${risks.length - highRisks.length - mediumRisks.length}
+🎯 **Risiko-Übersicht:**
+• Gesamtrisiken: ${risks.length}
+🔴 Hoch: ${highRisks.length}
+🟡 Mittel: ${mediumRisks.length}
+🟢 Niedrig: ${lowRisks.length}
+
+📊 **Bearbeitungs-Status:**
+• 🔓 Offen: ${openRisks.length}
+• 🛡️ Mitigiert: ${mitigatedRisks.length}
+• ✅ Gelöst: ${resolvedRisks.length}
 
 📋 **Risiko-Details:**
-${risks.map(risk => `• ${risk.text} (Wahrscheinlichkeit: ${risk.probability}, Auswirkung: ${risk.impact})`).join('\n')}
+${risks.map(risk => {
+    const statusIcon = risk.status === "Gelöst" ? "✅" : risk.status === "Mitigiert" ? "🛡️" : "⚠️";
+    const measures = risk.measures ? ` | Maßnahmen: ${risk.measures}` : "";
+    return `• ${statusIcon} ${risk.name} (${risk.level})${measures}`;
+}).join('\n')}
 
-💡 **Empfehlung:** ${highRisks.length > 0 ? `⚠️ ${highRisks.length} hohe Risiken! Entwickle Maßnahmen.` : "Risiko-Lage überschaubar."}`;
+💡 **Risiko-Status:**
+${highRisks.length > 0 ? `🔴 KRITISCH: ${highRisks.length} hohe Risiken erfordern sofortige Maßnahmen!` : openRisks.length > 0 ? `⚠️ ACHTUNG: ${openRisks.length} offene Risiken ohne Mitigation!` : "✅ Risiken sind gut gemanagt"}
+
+🎯 **Nächste Schritte:**
+${highRisks.filter(r => r.status === "Offen").length > 0 ? "1. Definiere Mitigation für alle hohen offenen Risiken\n2. Erstelle Notfall-Plan\n3. Überwache kontinuierlich" : "Fortlaufende Überwachung und Validierung der Mitigations-Maßnahmen"}`;
 }
 
 function generateTeamAnalysis(project) {
@@ -981,16 +1006,29 @@ function generateTeamAnalysis(project) {
     
     const totalAvailability = team.reduce((sum, member) => sum + (member.availability || 100), 0);
     const avgAvailability = totalAvailability / team.length;
+    const fullTimeEquivalent = team.filter(m => (m.availability || 100) >= 100).length;
+    const partTimeMembers = team.filter(m => (m.availability || 100) < 100).length;
     
-    return `👥 **Team-Analyse für "${project.name}"**
+    return `👥 **Team-Management für "${project.name}"**
 
-👤 **Team-Größe:** ${team.length} Mitglieder
-📊 **Durchschnittliche Verfügbarkeit:** ${avgAvailability.toFixed(1)}%
+📊 **Team-Überblick:**
+• Gesamt-Team: ${team.length} Personen
+• Vollzeit-Äquivalent (FTE): ${fullTimeEquivalent} Mitglieder
+• Teilzeit-Mitglieder: ${partTimeMembers} Mitglieder
+• Durchschnittliche Verfügbarkeit: ${avgAvailability.toFixed(1)}%
 
-📋 **Team-Mitglieder:**
-${team.map(member => `• ${member.name} (${member.role}) - ${member.availability || 100}% verfügbar`).join('\n')}
+👨‍💼 **Team-Zusammensetzung:**
+${team.map(member => {
+    const availability = member.availability || 100;
+    const status = availability >= 100 ? "✅ Vollzeit" : availability >= 75 ? "⚠️ Reduziert" : "❌ Gering";
+    return `• ${member.name} (${member.role}) - ${availability}% ${status}`;
+}).join('\n')}
 
-💡 **Empfehlung:** ${avgAvailability < 70 ? "Team-Kapazität niedrig! Überprüfe Workload." : "Team-Kapazität ausreichend."}`;
+🎯 **Kapazitäts-Status:**
+${avgAvailability >= 90 ? "✅ Exzellente Team-Kapazität" : avgAvailability >= 75 ? "⚠️ Ausreichende Kapazität" : avgAvailability >= 50 ? "⚠️ Begrenzte Kapazität" : "❌ Kritische Auslastung"}
+
+💡 **Empfehlung:**
+${avgAvailability < 70 ? "Erhöhe Team-Verfügbarkeit oder reduziere Projektscope für realistische Ziele" : avgAvailability < 85 ? "Optimiere Team-Zuweisung, um Engpässe zu vermeiden" : "Team-Auslastung optimal. Projekt kann voranschreiten."}`;
 }
 
 function generateTaskAnalysis(project) {
