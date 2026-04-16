@@ -9,8 +9,8 @@
 <body>
 
 <nav>
-    <a href="index.html" class="active">📋 Dashboard</a>
-    <a href="projektplanung.html" onclick="syncProjectsToWindowName()">📊 Projektplanung</a>
+    <a href="#" data-page="dashboard" class="active" onclick="showSection('dashboard', event)">📋 Dashboard</a>
+    <a href="#" data-page="planner" onclick="showSection('planner', event)">📊 Projektplanung</a>
     <a href="info.html">ℹ️ Info</a>
 </nav>
 
@@ -20,7 +20,8 @@
 </header>
 
 <!-- APP -->
-<div id="app">
+<div id="dashboardSection">
+    <div id="app">
 
 <!-- Projektwahl -->
 <section class="form-section">
@@ -165,7 +166,16 @@
 
 </div><!-- end projectDetail -->
 
-</div><!-- end app -->
+    </div><!-- end app -->
+</div><!-- end dashboardSection -->
+
+<div id="plannerSection" style="display: none; padding: 20px;">
+    <div style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+        <button onclick="showSection('dashboard', event)" style="padding: 10px 15px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">← Zurück zum Dashboard</button>
+        <h2 style="margin: 0;">📊 Projektplanung (Testmodus)</h2>
+    </div>
+    <iframe id="plannerIframe" src="projektplanung.html" style="width: 100%; min-height: 900px; border: 1px solid #ccc; border-radius: 8px;" title="Projektplanung"></iframe>
+</div>
 
 <footer>
     <p>© 2025 Projektplaner • Projektmanagement & Task-Verwaltung</p>
@@ -193,8 +203,29 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Jetzt lade Projekte sicher
     await loadProjectList();
-    setActiveNav();
+    setActiveNav('dashboard');
 });
+
+function showSection(page, event) {
+    if (event) event.preventDefault();
+    document.getElementById('dashboardSection').style.display = page === 'dashboard' ? 'block' : 'none';
+    document.getElementById('plannerSection').style.display = page === 'planner' ? 'block' : 'none';
+    setActiveNav(page);
+    if (page === 'planner') {
+        const iframe = document.getElementById('plannerIframe');
+        iframe.src = iframe.src; // reload iframe if needed
+    }
+}
+
+function setActiveNav(page) {
+    document.querySelectorAll('nav a[data-page]').forEach(link => {
+        if (link.dataset.page === page) {
+            link.classList.add('active');
+        } else {
+            link.classList.remove('active');
+        }
+    });
+}
 
 window.addEventListener('beforeunload', () => {
     try {
@@ -864,14 +895,6 @@ function escapeHtml(text) {
     return text.replace(/[&<>"']/g, m => map[m]);
 }
 
-function setActiveNav() {
-    document.querySelectorAll("nav a").forEach(link => {
-        link.classList.remove("active");
-        if (link.href.includes("index.html") || link.href.endsWith("/")) {
-            link.classList.add("active");
-        }
-    });
-}
 </script>
 
 </body>
