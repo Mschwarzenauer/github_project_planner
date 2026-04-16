@@ -223,11 +223,12 @@
     <p>© 2025 Projektplaner • Projektplanung Modul</p>
 </footer>
 
+<script src="storage.js"></script>
 <script>
 let currentProject = null;
 let currentProjectData = null;
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     const savedDeepseekKey = localStorage.getItem("deepseekApiKey");
     if (savedDeepseekKey) {
         document.getElementById("deepseekApiKey").value = savedDeepseekKey;
@@ -238,18 +239,19 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("geminiApiKey").value = savedGeminiKey;
     }
     
-    loadProjects();
-    setActiveNav();
+    // Warte auf IndexedDB Initialisierung
+    await new Promise(resolve => {
+        setTimeout(() => {
+            loadProjects();
+            setActiveNav();
+            resolve();
+        }, 500); // Gebe IndexedDB Zeit zu laden
+    });
 });
 
-function getProjectById(projectId) {
-    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
-    return projects[projectId] || null;
-}
-
 function loadProjects() {
-    // Force sync from dashboard
-    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    // Nutze GlobalCache von storage.js
+    const projects = getAllProjectsSync() || {};
     const projectList = document.getElementById("projectList");
     projectList.innerHTML = "";
 
@@ -257,8 +259,6 @@ function loadProjects() {
     
     if (projectIds.length === 0) {
         projectList.innerHTML = "<p style='color: red; font-weight: bold;'>⚠️ Noch keine Projekte. Erstelle ein Projekt auf dem Dashboard!</p>";
-        console.log("localStorage Keys:", Object.keys(localStorage));
-        console.log("Projects object:", projects);
         return;
     }
 
@@ -270,9 +270,74 @@ function loadProjects() {
         btn.style.cssText = "padding: 10px 20px; background: #0d6efd; color: white; border: none; border-radius: 4px; cursor: pointer;";
         projectList.appendChild(btn);
     });
+    
+    console.log("✓ " + projectIds.length + " Projekte geladen und angezeigt");
+}
+
+function loadProjectsOld() {
+    if (!loadProjectsData) {
+        // Fallback wenn storage.js nicht geladen ist
+        const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+        const projectList = document.getElementById("projectList");
+        projectList.innerHTML = "";
+
+        const projectIds = Object.keys(projects);
+        
+        if (projectIds.length === 0) {
+            projectList.innerHTML = "<p style='color: red; font-weight: bold;'>⚠️ Noch keine Projekte. Erstelle ein Projekt auf dem Dashboard!</p>";
+            console.log("localStorage Keys:", Object.keys(localStorage));
+            console.log("Projects object:", projects);
+            return;
+        }
+
+        projectIds.forEach(projectId => {
+            const project = projects[projectId];
+            const btn = document.createElement("button");
+            btn.textContent = project.name;
+            btn.onclick = () => selectProject(projectId);
+            btn.style.cssText = "padding: 10px 20px; background: #0d6efd; color: white; border: none; border-radius: 4px; cursor: pointer;";
+            projectList.appendChild(btn);
+        });
+        return;
+    }
+
+    // Mit storage.js (IndexedDB + localStorage)
+    loadProjectsData().then(projects => {
+        const projectList = document.getElementById("projectList");
+        projectList.innerHTML = "";
+
+        const projectIds = Object.keys(projects);
+        
+        if (projectIds.length === 0) {
+            projectList.innerHTML = "<p style='color: red; font-weight: bold;'>⚠️ Noch keine Projekte. Erstelle ein Projekt auf dem Dashboard!</p>";
+            console.log("✓ Storage.js aktiv, aber keine Projekte gefunden");
+            return;
+        }
+
+        projectIds.forEach(projectId => {
+            const project = projects[projectId];
+            const btn = document.createElement("button");
+            btn.textContent = project.name;
+            btn.onclick = () => selectProject(projectId);
+            btn.style.cssText = "padding: 10px 20px; background: #0d6efd; color: white; border: none; border-radius: 4px; cursor: pointer;";
+            projectList.appendChild(btn);
+        });
+        
+        console.log("✓ " + projectIds.length + " Projekte geladen und angezeigt");
+    }).catch(err => {
+        console.error("Fehler beim Laden der Projekte:", err);
+        projectList.innerHTML = "<p style='color: red;'>Fehler beim Laden der Projekte: " + err.message + "</p>";
+    });
 }
 
 function selectProject(projectId) {
+    // Lade Daten sofort aus Cache
+    const project = getProjectById(projectId);
+    if (!project) {
+        console.error("Projekt nicht gefunden:", projectId);
+        return;
+    }
+    
     currentProject = projectId;
     loadProjectDetail();
     document.getElementById("projectSelectView").style.display = "none";
@@ -347,9 +412,9 @@ function addTeamMember() {
         availability: 100
     });
 
-    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    const projects = getAllProjectsSync() || {};
     projects[currentProject] = project;
-    localStorage.setItem("projects", JSON.stringify(projects));
+    saveProjectsData(projects);
 
     document.getElementById("memberName").value = "";
     document.getElementById("memberRole").value = "";
@@ -392,9 +457,9 @@ function removeTeamMember(memberId) {
 
     project.planning.team = project.planning.team.filter(m => m.id !== memberId);
 
-    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    const projects = getAllProjectsSync() || {};
     projects[currentProject] = project;
-    localStorage.setItem("projects", JSON.stringify(projects));
+    saveProjectsData(projects);
 
     loadTeamMembers();
 }
@@ -428,9 +493,9 @@ function addRisk() {
         status: "Offen"
     });
 
-    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    const projects = getAllProjectsSync() || {};
     projects[currentProject] = project;
-    localStorage.setItem("projects", JSON.stringify(projects));
+    saveProjectsData(projects);
 
     document.getElementById("riskName").value = "";
     document.getElementById("riskLevel").value = "Mittel";
@@ -493,9 +558,9 @@ function saveProjectPlanning() {
     if (!project.planning.goals) project.planning.goals = [];
     if (!project.planning.milestones) project.planning.milestones = [];
 
-    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    const projects = getAllProjectsSync() || {};
     projects[currentProject] = project;
-    localStorage.setItem("projects", JSON.stringify(projects));
+    saveProjectsData(projects);
 
     console.log("Planung gespeichert!");
 }
@@ -521,9 +586,9 @@ function addGoal() {
         completed: false
     });
     
-    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    const projects = getAllProjectsSync() || {};
     projects[currentProject] = project;
-    localStorage.setItem("projects", JSON.stringify(projects));
+    saveProjectsData(projects);
     
     document.getElementById("goalText").value = "";
     document.getElementById("goalDeadline").value = "";
@@ -563,9 +628,9 @@ function toggleGoal(goalId, completed) {
     const goal = project.planning.goals.find(g => g.id === goalId);
     if (goal) {
         goal.completed = completed;
-        const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+        const projects = getAllProjectsSync() || {};
         projects[currentProject] = project;
-        localStorage.setItem("projects", JSON.stringify(projects));
+        saveProjectsData(projects);
         loadGoals();
     }
 }
@@ -575,9 +640,9 @@ function deleteGoal(goalId) {
     if (!project || !project.planning) return;
     
     project.planning.goals = project.planning.goals.filter(g => g.id !== goalId);
-    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    const projects = getAllProjectsSync() || {};
     projects[currentProject] = project;
-    localStorage.setItem("projects", JSON.stringify(projects));
+    saveProjectsData(projects);
     loadGoals();
 }
 
@@ -601,9 +666,9 @@ function addMilestone() {
         date: milestoneDate
     });
     
-    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    const projects = getAllProjectsSync() || {};
     projects[currentProject] = project;
-    localStorage.setItem("projects", JSON.stringify(projects));
+    saveProjectsData(projects);
     
     document.getElementById("milestoneText").value = "";
     document.getElementById("milestoneDate").value = "";
@@ -639,9 +704,9 @@ function deleteMilestone(milestoneId) {
     if (!project || !project.planning) return;
     
     project.planning.milestones = project.planning.milestones.filter(m => m.id !== milestoneId);
-    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    const projects = getAllProjectsSync() || {};
     projects[currentProject] = project;
-    localStorage.setItem("projects", JSON.stringify(projects));
+    saveProjectsData(projects);
     loadMilestones();
 }
 

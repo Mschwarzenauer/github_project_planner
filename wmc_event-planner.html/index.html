@@ -171,19 +171,20 @@
     <p>© 2025 Projektplaner • Projektmanagement & Task-Verwaltung</p>
 </footer>
 
+<script src="storage.js"></script>
 <script>
 let currentUser = "default";
 let currentProject = null;
 
 // Initialisierung
-document.addEventListener("DOMContentLoaded", () => {
-    loadProjectList();
+document.addEventListener("DOMContentLoaded", async () => {
+    await loadProjectList();
     setActiveNav();
 });
 
 // ========== PROJEKT-VERWALTUNG ==========
-function loadProjectList() {
-    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+async function loadProjectList() {
+    const projects = await getAllProjects();
     const projectIds = Object.keys(projects);
 
     const html = projectIds.map((pid) => {
@@ -221,13 +222,13 @@ function hideNewProjectForm() {
     document.getElementById("newProjectDesc").value = "";
 }
 
-function createProject() {
+async function createProject() {
     const name = document.getElementById("newProjectName").value.trim();
     const desc = document.getElementById("newProjectDesc").value.trim();
 
     if (!name) return alert("Projektname erforderlich");
 
-    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    const projects = await getAllProjects();
     const projectId = "proj_" + Date.now();
 
     projects[projectId] = {
@@ -240,7 +241,7 @@ function createProject() {
         tasks: []
     };
 
-    localStorage.setItem("projects", JSON.stringify(projects));
+    await saveProjectsData(projects);
 
     // Zurück zur Projektliste
     document.getElementById("newProjectForm").style.display = "none";
@@ -249,28 +250,25 @@ function createProject() {
     document.getElementById("newProjectName").value = "";
     document.getElementById("newProjectDesc").value = "";
     
-    loadProjectList();
+    // Projekte neu laden
+    await loadProjectList();
 }
 
-function deleteProject() {
+async function deleteProject() {
     if (!currentProject) return;
     if (!confirm("Projekt wirklich löschen?")) return;
 
-    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
-    delete projects[currentProject];
-    localStorage.setItem("projects", JSON.stringify(projects));
-
+    await deleteProjectData(currentProject);
     goBack();
 }
 
-function getProjectById(projectId) {
-    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
-    return projects[projectId] || null;
+async function getProjectById(projectId) {
+    return await loadProjectsData().then(projects => projects[projectId] || null);
 }
 
 // ========== DATEN LADEN/SPEICHERN ==========
-function loadProjectData() {
-    const p = getProjectById(currentProject);
+async function loadProjectData() {
+    const p = await getProjectById(currentProject);
     if (!p) {
         alert("Projekt nicht gefunden");
         goBack();
@@ -288,10 +286,10 @@ function loadProjectData() {
     loadMilestones();
 }
 
-function saveProjectData() {
+async function saveProjectData() {
     if (!currentProject) return;
 
-    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    const projects = await getAllProjects();
     const p = projects[currentProject];
 
     if (!p) return;
@@ -301,7 +299,7 @@ function saveProjectData() {
     p.startDate = document.getElementById("startDate").value;
     p.endDate = document.getElementById("endDate").value;
 
-    localStorage.setItem("projects", JSON.stringify(projects));
+    await saveProjectsData(projects);
     console.log("Projekt gespeichert");
 }
 
@@ -327,13 +325,13 @@ function addTask() {
     if (!p.tasks) p.tasks = [];
     p.tasks.push(task);
 
-    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    // Update GlobalCache
+    const projects = getAllProjectsSync();
     projects[currentProject] = p;
-    localStorage.setItem("projects", JSON.stringify(projects));
-    
-    document.getElementById("newTask").value = "";
-    loadTasks();
-    saveProjectData();
+    saveProjectsData(projects).then(() => {
+        document.getElementById("newTask").value = "";
+        loadTasks();
+    });
 }
 
 function deleteTask(taskId) {
@@ -344,11 +342,11 @@ function deleteTask(taskId) {
 
     p.tasks = p.tasks.filter(t => t.id !== taskId);
 
-    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    const projects = getAllProjectsSync();
     projects[currentProject] = p;
-    localStorage.setItem("projects", JSON.stringify(projects));
-
-    loadTasks();
+    saveProjectsData(projects).then(() => {
+        loadTasks();
+    });
 }
 
 function loadTasks() {
@@ -489,12 +487,12 @@ function clearTaskProperty(taskId, property) {
         if (property === "endDate") task.endDate = "";
         if (property === "assignedMembers") task.assignedMembers = [];
 
-        const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+        const projects = getAllProjectsSync();
         projects[currentProject] = p;
-        localStorage.setItem("projects", JSON.stringify(projects));
-
-        loadTasks();
-        if (task.id) displayTaskInspector(task);
+        saveProjectsData(projects).then(() => {
+            loadTasks();
+            if (task.id) displayTaskInspector(task);
+        });
     }
 }
 
@@ -638,13 +636,12 @@ function changeTaskPriority(taskId, newPriority) {
     
     task.priority = newPriority;
     
-    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    const projects = getAllProjectsSync();
     projects[currentProject] = p;
-    localStorage.setItem("projects", JSON.stringify(projects));
-    
-    displayTaskInspector(task);
-    loadTasks();
-    saveProjectData();
+    saveProjectsData(projects).then(() => {
+        displayTaskInspector(task);
+        loadTasks();
+    });
 }
 
 function changeTaskStatus(taskId, newStatus) {
@@ -656,13 +653,12 @@ function changeTaskStatus(taskId, newStatus) {
     
     task.status = newStatus;
     
-    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    const projects = getAllProjectsSync();
     projects[currentProject] = p;
-    localStorage.setItem("projects", JSON.stringify(projects));
-    
-    displayTaskInspector(task);
-    loadTasks();
-    saveProjectData();
+    saveProjectsData(projects).then(() => {
+        displayTaskInspector(task);
+        loadTasks();
+    });
 }
 
 function changeTaskDate(taskId, dateField, dateValue) {
@@ -675,12 +671,12 @@ function changeTaskDate(taskId, dateField, dateValue) {
     if (dateField === 'startDate') task.startDate = dateValue;
     if (dateField === 'endDate') task.endDate = dateValue;
     
-    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    const projects = getAllProjectsSync();
     projects[currentProject] = p;
-    localStorage.setItem("projects", JSON.stringify(projects));
-    
-    loadTasks();
-    saveProjectData();
+    saveProjectsData(projects).then(() => {
+        displayTaskInspector(task);
+        loadTasks();
+    });
 }
 
 function changeTaskDescription(taskId, description) {
@@ -692,11 +688,9 @@ function changeTaskDescription(taskId, description) {
     
     task.description = description;
     
-    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    const projects = getAllProjectsSync();
     projects[currentProject] = p;
-    localStorage.setItem("projects", JSON.stringify(projects));
-    
-    saveProjectData();
+    saveProjectsData(projects);
 }
 
 function toggleTaskMember(taskId, memberName, isChecked) {
@@ -716,12 +710,11 @@ function toggleTaskMember(taskId, memberName, isChecked) {
         task.assignedMembers = task.assignedMembers.filter(m => m !== memberName);
     }
     
-    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    const projects = getAllProjectsSync();
     projects[currentProject] = p;
-    localStorage.setItem("projects", JSON.stringify(projects));
-    
-    loadTasks();
-    saveProjectData();
+    saveProjectsData(projects).then(() => {
+        loadTasks();
+    });
 }
 
 // ========== DRAG & DROP ==========
@@ -760,12 +753,11 @@ function dropTask(e, target) {
         }
     }
 
-    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    const projects = getAllProjectsSync();
     projects[currentProject] = p;
-    localStorage.setItem("projects", JSON.stringify(projects));
-
-    loadTasks();
-    saveProjectData();
+    saveProjectsData(projects).then(() => {
+        loadTasks();
+    });
 }
 
 // ========== HELPERS ==========
