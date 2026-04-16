@@ -316,6 +316,7 @@ function addTask() {
     const task = {
         id: "task_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9),
         text: taskText,
+        description: "",
         status: "todo",
         priority: "priority-medium",
         startDate: "",
@@ -367,6 +368,7 @@ function loadTasks() {
         // Hover-Tooltip vorbereiten
         const priorityMap = { 'priority-high': '🔴 Hoch', 'priority-medium': '🟡 Mittel', 'priority-low': '🟢 Niedrig' };
         const statusMap = { 'todo': '📋 To Do', 'progress': '⚙️ In Progress', 'review': '👀 Review', 'done': '✅ Done' };
+        const statusIcons = { 'todo': '📋', 'progress': '⚙️', 'review': '👀', 'done': '✅' };
         
         const memberText = task.assignedMembers && task.assignedMembers.length > 0 ? `\nTeam: ${task.assignedMembers.join(', ')}` : '\nTeam: Unzugeordnet';
         const dateText = task.startDate || task.endDate ? `\nDatum: ${task.startDate || '?'} bis ${task.endDate || '?'}` : '\nDatum: Nicht gesetzt';
@@ -375,12 +377,11 @@ function loadTasks() {
         div.title = tooltipText;
         div.style.position = "relative";
         
-        let taskInfo = `<strong>${escapeHtml(task.text)}</strong>`;
+        const statusIcon = statusIcons[task.status] || '📋';
+        const priorityIcon = task.priority === 'priority-high' ? '🔴' : task.priority === 'priority-low' ? '🟢' : '🟡';
+        let taskInfo = `<strong>${statusIcon} ${priorityIcon} ${escapeHtml(task.text)}</strong>`;
         if (task.startDate) taskInfo += `<br><small>📅 ${task.startDate}${task.endDate ? ' → ' + task.endDate : ''}</small>`;
         if (task.assignedMembers && task.assignedMembers.length > 0) taskInfo += `<br><small>👥 ${task.assignedMembers.join(', ')}</small>`;
-        
-        const priorityIcon = task.priority === 'priority-high' ? '🔴' : task.priority === 'priority-low' ? '🟢' : '🟡';
-        taskInfo += `<br><small>${priorityIcon} Priorität: ${priorityMap[task.priority] || 'Mittel'}</small>`;
 
         div.innerHTML = `<div style="display: flex; justify-content: space-between; align-items: start; gap: 8px; padding: 10px; background: white; border-radius: 6px; border: 1px solid #ddd; margin-bottom: 8px;">
             <div style="flex: 1; cursor: grab;">${taskInfo}</div>
@@ -434,9 +435,37 @@ function loadTasks() {
         });
     });
 
-    // Meilensteine-Box (jetzt leer oder für Infos)
+    // Meilensteine-Box mit Aufgaben
     const milestoneBox = document.getElementById("milestonesList");
-    milestoneBox.innerHTML = "<p style='color: #999; font-size: 0.9rem; text-align: center; padding: 20px;'>Verwende den Eigenschafts-Inspector (rechts) um Task-Details zu bearbeiten!</p>";
+    milestoneBox.innerHTML = "";
+    
+    const milestones = p.milestones || [];
+    if (milestones.length === 0) {
+        milestoneBox.innerHTML = "<p style='color: #999; font-size: 0.9rem; text-align: center; padding: 20px;'>Keine Meilensteine. Füge sie in der Projektplanung hinzu!</p>";
+    } else {
+        milestones.forEach(milestone => {
+            const milestoneTasks = p.tasks.filter(t => t.milestone === milestone.name);
+            const milestoneDiv = document.createElement("div");
+            milestoneDiv.style.cssText = "margin-bottom: 12px; padding: 10px; background: #fff9e5; border: 2px dashed #ff9800; border-radius: 4px;";
+            
+            let milestoneHtml = `<div style="font-weight: bold; font-size: 0.9rem; color: #ff6f00; margin-bottom: 8px;">🏁 ${escapeHtml(milestone.name)}</div>`;
+            
+            if (milestoneTasks.length === 0) {
+                milestoneHtml += `<div style="color: #999; font-size: 0.85rem; text-align: center; padding: 10px;">Drag & Drop hier ablegen</div>`;
+            } else {
+                milestoneTasks.forEach(task => {
+                    const statusIcon = { 'todo': '📋', 'progress': '⚙️', 'review': '👀', 'done': '✅' }[task.status] || '📋';
+                    const priorityIcon = task.priority === 'priority-high' ? '🔴' : task.priority === 'priority-low' ? '🟢' : '🟡';
+                    milestoneHtml += `<div style="padding: 4px; background: white; border-radius: 2px; margin-bottom: 4px; font-size: 0.85rem;">
+                        ${statusIcon} ${priorityIcon} ${escapeHtml(task.text)}
+                    </div>`;
+                });
+            }
+            
+            milestoneDiv.innerHTML = milestoneHtml;
+            milestoneBox.appendChild(milestoneDiv);
+        });
+    }
 }
 
 function loadMilestones() {
@@ -521,6 +550,12 @@ function displayTaskInspector(task) {
         <div style="width: 100%; padding: 10px; background: #f9fffe; border-radius: 6px; overflow-y: auto; max-height: 400px;">
             <h5 style="margin-top: 0; margin-bottom: 15px; color: #028641; border-bottom: 2px solid #028641; padding-bottom: 8px;">📌 ${escapeHtml(task.text)}</h5>
             
+            <!-- Beschreibung -->
+            <div style="margin: 10px 0; padding: 10px; background: white; border-left: 4px solid #9C27B0; border-radius: 4px;">
+                <strong>📝 Beschreibung:</strong>
+                <textarea id="task_description_${task.id}" style="width: 100%; height: 60px; padding: 8px; border: 1px solid #ddd; border-radius: 3px; font-size: 0.9rem; margin-top: 6px; font-family: Arial, sans-serif; resize: vertical;">${escapeHtml(task.description || '')}</textarea>
+            </div>
+            
             <!-- Status -->
             <div style="margin: 10px 0; padding: 10px; background: white; border-left: 4px solid #028641; border-radius: 4px;">
                 <strong>📊 Status:</strong> <em>${statusMap[task.status] || task.status}</em>
@@ -576,6 +611,9 @@ function displayTaskInspector(task) {
     document.getElementById('pr_high_' + task.id)?.addEventListener('click', () => changeTaskPriority(task.id, 'priority-high'));
     document.getElementById('pr_med_' + task.id)?.addEventListener('click', () => changeTaskPriority(task.id, 'priority-medium'));
     document.getElementById('pr_low_' + task.id)?.addEventListener('click', () => changeTaskPriority(task.id, 'priority-low'));
+    
+    // Beschreibungs-Change Listener
+    document.getElementById('task_description_' + task.id)?.addEventListener('change', (e) => changeTaskDescription(task.id, e.target.value));
     
     // Datum-Change Listener
     document.getElementById('task_startDate_' + task.id)?.addEventListener('change', (e) => changeTaskDate(task.id, 'startDate', e.target.value));
@@ -645,6 +683,22 @@ function changeTaskDate(taskId, dateField, dateValue) {
     saveProjectData();
 }
 
+function changeTaskDescription(taskId, description) {
+    const p = getProjectById(currentProject);
+    if (!p || !p.tasks) return;
+    
+    const task = p.tasks.find(t => t.id === taskId);
+    if (!task) return;
+    
+    task.description = description;
+    
+    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    projects[currentProject] = p;
+    localStorage.setItem("projects", JSON.stringify(projects));
+    
+    saveProjectData();
+}
+
 function toggleTaskMember(taskId, memberName, isChecked) {
     const p = getProjectById(currentProject);
     if (!p || !p.tasks) return;
@@ -693,6 +747,17 @@ function dropTask(e, target) {
     // Priorität-Zuordnung
     if (target.startsWith("priority-")) {
         task.priority = target;
+    }
+
+    // Meilenstein-Zuordnung
+    if (target === "milestone") {
+        const milestones = p.milestones || [];
+        const unassignedMilestone = milestones.find(m => !p.tasks.some(t => t.milestone === m.name && t.id !== taskId));
+        if (unassignedMilestone) {
+            task.milestone = unassignedMilestone.name;
+        } else if (milestones.length > 0) {
+            task.milestone = milestones[0].name;
+        }
     }
 
     const projects = JSON.parse(localStorage.getItem("projects") || "{}");
