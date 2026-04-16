@@ -338,12 +338,17 @@
     <h2>💬 Freie KI-Fragen</h2>
     
     <div style="background: #f8f9fa; padding: 20px; border-radius: 6px;">
-        <div style="margin-bottom: 15px;">
-            <label style="display: block; margin-bottom: 5px; font-weight: bold;">🤖 KI-Modell auswählen</label>
-            <select id="aiModelSelect" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                <option value="gemini">🤖 Gemini (Google)</option>
-                <option value="deepseek">🧠 DeepSeek</option>
-            </select>
+            <div style="margin-bottom: 10px;">
+                <small style="color: #666;">
+                    💡 <strong>Hinweis:</strong> Konfiguriere zuerst deine API Keys oben im Dashboard, um KI-Fragen zu stellen.
+                </small>
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">🤖 KI-Modell auswählen</label>
+                <select id="aiModelSelect" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    <option value="gemini">🤖 Gemini (Google) - Kostenloses Kontingent verfügbar</option>
+                    <option value="deepseek">🧠 DeepSeek - Kostenpflichtig</option>
         </div>
         
         <div style="margin-bottom: 15px;">
@@ -511,7 +516,7 @@ async function testApiKeys() {
     // Teste Gemini API
     if (geminiKey) {
         try {
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${geminiKey}`, {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -575,7 +580,7 @@ async function testApiKeys() {
     } else if (deepseekOk) {
         message = '✅ DeepSeek API funktioniert! Gemini API fehlgeschlagen.';
     } else {
-        message = '❌ Beide API Keys fehlgeschlagen.';
+        message = '❌ Beide API Keys fehlgeschlagen. Überprüfe deine Keys und Guthaben.';
     }
     
     showApiStatus(message, geminiOk || deepseekOk ? 'success' : 'error');
@@ -1794,7 +1799,7 @@ async function askAI() {
         : localStorage.getItem('deepseek_api_key');
     
     if (!apiKey) {
-        showApiStatus(`❌ Kein ${model === 'gemini' ? 'Gemini' : 'DeepSeek'} API Key gespeichert`, 'error');
+        showApiStatus(`❌ Kein ${model === 'gemini' ? 'Gemini' : 'DeepSeek'} API Key gespeichert. Konfiguriere ihn oben im Dashboard.`, 'error');
         return;
     }
     
@@ -1838,7 +1843,7 @@ Frage: ${question}
 
 Bitte antworte hilfreich und bezugnehmend auf das Projekt.`;
     
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -1857,7 +1862,8 @@ Bitte antworte hilfreich und bezugnehmend auf das Projekt.`;
     });
     
     if (!response.ok) {
-        throw new Error(`Gemini API Fehler: ${response.status}`);
+        const errorData = await response.text();
+        throw new Error(`Gemini API Fehler ${response.status}: ${errorData}`);
     }
     
     const data = await response.json();
@@ -1903,7 +1909,12 @@ Bitte antworte hilfreich und bezugnehmend auf das Projekt.`;
     });
     
     if (!response.ok) {
-        throw new Error(`DeepSeek API Fehler: ${response.status}`);
+        const errorData = await response.text();
+        if (response.status === 402) {
+            throw new Error(`DeepSeek API: Kein Guthaben oder kostenloses Kontingent aufgebraucht. Bitte Guthaben aufladen.`);
+        } else {
+            throw new Error(`DeepSeek API Fehler ${response.status}: ${errorData}`);
+        }
     }
     
     const data = await response.json();
