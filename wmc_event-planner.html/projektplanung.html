@@ -249,13 +249,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
     
     // Jetzt lade Projekte sicher
-    loadProjects();
+    await loadProjects();
     setActiveNav();
 });
 
-function loadProjects() {
-    // Nutze GlobalCache von storage.js
-    const projects = getAllProjectsSync() || {};
+async function loadProjects() {
+    // Nutze asynchrone Datenladung für Browser-Umgebungen
+    const projects = await getAllProjects() || {};
     const projectList = document.getElementById("projectList");
     projectList.innerHTML = "";
 
