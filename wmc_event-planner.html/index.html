@@ -42,8 +42,8 @@
     <textarea id="newProjectDesc" rows="3" placeholder="Worum geht es?"></textarea>
       
     <div class="grid-2">
-        <button onclick="createProject()" class="save-btn">✓ Projekt erstellen</button>
-        <button onclick="hideNewProjectForm()" class="save-btn">✗ Abbrechen</button>
+        <button type="button" onclick="createProject()" class="save-btn">✓ Projekt erstellen</button>
+        <button type="button" onclick="hideNewProjectForm()" class="save-btn">✗ Abbrechen</button>
     </div>
 </section>
 
@@ -242,7 +242,16 @@ async function createProject() {
 
     if (!name) return alert("Projektname erforderlich");
 
-    const projects = await getAllProjects();
+    await window.waitForStorage();
+
+    let projects;
+    try {
+        projects = await getAllProjects();
+    } catch (e) {
+        console.error("Fehler beim Laden der Projekte:", e);
+        projects = {};
+    }
+
     const projectId = "proj_" + Date.now();
 
     projects[projectId] = {
@@ -255,7 +264,12 @@ async function createProject() {
         tasks: []
     };
 
-    await saveProjectsData(projects);
+    try {
+        await saveProjectsData(projects);
+    } catch (e) {
+        console.error("Projekt speichern fehlgeschlagen:", e);
+        return alert("Projekt konnte nicht erstellt werden. Bitte Seite neu laden und erneut versuchen.");
+    }
 
     // Zurück zur Projektliste
     document.getElementById("newProjectForm").style.display = "none";
