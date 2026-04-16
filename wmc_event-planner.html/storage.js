@@ -145,6 +145,17 @@ function getProjectById(projectId) {
 
 // Alle Projekte laden (SYNCHRON aus Cache)
 function getAllProjectsSync() {
+    // Fallback falls Cache noch nicht initialisiert
+    if (Object.keys(GLOBAL_CACHE).length === 0) {
+        try {
+            const fallback = JSON.parse(localStorage.getItem("projects") || "{}");
+            GLOBAL_CACHE = fallback;
+            console.log("✓ Cache aus localStorage geladen:", Object.keys(GLOBAL_CACHE).length, "Projekte");
+        } catch (e) {
+            console.warn("localStorage Fallback fehlgeschlagen:", e);
+            return {};
+        }
+    }
     return GLOBAL_CACHE;
 }
 
@@ -177,9 +188,37 @@ async function deleteProjectData(projectId) {
     try {
         await loadProjectsData();
         console.log("✓ Storage.js bereit - " + Object.keys(GLOBAL_CACHE).length + " Projekte in Cache");
+        
+        // Stelle sicher, dass andere Skripte warten können
+        window.storageReady = true;
+        if (window.storageReadyCallback) {
+            window.storageReadyCallback();
+        }
     } catch (e) {
         console.error("Storage.js Initialisierung fehlgeschlagen:", e);
+        // Fallback: Verwende nur localStorage
+        try {
+            const fallback = JSON.parse(localStorage.getItem("projects") || "{}");
+            GLOBAL_CACHE = fallback;
+            console.log("✓ Fallback zu localStorage - " + Object.keys(GLOBAL_CACHE).length + " Projekte");
+            window.storageReady = true;
+        } catch (fallbackError) {
+            console.error("Auch localStorage Fallback fehlgeschlagen:", fallbackError);
+            GLOBAL_CACHE = {};
+            window.storageReady = false;
+        }
     }
 })();
+
+// Hilfsfunktion für andere Skripte, um auf Storage-Initialisierung zu warten
+window.waitForStorage = function() {
+    return new Promise((resolve) => {
+        if (window.storageReady) {
+            resolve();
+        } else {
+            window.storageReadyCallback = resolve;
+        }
+    });
+};
 
 console.log("✓ Storage.js geladen (IndexedDB + localStorage hybrid mit GlobalCache)");

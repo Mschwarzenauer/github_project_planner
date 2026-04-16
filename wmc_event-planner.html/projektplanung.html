@@ -239,15 +239,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.getElementById("geminiApiKey").value = savedGeminiKey;
     }
     
-    // Warte auf IndexedDB Initialisierung und lade Projektdaten
-    console.log("🔄 Initialisiere storage.js...");
-    if (typeof loadProjectsData === 'function') {
-        try {
-            await loadProjectsData();
-            console.log("✓ IndexedDB Cache gefüllt, lade Projekte...");
-        } catch (e) {
-            console.error("Fehler beim Laden von IndexedDB:", e);
-        }
+    // Warte auf Storage-Initialisierung (funktioniert im Browser und Editor)
+    console.log("🔄 Warte auf Storage-Initialisierung...");
+    try {
+        await window.waitForStorage();
+        console.log("✓ Storage bereit, lade Projekte...");
+    } catch (e) {
+        console.warn("Storage-Wait fehlgeschlagen, fahre trotzdem fort:", e);
     }
     
     // Jetzt lade Projekte sicher
@@ -265,6 +263,7 @@ function loadProjects() {
     
     if (projectIds.length === 0) {
         projectList.innerHTML = "<p style='color: red; font-weight: bold;'>⚠️ Noch keine Projekte. Erstelle ein Projekt auf dem Dashboard!</p>";
+        console.log("✓ Keine Projekte gefunden - erstelle eines im Dashboard");
         return;
     }
 
@@ -793,14 +792,281 @@ async function askDeepSeek() {
         responseDiv.innerHTML = `<strong>Antwort:</strong><br>${aiText}`;
         document.getElementById("aiQuestion").value = "";
     } catch (error) {
-        responseDiv.innerHTML = `<span style="color: red;">Fehler: ${error.message || "Unbekannter Fehler"}</span>`;
-        console.error("DeepSeek Error:", error);
+        console.error("DeepSeek API Fehler:", error);
+        let errorMessage = error.message;
+        
+        if (error.message.includes("Insufficient Balance")) {
+            errorMessage = "Insufficient Balance - Dein kostenloses Guthaben ist aufgebraucht.";
+        } else if (error.message.includes("401")) {
+            errorMessage = "401 - API Key ungültig.";
+        } else if (error.message.includes("429")) {
+            errorMessage = "429 - Zu viele Anfragen. Warte einen Moment.";
+        }
+        
+        responseDiv.innerHTML = `
+            <div style="color: red; background: #ffe6e6; padding: 15px; border-radius: 8px;">
+                <strong>DeepSeek API-Fehler:</strong> ${errorMessage}<br>
+                <small>💡 <strong>Kostenlose Alternative:</strong> Verwende die <strong>lokale Analyse</strong> - keine API nötig!</small>
+                <br><button onclick="analyzeLocally()" style="margin-top: 10px; background: #28a745; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">📊 Lokale Analyse starten</button>
+            </div>
+        `;
     }
 }
 
-// ========== GEMINI AI ==========
+// ========== LOKALE ANALYSE (KEINE API NÖTIG) ==========
 
-function testGeminiConnection() {
+function analyzeLocally() {
+    const question = document.getElementById("aiQuestion").value.trim();
+    if (!question) {
+        alert("Bitte eine Frage stellen!");
+        return;
+    }
+
+    const responseDiv = document.getElementById("aiResponse");
+    responseDiv.innerHTML = "<div style='color: blue;'>🤖 Analysiere lokal...</div>";
+
+    // Sammle Projektdaten
+    const project = getProjectById(currentProject);
+    if (!project) {
+        responseDiv.innerHTML = "<div style='color: red;'>Kein Projekt ausgewählt!</div>";
+        return;
+    }
+
+    // Erstelle lokale Analyse basierend auf Frage
+    setTimeout(() => {
+        const analysis = generateLocalAnalysis(question, project);
+        responseDiv.innerHTML = `
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #28a745;">
+                <strong>📊 Lokale Analyse:</strong><br>
+                ${analysis.replace(/\n/g, '<br>')}
+            </div>
+        `;
+    }, 1000); // Simuliere Denkzeit
+}
+
+function generateLocalAnalysis(question, project) {
+    const lowerQuestion = question.toLowerCase();
+    
+    // Budget-Analyse
+    if (lowerQuestion.includes("budget") || lowerQuestion.includes("kosten") || lowerQuestion.includes("geld")) {
+        return generateBudgetAnalysis(project);
+    }
+    
+    // Zeitplan-Analyse
+    if (lowerQuestion.includes("zeit") || lowerQuestion.includes("termin") || lowerQuestion.includes("deadline")) {
+        return generateTimelineAnalysis(project);
+    }
+    
+    // Risiko-Analyse
+    if (lowerQuestion.includes("risiko") || lowerQuestion.includes("gefahr") || lowerQuestion.includes("problem")) {
+        return generateRiskAnalysis(project);
+    }
+    
+    // Team-Analyse
+    if (lowerQuestion.includes("team") || lowerQuestion.includes("mitarbeiter") || lowerQuestion.includes("personal")) {
+        return generateTeamAnalysis(project);
+    }
+    
+    // Aufgaben-Analyse
+    if (lowerQuestion.includes("aufgabe") || lowerQuestion.includes("task") || lowerQuestion.includes("arbeit")) {
+        return generateTaskAnalysis(project);
+    }
+    
+    // Ziele-Analyse
+    if (lowerQuestion.includes("ziel") || lowerQuestion.includes("goal") || lowerQuestion.includes("erfolg")) {
+        return generateGoalsAnalysis(project);
+    }
+    
+    // Allgemeine Projektübersicht
+    return generateProjectOverview(project);
+}
+
+function generateBudgetAnalysis(project) {
+    if (!project.planning || !project.planning.budget) {
+        return "Keine Budget-Informationen vorhanden. Füge Budget-Items in der Budget-Sektion hinzu.";
+    }
+    
+    const budget = project.planning.budget;
+    const items = budget.items || [];
+    
+    let totalIncome = 0;
+    let totalExpenses = 0;
+    
+    items.forEach(item => {
+        if (item.type === "income") {
+            totalIncome += item.amount;
+        } else {
+            totalExpenses += item.amount;
+        }
+    });
+    
+    const balance = totalIncome - totalExpenses;
+    
+    return `📊 **Budget-Analyse für "${project.name}"**
+
+💰 **Einnahmen:** ${totalIncome.toFixed(2)}€
+💸 **Ausgaben:** ${totalExpenses.toFixed(2)}€
+⚖️ **Saldo:** ${balance.toFixed(2)}€ ${balance >= 0 ? "✅ (im Plus)" : "❌ (Defizit)"}
+
+📋 **Budget-Items:**
+${items.map(item => `• ${item.name}: ${item.amount}€ (${item.type})`).join('\n')}
+
+💡 **Empfehlung:** ${balance < 0 ? "Budget-Defizit! Überprüfe Ausgaben oder erhöhe Einnahmen." : "Budget ist ausgeglichen. Gut gemacht!"}`;
+}
+
+function generateTimelineAnalysis(project) {
+    const tasks = project.tasks || [];
+    const goals = project.planning?.goals || [];
+    const milestones = project.planning?.milestones || [];
+    
+    const now = new Date();
+    let overdueTasks = 0;
+    let upcomingTasks = 0;
+    let completedTasks = 0;
+    
+    tasks.forEach(task => {
+        if (task.status === "done") {
+            completedTasks++;
+        } else if (task.endDate) {
+            const endDate = new Date(task.endDate);
+            if (endDate < now) {
+                overdueTasks++;
+            } else if (endDate.getTime() - now.getTime() < 7 * 24 * 60 * 60 * 1000) { // 7 Tage
+                upcomingTasks++;
+            }
+        }
+    });
+    
+    return `⏰ **Zeitplan-Analyse für "${project.name}"**
+
+📈 **Aufgaben-Status:**
+✅ Abgeschlossen: ${completedTasks}
+⏳ Überfällig: ${overdueTasks}
+📅 Bald fällig: ${upcomingTasks}
+
+🎯 **Ziele:** ${goals.length} gesetzt, ${goals.filter(g => g.completed).length} erreicht
+🏁 **Meilensteine:** ${milestones.length} geplant
+
+💡 **Empfehlung:** ${overdueTasks > 0 ? `⚠️ ${overdueTasks} überfällige Aufgaben! Priorisiere diese.` : "Zeitplan sieht gut aus!"}`;
+}
+
+function generateRiskAnalysis(project) {
+    const risks = project.planning?.risks || [];
+    
+    if (risks.length === 0) {
+        return "Keine Risiken identifiziert. Füge potenzielle Risiken in der Risiko-Sektion hinzu.";
+    }
+    
+    const highRisks = risks.filter(r => r.probability === "high" || r.impact === "high");
+    const mediumRisks = risks.filter(r => r.probability === "medium" || r.impact === "medium");
+    
+    return `⚠️ **Risiko-Analyse für "${project.name}"**
+
+🔴 **Hohe Risiken:** ${highRisks.length}
+🟡 **Mittlere Risiken:** ${mediumRisks.length}
+🟢 **Niedrige Risiken:** ${risks.length - highRisks.length - mediumRisks.length}
+
+📋 **Risiko-Details:**
+${risks.map(risk => `• ${risk.text} (Wahrscheinlichkeit: ${risk.probability}, Auswirkung: ${risk.impact})`).join('\n')}
+
+💡 **Empfehlung:** ${highRisks.length > 0 ? `⚠️ ${highRisks.length} hohe Risiken! Entwickle Maßnahmen.` : "Risiko-Lage überschaubar."}`;
+}
+
+function generateTeamAnalysis(project) {
+    const team = project.planning?.team || [];
+    
+    if (team.length === 0) {
+        return "Kein Team definiert. Füge Team-Mitglieder in der Team-Sektion hinzu.";
+    }
+    
+    const totalAvailability = team.reduce((sum, member) => sum + (member.availability || 100), 0);
+    const avgAvailability = totalAvailability / team.length;
+    
+    return `👥 **Team-Analyse für "${project.name}"**
+
+👤 **Team-Größe:** ${team.length} Mitglieder
+📊 **Durchschnittliche Verfügbarkeit:** ${avgAvailability.toFixed(1)}%
+
+📋 **Team-Mitglieder:**
+${team.map(member => `• ${member.name} (${member.role}) - ${member.availability || 100}% verfügbar`).join('\n')}
+
+💡 **Empfehlung:** ${avgAvailability < 70 ? "Team-Kapazität niedrig! Überprüfe Workload." : "Team-Kapazität ausreichend."}`;
+}
+
+function generateTaskAnalysis(project) {
+    const tasks = project.tasks || [];
+    
+    if (tasks.length === 0) {
+        return "Keine Aufgaben vorhanden. Erstelle Aufgaben im Dashboard.";
+    }
+    
+    const statusCount = {
+        todo: tasks.filter(t => t.status === "todo").length,
+        progress: tasks.filter(t => t.status === "progress").length,
+        review: tasks.filter(t => t.status === "review").length,
+        done: tasks.filter(t => t.status === "done").length
+    };
+    
+    const priorityCount = {
+        high: tasks.filter(t => t.priority === "priority-high").length,
+        medium: tasks.filter(t => t.priority === "priority-medium").length,
+        low: tasks.filter(t => t.priority === "priority-low").length
+    };
+    
+    return `📋 **Aufgaben-Analyse für "${project.name}"**
+
+📊 **Status-Verteilung:**
+• To Do: ${statusCount.todo}
+• In Progress: ${statusCount.progress}
+• Review: ${statusCount.review}
+• Done: ${statusCount.done}
+
+🎯 **Prioritäten:**
+• Hoch: ${priorityCount.high}
+• Mittel: ${priorityCount.medium}
+• Niedrig: ${priorityCount.low}
+
+💡 **Empfehlung:** ${statusCount.todo > statusCount.done ? "Mehr Aufgaben abschließen!" : "Gute Fortschritte!"}`;
+}
+
+function generateGoalsAnalysis(project) {
+    const goals = project.planning?.goals || [];
+    
+    if (goals.length === 0) {
+        return "Keine Ziele gesetzt. Definiere Projektziele in der Ziele-Sektion.";
+    }
+    
+    const completed = goals.filter(g => g.completed).length;
+    const completionRate = (completed / goals.length * 100).toFixed(1);
+    
+    return `🎯 **Ziele-Analyse für "${project.name}"**
+
+📈 **Fortschritt:** ${completed}/${goals.length} Ziele erreicht (${completionRate}%)
+
+📋 **Ziele:**
+${goals.map(goal => `${goal.completed ? '✅' : '⏳'} ${goal.text}${goal.deadline ? ` (Deadline: ${goal.deadline})` : ''}`).join('\n')}
+
+💡 **Empfehlung:** ${completionRate < 50 ? "Mehr Ziele erreichen! Fokussiere dich auf Prioritäten." : "Gute Zielerreichung!"}`;
+}
+
+function generateProjectOverview(project) {
+    const tasks = project.tasks || [];
+    const team = project.planning?.team || [];
+    const goals = project.planning?.goals || [];
+    const risks = project.planning?.risks || [];
+    
+    return `📊 **Projekt-Übersicht: "${project.name}"**
+
+📝 **Beschreibung:** ${project.description || "Keine Beschreibung"}
+📅 **Zeitraum:** ${project.startDate || "?"} - ${project.endDate || "?"}
+
+📋 **Aufgaben:** ${tasks.length} gesamt
+👥 **Team:** ${team.length} Mitglieder
+🎯 **Ziele:** ${goals.length} gesetzt, ${goals.filter(g => g.completed).length} erreicht
+⚠️ **Risiken:** ${risks.length} identifiziert
+
+💡 **Status:** ${tasks.filter(t => t.status === "done").length === tasks.length && tasks.length > 0 ? "✅ Alle Aufgaben abgeschlossen!" : "🔄 Projekt in Arbeit"}`;
+}
     const apiKey = document.getElementById("geminiApiKey").value.trim();
     if (!apiKey) return alert("Bitte API-Key eingeben!");
     
