@@ -211,10 +211,12 @@ function goBack() {
 
 function showNewProjectForm() {
     document.getElementById("newProjectForm").style.display = "block";
+    document.getElementById("projectList").parentElement.style.display = "none";
 }
 
 function hideNewProjectForm() {
     document.getElementById("newProjectForm").style.display = "none";
+    document.getElementById("projectList").parentElement.style.display = "block";
     document.getElementById("newProjectName").value = "";
     document.getElementById("newProjectDesc").value = "";
 }
@@ -240,7 +242,13 @@ function createProject() {
 
     localStorage.setItem("projects", JSON.stringify(projects));
 
-    hideNewProjectForm();
+    // Zurück zur Projektliste
+    document.getElementById("newProjectForm").style.display = "none";
+    document.getElementById("projectDetail").style.display = "none";
+    document.getElementById("projectList").parentElement.style.display = "block";
+    document.getElementById("newProjectName").value = "";
+    document.getElementById("newProjectDesc").value = "";
+    
     loadProjectList();
 }
 
@@ -429,18 +437,6 @@ function loadTasks() {
         div.innerHTML = `<div style="display: flex; justify-content: space-between; gap: 5px; align-items: center;">
             <span title="Klick zum Inspizieren" style="cursor: pointer; flex: 1;">${escapeHtml(task.text)}</span>
             <button onclick="event.stopPropagation(); clearTaskProperty('${task.id}', 'milestone')" style="background: #dc3545; color: white; border: none; padding: 2px 4px; border-radius: 2px; cursor: pointer; font-size: 0.7rem;">✕</button>
-        </div>`;
-
-        div.ondragstart = (e) => {
-            e.dataTransfer.effectAllowed = "move";
-            e.dataTransfer.setData("taskId", task.id);
-        };
-        
-        div.addEventListener("click", () => inspectTaskById(task.id));
-
-        milestoneBox.appendChild(div);
-    });
-}
         </div>`;
 
         div.ondragstart = (e) => {
