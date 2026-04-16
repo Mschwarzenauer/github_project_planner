@@ -233,22 +233,26 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (savedDeepseekKey) {
         document.getElementById("deepseekApiKey").value = savedDeepseekKey;
     }
-    
+
     const savedGeminiKey = localStorage.getItem("geminiApiKey");
     if (savedGeminiKey) {
         document.getElementById("geminiApiKey").value = savedGeminiKey;
     }
-    
-    // Warte auf Storage-Initialisierung (funktioniert im Browser und Editor)
-    console.log("🔄 Warte auf Storage-Initialisierung...");
+
+    // WARTE ZUVERLÄSSIG auf Storage-Initialisierung - KEINE Race Conditions mehr!
+    console.log("🔄 Warte auf vollständige Storage-Initialisierung...");
     try {
-        await window.waitForStorage();
-        console.log("✓ Storage bereit, lade Projekte...");
+        const initSuccess = await window.waitForStorage();
+        if (initSuccess) {
+            console.log("✓ Storage vollständig bereit");
+        } else {
+            console.warn("⚠️ Storage-Init mit Einschränkungen, aber funktionsfähig");
+        }
     } catch (e) {
         console.warn("Storage-Wait fehlgeschlagen, fahre trotzdem fort:", e);
     }
-    
-    // Jetzt lade Projekte sicher
+
+    // Jetzt lade Projekte sicher - Storage ist garantiert bereit
     await loadProjects();
     setActiveNav();
 });

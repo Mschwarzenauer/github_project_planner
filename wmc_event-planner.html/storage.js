@@ -182,42 +182,74 @@ async function deleteProjectData(projectId) {
 
 // ========== INITIALIZATION ==========
 
-// Automatische Initialisierung beim Laden
-(async function initStorage() {
-    console.log("🔄 Storage.js: Initialisiere automatisch...");
-    try {
-        await loadProjectsData();
-        console.log("✓ Storage.js bereit - " + Object.keys(GLOBAL_CACHE).length + " Projekte in Cache");
-        
-        // Stelle sicher, dass andere Skripte warten können
-        window.storageReady = true;
-        if (window.storageReadyCallback) {
-            window.storageReadyCallback();
-        }
-    } catch (e) {
-        console.error("Storage.js Initialisierung fehlgeschlagen:", e);
-        // Fallback: Verwende nur localStorage
+// Erstelle ein Promise für Storage-Initialisierung - IMMER zuverlässig
+window.storageInitialized = false;
+window.storageInitPromise = new Promise(async (resolve) => {
+    console.log("🔄 Storage.js: Starte Initialisierung...");
+    
+    let maxRetries = 3;
+    let retryCount = 0;
+    
+    while (retryCount < maxRetries) {
         try {
-            const fallback = JSON.parse(localStorage.getItem("projects") || "{}");
-            GLOBAL_CACHE = fallback;
-            console.log("✓ Fallback zu localStorage - " + Object.keys(GLOBAL_CACHE).length + " Projekte");
-            window.storageReady = true;
-        } catch (fallbackError) {
-            console.error("Auch localStorage Fallback fehlgeschlagen:", fallbackError);
-            GLOBAL_CACHE = {};
-            window.storageReady = false;
+            // Initialisiere IndexedDB
+            await initDB();
+            console.log("✓ IndexedDB initialisiert");
+            
+            // Lade Projekte
+            const projects = await loadProjectsData();
+            console.log("✓ Projekte geladen: " + Object.keys(projects).length + " Stück");
+            
+            // Stelle sicher dass GLOBAL_CACHE gefüllt ist
+            if (Object.keys(GLOBAL_CACHE).length === 0) {
+                console.warn("⚠️ GLOBAL_CACHE leer, versuche localStorage Fallback...");
+                const fallback = JSON.parse(localStorage.getItem("projects") || "{}");
+                GLOBAL_CACHE = fallback;
+                if (Object.keys(GLOBAL_CACHE).length > 0) {
+                    console.log("✓ Cache aus localStorage gefüllt: " + Object.keys(GLOBAL_CACHE).length + " Projekte");
+                    // Synchronisiere mit IndexedDB
+                    await saveProjectsData(GLOBAL_CACHE);
+                }
+            }
+            
+            window.storageInitialized = true;
+            console.log("✅ Storage.js Initialisierung ERFOLGREICH");
+            resolve(true);
+            break;
+            
+        } catch (e) {
+            retryCount++;
+            console.warn("⚠️ Storage-Init Versuch " + retryCount + " fehlgeschlagen:", e.message);
+            
+            if (retryCount >= maxRetries) {
+                console.error("❌ Storage-Initialisierung nach " + maxRetries + " Versuchen fehlgeschlagen");
+                // Fallback: Laden aus localStorage
+                try {
+                    const fallback = JSON.parse(localStorage.getItem("projects") || "{}");
+                    GLOBAL_CACHE = JSON.parse(JSON.stringify(fallback));
+                    window.storageInitialized = true;
+                    console.log("✓ Fallback zu localStorage erfolgreich");
+                    resolve(true);
+                } catch (fallbackError) {
+                    console.error("❌ Auch localStorage Fallback fehlgeschlagen:", fallbackError);
+                    GLOBAL_CACHE = {};
+                    window.storageInitialized = false;
+                    resolve(false);
+                }
+                break;
+            }
+            
+            // Warte kurz vor erneutem Versuch
+            await new Promise(r => setTimeout(r, 100));
         }
     }
-})();
+});
 
-// Hilfsfunktion für andere Skripte, um auf Storage-Initialisierung zu warten
+// Hilfsfunktion für andere Skripte, um auf Storage-Initialisierung zu warten - ZUVERLÄSSIG
 window.waitForStorage = function() {
-    return new Promise((resolve) => {
-        if (window.storageReady) {
-            resolve();
-        } else {
-            window.storageReadyCallback = resolve;
-        }
+    // Nutze das Promise, nicht irgendwelche Callbacks
+    return window.storageInitPromise;
+}
     });
 };
 

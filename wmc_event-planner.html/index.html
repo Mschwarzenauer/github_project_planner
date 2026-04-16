@@ -178,6 +178,20 @@ let currentProject = null;
 
 // Initialisierung
 document.addEventListener("DOMContentLoaded", async () => {
+    // Warte auf vollständige Storage-Initialisierung
+    console.log("🔄 Dashboard: Warte auf Storage...");
+    try {
+        const initSuccess = await window.waitForStorage();
+        if (initSuccess) {
+            console.log("✓ Dashboard: Storage bereit");
+        } else {
+            console.warn("⚠️ Dashboard: Storage mit Einschränkungen");
+        }
+    } catch (e) {
+        console.warn("Dashboard: Storage-Wait fehlgeschlagen:", e);
+    }
+
+    // Jetzt lade Projekte sicher
     await loadProjectList();
     setActiveNav();
 });
@@ -334,19 +348,33 @@ function addTask() {
     });
 }
 
-function deleteTask(taskId) {
+async function deleteTask(taskId) {
     if (!confirm("Aufgabe wirklich löschen?")) return;
 
-    const p = getProjectById(currentProject);
-    if (!p || !p.tasks) return;
+    // Stelle sicher dass Storage bereit ist
+    await window.waitForStorage();
+
+    // Lade Projekt sicher
+    let p = getProjectById(currentProject);
+    if (!p) {
+        const allProjects = await getAllProjects();
+        p = allProjects[currentProject];
+        if (!p || !p.tasks) return;
+    }
 
     p.tasks = p.tasks.filter(t => t.id !== taskId);
 
     const projects = getAllProjectsSync();
     projects[currentProject] = p;
-    saveProjectsData(projects).then(() => {
+
+    try {
+        await saveProjectsData(projects);
         loadTasks();
-    });
+        console.log("✓ Aufgabe erfolgreich gelöscht");
+    } catch (e) {
+        console.error("Fehler beim Löschen der Aufgabe:", e);
+        alert("Fehler beim Löschen. Bitte versuche es erneut.");
+    }
 }
 
 function loadTasks() {
