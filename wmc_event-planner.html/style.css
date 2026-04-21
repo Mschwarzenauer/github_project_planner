@@ -1,17 +1,19 @@
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
-    background: #f4f6f9;
+    background: linear-gradient(135deg, #f4f6f9 0%, #e8f0f5 100%);
     color: #000000;
+    min-height: 100vh;
 }
 
 /* Navigation */
 nav {
-    background: #026d34;
+    background: linear-gradient(90deg, #026d34 0%, #037217 100%);
     padding: 0;
     display: flex;
     gap: 0;
     border-bottom: 3px solid #037217;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 nav a {
@@ -24,7 +26,7 @@ nav a {
 }
 
 nav a:hover {
-    background: #006425;
+    background: rgba(0, 0, 0, 0.1);
 }
 
 nav a.active {
@@ -34,9 +36,30 @@ nav a.active {
 
 header {
     text-align: center;
-    padding: 25px;
-    background: #059448;
+    padding: 30px 25px;
+    background: linear-gradient(135deg, #059448 0%, #026d34 100%);
     color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+header h1 {
+    margin: 0;
+    font-size: 2.5rem;
+}
+
+header p {
+    margin: 5px 0 0 0;
+    opacity: 0.9;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 2.5rem;
+}
+
+header p {
+    margin: 5px 0 0 0;
+    opacity: 0.9;
 }
 
 .form-section {
@@ -44,24 +67,41 @@ header {
     max-width: 1000px;
     margin: 25px auto;
     background: white;
-    padding: 20px;
+    padding: 25px;
     border-radius: 10px;
     border: 1px solid #ddd;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    transition: box-shadow 0.3s;
+}
+
+.form-section:hover {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 label {
     font-weight: bold;
-    margin-top: 10px;
+    margin-top: 12px;
     display: block;
+    color: #333;
 }
 
 input, textarea {
-    width: 90%;
+    width: 100%;
     padding: 10px;
     margin: 5px 0 15px;
     border-radius: 6px;
-    border: 1px solid #9ad7a7; /* grüner Rand */
-    background: #e9f7ef; /* hellgrüner Hintergrund statt grau/weiß */
+    border: 2px solid #9ad7a7;
+    background: #e9f7ef;
+    box-sizing: border-box;
+    font-family: inherit;
+    transition: all 0.3s;
+}
+
+input:focus, textarea:focus {
+    outline: none;
+    border-color: #028641;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(2, 138, 65, 0.1);
 }
 
 .grid-2 {
@@ -77,8 +117,18 @@ table {
     margin-top: 10px;
 }
 th, td {
-    padding: 8px;
-    border: 1px solid #ccc;
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+th {
+    background: #f0f0f0;
+    font-weight: bold;
+}
+
+tr:hover {
+    background: #f9f9f9;
 }
 
 /* Kanban */
@@ -86,32 +136,190 @@ th, td {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 15px;
+    margin-top: 20px;
 }
 
 .col {
     background: #ffffff;
-    border: 1px solid #ddd;
+    border: 2px solid #ddd;
     border-radius: 10px;
     padding: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s;
+}
+
+.col:hover {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+    border-color: #028641;
+}
+
+.col h3 {
+    margin-top: 0;
+    color: #028641;
+    font-size: 1rem;
+    border-bottom: 2px solid #028641;
+    padding-bottom: 10px;
 }
 
 .kanban-box {
-    background: #e9f7ef; /* hellgrün für Eingabebereiche */
-    min-height: 120px;
+    background: #f9fffe;
+    min-height: 200px;
     border-radius: 8px;
     padding: 10px;
-    border: 1px solid #bfe6c8; /* dezenter grüner Rand */
+    border: 2px dashed #bfe6c8;
     overflow-y: auto;
+    transition: all 0.3s;
+}
+
+.kanban-box:hover {
+    border-color: #028641;
+    background: #f0fdf9;
+}
+
+.kanban-box.dragover {
+    background: #d4f1e4;
+    border-color: #028641;
+    border-style: solid;
 }
 
 /* Aufgaben */
 .task {
-    background: #f8fff9; /* leicht grünlich, bleibt dezent */
-    padding: 8px;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fff9 100%);
+    padding: 10px;
     margin-bottom: 8px;
     border-radius: 6px;
+    border: 2px solid #cfead4;
+    cursor: grab;
+    transition: all 0.3s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    word-wrap: break-word;
+    position: relative;
+}
+
+.task:hover {
+    border-color: #028641;
+    box-shadow: 0 3px 8px rgba(2, 140, 65, 0.15);
+    transform: translateY(-2px);
+    background: #f0fdf9;
+}
+
+.task:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #028641;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    white-space: normal;
+    width: 200px;
+    z-index: 10;
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    pointer-events: none;
+    word-wrap: break-word;
+    line-height: 1.4;
+}
+
+.task:active {
+    cursor: grabbing;
+    opacity: 0.8;
+}
+
+.delete-task-btn {
+    transition: all 0.2s;
+    font-weight: bold;
+}
+
+.delete-task-btn:hover {
+    background: #c82333 !important;
+    transform: scale(1.1);
+}
+
+/* Task Items für Aufgabenliste */
+.task-item {
+    padding: 10px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    cursor: grab;
+    transition: all 0.3s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+.task-item:hover {
+    border-color: #028641;
+    box-shadow: 0 3px 8px rgba(2, 140, 65, 0.15);
+    transform: translateY(-2px);
+    background: #f0fdf9;
+}
+
+.task-item:active {
+    cursor: grabbing;
+    background: #e5f7f1;
+}
+
+/* Property Boxes */
+.property-box {
+    background: white;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 10px;
+    transition: all 0.3s;
+}
+
+.property-box:hover {
+    border-color: #028641;
+    box-shadow: 0 2px 8px rgba(2, 140, 65, 0.1);
+}
+
+.property-box h4 {
+    margin: 0 0 10px 0;
+    color: #028641;
+    font-size: 0.95rem;
+}
+
+.property-items {
+    min-height: 60px;
+    background: #f9fffe;
+    border: 2px dashed #bfe6c8;
+    border-radius: 6px;
+    padding: 8px;
+    transition: all 0.3s;
+}
+
+.property-items:hover {
+    border-color: #028641;
+    background: #f0fdf9;
+}
+
+.property-item {
+    background: white;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    border-radius: 5px;
     border: 1px solid #cfead4;
     cursor: grab;
+    transition: all 0.3s;
+    font-size: 0.9rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.property-item:hover {
+    border-color: #028641;
+    box-shadow: 0 2px 6px rgba(2, 140, 65, 0.12);
+    transform: translateY(-1px);
+    background: #f0fdf9;
+}
+
+.property-item:active {
+    cursor: grabbing;
+    background: #e5f7f1;
 }
 
 /* Buttons */
@@ -123,8 +331,8 @@ th, td {
     flex-wrap: wrap;
 }
 
-.save-btn, .logout-btn, .nav-link, .nav-btn {
-    padding: 10px 20px;
+.save-btn, .logout-btn, .nav-link, .nav-btn, .info-btn {
+    padding: 12px 20px;
     font-size: 1rem;
     border: none;
     border-radius: 6px;
@@ -134,54 +342,93 @@ th, td {
     text-decoration: none;
     display: inline-block;
     text-align: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .save-btn {
-    background: #28a745;
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
     color: white;
 }
 
 .save-btn:hover {
-    background: #218838;
-    transform: scale(1.05);
+    background: linear-gradient(135deg, #218838 0%, #1bb496 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
 }
 
 .logout-btn {
-    background: #dc3545;
+    background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
     color: white;
 }
 
 .logout-btn:hover {
-    background: #c82333;
+    background: linear-gradient(135deg, #c82333 0%, #fc6c3c 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
 }
 
 .nav-link, .nav-btn {
-    background: #0d6efd;
+    background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%);
     color: white;
 }
 
 .nav-link:hover, .nav-btn:hover {
-    background: #0b5ed7;
-    transform: scale(1.05);
+    background: linear-gradient(135deg, #0b5ed7 0%, #0ba8d1 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+}
+
+.info-btn {
+    background: linear-gradient(135deg, #17a2b8 0%, #20c997 100%);
+    color: white;
+}
+
+.info-btn:hover {
+    background: linear-gradient(135deg, #138496 0%, #1bb496 100%);
+    transform: translateY(-2px);
+}
+
+button {
+    text-decoration: none;
+    border: none;
 }
 
 /* Footer */
 footer {
     text-align: center;
-    padding: 10px 0;
-    margin-top: 20px;
+    padding: 15px;
+    margin-top: 40px;
     font-size: 0.9rem;
     color: #777;
+    border-top: 1px solid #ddd;
+    background: #f9f9f9;
 }
 
 /* Mobile */
-@media (max-width: 800px) {
+@media (max-width: 1000px) {
     .kanban {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(2, 1fr);
     }
 }
-@media (max-width: 500px) {
+
+@media (max-width: 600px) {
     .kanban {
         grid-template-columns: 1fr;
+    }
+    
+    .grid-2 {
+        grid-template-columns: 1fr;
+    }
+    
+    header h1 {
+        font-size: 1.8rem;
+    }
+    
+    nav {
+        flex-direction: column;
+    }
+    
+    nav a {
+        padding: 12px 15px;
     }
 }

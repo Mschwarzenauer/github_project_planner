@@ -5,12 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Projektplaner</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
 
 <nav>
-    <a href="index.html" class="active">📋 Dashboard</a>
-    <a href="projektplanung.html">📊 Projektplanung</a>
+    <a href="#" data-page="dashboard" class="active" onclick="showSection('dashboard', event)">📋 Dashboard</a>
+    <a href="#" data-page="planner" onclick="showSection('planner', event)">📊 Projektplanung</a>
     <a href="info.html">ℹ️ Info</a>
 </nav>
 
@@ -19,21 +24,9 @@
     <p>Projektplanung zur besseren Organisation</p>
 </header>
 
-<!-- LOGIN -->
-<section id="loginBox" class="form-section">
-    <h2>Login</h2>
-
-    <label>Benutzername</label>
-    <input id="username" type="text">
-
-    <label>Passwort</label>
-    <input id="password" type="password">
-
-    <button onclick="login()">Login</button>
-</section>
-
 <!-- APP -->
-<div id="app" style="display:none;">
+<div id="dashboardSection">
+    <div id="app">
 
 <!-- Projektwahl -->
 <section class="form-section">
@@ -42,6 +35,70 @@
     </div>
     
     <button onclick="showNewProjectForm()" style="margin-top: 10px;">➕ Neues Projekt erstellen</button>
+</section>
+
+<!-- API-Key Einstellungen -->
+<section class="form-section">
+    <h2>🔑 KI-API Einstellungen</h2>
+    <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+        <p style="margin: 0 0 10px 0; font-size: 14px; color: #666;">
+            Konfiguriere deine API-Keys für Gemini und DeepSeek, um echte KI-Funktionen zu nutzen.
+        </p>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">🤖 Gemini API Key</label>
+                <input id="geminiApiKey" type="password" placeholder="Gib deinen Gemini API Key ein" 
+                       style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace;">
+                <small style="color: #666; font-size: 12px;">Erhalte deinen Key von <a href="https://makersuite.google.com/app/apikey" target="_blank">Google AI Studio</a></small>
+            </div>
+            
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">🧠 DeepSeek API Key</label>
+                <input id="deepseekApiKey" type="password" placeholder="Gib deinen DeepSeek API Key ein" 
+                       style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace;">
+                <small style="color: #666; font-size: 12px;">Erhalte deinen Key von <a href="https://platform.deepseek.com/" target="_blank">DeepSeek Platform</a></small>
+            </div>
+        </div>
+        
+        <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
+            <h3 style="margin-top: 0; color: #856404;">💡 Gemini funktioniert nicht?</h3>
+            <p style="margin: 5px 0; color: #856404; font-size: 14px;">
+                <strong>Lösungsschritte:</strong>
+            </p>
+            <ol style="margin: 5px 0; padding-left: 20px; color: #856404; font-size: 14px;">
+                <li>Überprüfe deinen API Key auf <a href="https://makersuite.google.com/app/apikey" target="_blank">Google AI Studio</a></li>
+                <li>Stelle sicher, dass die Gemini API in deiner Region verfügbar ist (nicht überall aktiviert)</li>
+                <li>Überprüfe, ob das kostenlose Kontingent aufgebraucht ist</li>
+                <li><strong>Kostenlose Alternative:</strong> Nutze stattdessen <strong>Hugging Face Inference</strong> - kopiere <a href="https://huggingface.co/settings/tokens" target="_blank">einen kostenlosen Token</a> unten!</li>
+            </ol>
+        </div>
+        
+        <div style="margin-top: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">🤖 Hugging Face Token (Kostenlose Alternative)</label>
+                <input id="huggingfaceToken" type="password" placeholder="https://huggingface.co/settings/tokens" 
+                       style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace;">
+                <small style="color: #666; font-size: 12px;">Erstelle einen kostenlosen Token auf <a href="https://huggingface.co/settings/tokens" target="_blank">Hugging Face</a></small>
+            </div>
+            
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">🔧 API-Debug Info</label>
+                <button onclick="showApiDebugInfo()" style="width: 100%; padding: 8px; background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer;">📊 Debug-Info anzeigen</button>
+                <small style="color: #666; font-size: 12px;">Zeigt, welche APIs verfügbar sind</small>
+            </div>
+        </div>
+        
+        <div style="margin-top: 15px; display: flex; gap: 10px;">
+            <button onclick="saveApiKeys()" style="padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">💾 API Keys speichern</button>
+            <button onclick="testApiKeys()" style="padding: 8px 15px; background: #ffc107; color: black; border: none; border-radius: 4px; cursor: pointer;">🧪 API Keys testen</button>
+            <button onclick="clearApiKeys()" style="padding: 8px 15px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">🗑️ API Keys löschen</button>
+        </div>
+        
+        <div id="apiStatus" style="margin-top: 10px; padding: 8px; border-radius: 4px; display: none;"></div>
+        
+        <div id="debugInfo" style="margin-top: 15px; padding: 10px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 4px; display: none; font-family: monospace; font-size: 12px;"></div>
+    </div>
 </section>
  
 <!-- Neues Projekt Form (versteckt) -->
@@ -55,8 +112,8 @@
     <textarea id="newProjectDesc" rows="3" placeholder="Worum geht es?"></textarea>
       
     <div class="grid-2">
-        <button onclick="createProject()" class="save-btn">✓ Projekt erstellen</button>
-        <button onclick="hideNewProjectForm()" class="save-btn">✗ Abbrechen</button>
+        <button type="button" onclick="createProject()" class="save-btn">✓ Projekt erstellen</button>
+        <button type="button" onclick="hideNewProjectForm()" class="save-btn">✗ Abbrechen</button>
     </div>
 </section>
 
@@ -89,76 +146,178 @@
     </div> 
 </section>
 
-<!-- Team-Mitglieder einladen -->
 <section class="form-section">
-    <h2>👥 Team-Mitglieder</h2>
+    <h2>🎯 Aufgaben & Meilensteine</h2>
+
+    <!-- Aufgaben Input -->
+    <div style="margin-bottom: 20px;">
+        <label>Neue Aufgabe hinzufügen</label>
+        <div style="display: flex; gap: 5px;">
+            <input id="newTask" placeholder="z.B. Design fertigstellen" style="flex: 1;">
+            <button onclick="addTask()" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">➕ Hinzufügen</button>
+        </div>
+    </div>
+
+    <!-- Aufgabenliste & Eigenschaften-Felder -->
+    <div style="display: grid; grid-template-columns: 1fr 2.5fr 1fr; gap: 15px; margin-top: 20px;">
+        
+        <!-- Linke Seite: Aufgabenliste -->
+        <div style="border: 2px solid #028641; border-radius: 8px; padding: 15px; background: #f9fffe;">
+            <h4 style="margin-top: 0; color: #028641;">📝 Alle Aufgaben</h4>
+            <div id="tasksList" style="min-height: 300px; max-height: 600px; overflow-y: auto;">
+            </div>
+        </div>
+
+        <!-- Mittlere Seite: Status Spalten -->
+        <div>
+            <!-- Status Spalten (4x1 Grid) -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+                <div class="property-box" data-property="todo">
+                    <h4>📋 To Do</h4>
+                    <div class="property-items" ondrop="dropTask(event, 'todo')" ondragover="allowDrop(event)" style="min-height: 200px;"></div>
+                </div>
+                <div class="property-box" data-property="progress">
+                    <h4>⚙️ In Progress</h4>
+                    <div class="property-items" ondrop="dropTask(event, 'progress')" ondragover="allowDrop(event)" style="min-height: 200px;"></div>
+                </div>
+                <div class="property-box" data-property="review">
+                    <h4>👀 Review</h4>
+                    <div class="property-items" ondrop="dropTask(event, 'review')" ondragover="allowDrop(event)" style="min-height: 200px;"></div>
+                </div>
+                <div class="property-box" data-property="done">
+                    <h4>✅ Done</h4>
+                    <div class="property-items" ondrop="dropTask(event, 'done')" ondragover="allowDrop(event)" style="min-height: 200px;"></div>
+                </div>
+            </div>
+
+            <!-- Meilensteine & Priorität darunter -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div class="property-box">
+                    <h4>🏁 Meilensteine</h4>
+                    <div style="margin-bottom: 10px;">
+                        <input id="newMilestone" type="text" placeholder="Hinzufügen" style="width: 100%; margin-bottom: 5px; padding: 5px; border: 1px solid #ddd; border-radius: 4px;">
+                        <button onclick="addMilestone()" style="width: 100%; padding: 6px; background: #0d6efd; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">➕</button>
+                    </div>
+                    <div id="milestonesList" class="property-items" ondrop="dropTask(event, 'milestone')" ondragover="allowDrop(event)" style="min-height: 100px;"></div>
+                </div>
+
+                <div class="property-box">
+                    <h4>⭐ Priorität</h4>
+                    <div id="priorityList" class="property-items">
+                        <div class="property-item" ondrop="dropTask(event, 'priority-high')" ondragover="allowDrop(event)" style="background: #ffe5e5; border: 2px dashed #dc3545; cursor: pointer; text-align: center; padding: 10px;">🔴 Hoch</div>
+                        <div class="property-item" ondrop="dropTask(event, 'priority-medium')" ondragover="allowDrop(event)" style="background: #fff9e5; border: 2px dashed #ffc107; cursor: pointer; text-align: center; padding: 10px;">🟡 Mittel</div>
+                        <div class="property-item" ondrop="dropTask(event, 'priority-low')" ondragover="allowDrop(event)" style="background: #e5f9ff; border: 2px dashed #17a2b8; cursor: pointer; text-align: center; padding: 10px;">🟢 Niedrig</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rechte Seite: Property Inspector -->
+        <div style="border: 3px dashed #028641; border-radius: 8px; padding: 15px; background: #f0fff8; height: fit-content; position: sticky; top: 20px;">
+            <h4 style="margin-top: 0; color: #028641;">🔍 Eigenschafts-Details</h4>
+            <p style="color: #666; font-size: 0.9rem;">Ziehe eine Aufgabe hier hin um ihre Eigenschaften zu sehen &amp; zu bearbeiten</p>
+            
+            <div id="propertyInspector" ondrop="inspectTask(event)" ondragover="allowDrop(event)" style="min-height: 300px; padding: 10px; background: white; border-radius: 6px; border: 2px dashed #999; display: flex; align-items: center; justify-content: center;">
+                <p style="color: #999; text-align: center;">Noch keine Aufgabe gewählt</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Ziele & Meilensteine -->
+<section class="form-section">
+    <h2>🎯 Ziele & Planung</h2>
     
-    <label>Benutzer hinzufügen (müssen registriert sein)</label>
-    <div style="display: flex; gap: 10px;">
-        <input id="memberToAdd" type="text" placeholder="Benutzername eingeben" style="flex: 1;">
-        <button onclick="addMemberToProject()" style="padding: 10px 20px;">Hinzufügen</button>
-    </div>
-
-    <div id="teamList" style="margin-top: 15px;">
-        <h4>Aktuelle Mitglieder:</h4>
-        <ul id="teamMembers" style="list-style: none; padding: 0;">
-        </ul>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <div>
+            <h3>🎯 Ziele</h3>
+            <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+                <input id="goalText" type="text" placeholder="Ziel eingeben" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                <input id="goalDeadline" type="date" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                <button onclick="addGoal()" style="padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">➕</button>
+            </div>
+            <div id="goalsList" style="display: flex; flex-direction: column; gap: 8px;"></div>
+        </div>
+        
+        <div>
+            <h3>🏁 Meilensteine</h3>
+            <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+                <input id="milestoneTextPlanning" type="text" placeholder="Meilenstein eingeben" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                <input id="milestoneDatePlanning" type="date" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                <button onclick="addMilestonePlanning()" style="padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">➕</button>
+            </div>
+            <div id="milestonesListPlanning" style="display: flex; flex-direction: column; gap: 8px;"></div>
+        </div>
     </div>
 </section>
 
+<!-- Budget & Team -->
 <section class="form-section">
-    <h2>Meilensteine</h2>
-    <table>
-        <tr>   
-            <th>Meilenstein</th>
-            <th>Fälligkeitsdatum</th>
-            <th>Status</th>
+    <h2>💰 Budget & Team</h2>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <!-- Budget -->
+        <div>
+            <h3>💰 Budget-Planung</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                <div>
+                    <label>Gesamtbudget (€)</label>
+                    <input id="totalBudget" type="number" min="0" onchange="updateBudgetDisplay(); saveProjectData();" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+                <div>
+                    <label>Ausgegeben (€)</label>
+                    <input id="spentBudget" type="number" min="0" onchange="updateBudgetDisplay(); saveProjectData();" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+            </div>
+            <div style="padding: 10px; background: #f0f0f0; border-radius: 4px;">
+                <p style="margin: 5px 0;"><strong>Verbleibend:</strong> <span id="budgetRemaining">0</span> €</p>
+                <p style="margin: 5px 0;"><strong>Auslastung:</strong> <span id="budgetUsage">0</span>%</p>
+            </div>
+        </div>
+        
+        <!-- Team -->
+        <div>
+            <h3>👥 Team-Mitglieder</h3>
+            <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+                <input id="memberName" type="text" placeholder="Name" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                <input id="memberRole" type="text" placeholder="Rolle" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                <button onclick="addTeamMember()" style="padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">➕</button>
+            </div>
+            <table style="width: 100%; border-collapse: collapse;">
+                <tr style="background: #f0f0f0;">
+                    <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Name</th>
+                    <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Rolle</th>
+                    <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Aktion</th>
+                </tr>
+                <tbody id="teamTable"></tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- Risikoanalyse -->
+<section class="form-section">
+    <h2>⚠️ Risikoanalyse</h2>
+    
+    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+        <input id="riskName" type="text" placeholder="Risiko-Beschreibung" style="flex: 2; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+        <select id="riskLevel" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="Niedrig">Niedrig</option>
+            <option value="Mittel" selected>Mittel</option>
+            <option value="Hoch">Hoch</option>
+        </select>
+        <button onclick="addRisk()" style="padding: 8px 15px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">➕</button>
+    </div>
+    
+    <table style="width: 100%; border-collapse: collapse;">
+        <tr style="background: #ffe5e5;">
+            <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Risiko</th>
+            <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Stufe</th>
+            <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Status</th>
+            <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Aktion</th>
         </tr>
-        <tbody id="milestoneTable">
-            <tr>
-                <td contenteditable="true" onblur="saveProjectData()">MVP</td>
-                <td><input type="date" onchange="saveProjectData()"></td>
-                <td contenteditable="true" onblur="saveProjectData()">In Planung</td>
-            </tr>
-            <tr>
-                <td contenteditable="true" onblur="saveProjectData()">Release 1.0</td>
-                <td><input type="date" onchange="saveProjectData()"></td>
-                <td contenteditable="true" onblur="saveProjectData()">Offen</td>
-            </tr>
-        </tbody>
+        <tbody id="riskTable"></tbody>
     </table>
-</section>
-
-<section class="form-section">
-    <h2>Kanban Board</h2>
-
-    <div class="kanban">
-        <div class="col">
-            <h3>To Do</h3>
-            <input id="newTask" placeholder="Neue Aufgabe erstellen"
-                onkeydown="if(event.key==='Enter'){addTask()}">
-            <div class="kanban-box" id="todo"
-                ondrop="drop(event)" ondragover="allowDrop(event)"></div>
-        </div>
-
-        <div class="col">
-            <h3>In Progress</h3>
-            <div class="kanban-box" id="progress"
-                ondrop="drop(event)" ondragover="allowDrop(event)"></div>
-        </div>
-
-        <div class="col">
-            <h3>Review</h3>
-            <div class="kanban-box" id="review"
-                ondrop="drop(event)" ondragover="allowDrop(event)"></div>
-        </div>
-
-        <div class="col">
-            <h3>Done</h3>
-            <div class="kanban-box" id="done"
-                ondrop="drop(event)" ondragover="allowDrop(event)"></div>
-        </div>
-    </div>
 </section>
 
 <!-- Navigation Footer -->
@@ -172,181 +331,531 @@
 
 </div><!-- end projectDetail -->
 
-<section class="form-section" style="margin-top: 20px;">
-    <div class="button-group">
-        <button onclick="showUserInfo()" class="info-btn">👤 Benutzerinfo</button>
-        <button onclick="logout()" class="logout-btn">🚪 Logout</button>
+<!-- KI-Assistent (außerhalb projectDetail, immer sichtbar) -->
+<section class="form-section" id="aiAssistantSection" style="display: none;">
+    <h2>🤖 KI-Assistent</h2>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <!-- KI-Aufgaben-Vorschläge -->
+        <div>
+            <h3>💡 KI-Aufgaben-Vorschläge</h3>
+            <button onclick="generateTaskSuggestions()" style="padding: 10px 15px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 10px;">🎯 Aufgaben generieren</button>
+            <div id="taskSuggestions" style="display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto;"></div>
+        </div>
+        
+        <!-- KI-Risiko-Analyse -->
+        <div>
+            <h3>🔍 KI-Risiko-Analyse</h3>
+            <button onclick="analyzeRisksAI()" style="padding: 10px 15px; background: #ffc107; color: black; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 10px;">⚠️ Risiken analysieren</button>
+            <div id="riskAnalysis" style="padding: 10px; background: #f8f9fa; border-radius: 4px; min-height: 100px;"></div>
+        </div>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+        <!-- KI-Budget-Optimierung -->
+        <div>
+            <h3>💰 KI-Budget-Optimierung</h3>
+            <button onclick="optimizeBudgetAI()" style="padding: 10px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 10px;">📊 Budget optimieren</button>
+            <div id="budgetOptimization" style="padding: 10px; background: #f8f9fa; border-radius: 4px; min-height: 100px;"></div>
+        </div>
+        
+        <!-- KI-Zeitplan-Optimierung -->
+        <div>
+            <h3>⏰ KI-Zeitplan-Optimierung</h3>
+            <button onclick="optimizeScheduleAI()" style="padding: 10px 15px; background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 10px;">📅 Zeitplan optimieren</button>
+            <div id="scheduleOptimization" style="padding: 10px; background: #f8f9fa; border-radius: 4px; min-height: 100px;"></div>
+        </div>
     </div>
 </section>
 
-</div><!-- end app -->
+<!-- Freie KI-Fragen -->
+<section class="form-section" id="freeAISection" style="display: none;">
+    <h2>💬 Freie KI-Fragen</h2>
+    
+    <div style="background: #f8f9fa; padding: 20px; border-radius: 6px;">
+            <div style="margin-bottom: 10px;">
+                <small style="color: #666;">
+                    💡 <strong>Hinweis:</strong> Konfiguriere zuerst deine API Keys oben im Dashboard. Bei Überlastung wird automatisch auf ein alternatives Modell umgeschaltet.
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">🤖 KI-Modell auswählen</label>
+                <select id="aiModelSelect" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    <option value="gemini">🤖 Gemini (Google) ✅ Empfohlen</option>
+                    <option value="deepseek">🧠 DeepSeek (Bezahlt)</option>
+                </select>
+            </div>
+        
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 5px; font-weight: bold;">💭 Deine Frage zum aktuellen Projekt</label>
+            <textarea id="aiQuestionInput" rows="4" placeholder="Stelle eine Frage zu deinem Projekt... z.B. 'Wie kann ich mein Projekt effizienter planen?' oder 'Gib mir Tipps zur Risikominderung'" 
+                      style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit; resize: vertical;"></textarea>
+        </div>
+        
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <button onclick="askAI()" style="padding: 10px 20px; background: #6f42c1; color: white; border: none; border-radius: 4px; cursor: pointer;">🚀 Frage KI</button>
+            <button onclick="clearAIResponse()" style="padding: 10px 15px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">🗑️ Löschen</button>
+        </div>
+        
+        <div id="aiLoadingIndicator" style="display: none; margin-top: 15px; padding: 15px; background: #e7f3ff; border-left: 4px solid #007bff; border-radius: 4px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="display: inline-block; width: 30px; height: 30px; border: 4px solid #f0f0f0; border-top: 4px solid #007bff; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                <span style="font-size: 16px; color: #007bff; font-weight: bold;">🤖 KI denkt nach...</span>
+            </div>
+        </div>
+        
+        <div id="aiResponse" style="margin-top: 15px; padding: 25px; background: #ffffff; border: 2px solid #007bff; border-radius: 8px; min-height: 150px; max-height: 800px; width: 100%; box-sizing: border-box; overflow-y: auto; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word; word-break: break-word; font-size: 18px; line-height: 1.6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"></div>
+    </div>
+</section>
+
+    </div><!-- end app -->
+</div><!-- end dashboardSection -->
+
+<div id="plannerSection" style="display: none; padding: 20px;">
+    <div style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+        <button onclick="showSection('dashboard', event)" style="padding: 10px 15px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">← Zurück zum Dashboard</button>
+        <h2 style="margin: 0;">📊 Projektplanung (Testmodus)</h2>
+    </div>
+    <iframe id="plannerIframe" src="projektplanung.html" style="width: 100%; min-height: 900px; border: 1px solid #ccc; border-radius: 8px;" title="Projektplanung"></iframe>
+</div>
 
 <footer>
-    <p>© 2025 Projektplaner • Multi-User & Multi-Project Management</p>
+    <p>© 2025 Projektplaner • Projektmanagement & Task-Verwaltung</p>
 </footer>
 
+<script src="storage.js"></script>
 <script>
-let currentUser = null;
+let currentUser = "default";
 let currentProject = null;
 
 // Initialisierung
-document.addEventListener("DOMContentLoaded", () => {
-    const u = localStorage.getItem("currentUser");
-    if (u) {
-        currentUser = u;
-        showApp();
-        loadProjectList();
+document.addEventListener("DOMContentLoaded", async () => {
+    // Warte auf vollständige Storage-Initialisierung
+    console.log("🔄 Dashboard: Warte auf Storage...");
+    try {
+        const initSuccess = await window.waitForStorage();
+        if (initSuccess) {
+            console.log("✓ Dashboard: Storage bereit");
+        } else {
+            console.warn("⚠️ Dashboard: Storage mit Einschränkungen");
+        }
+    } catch (e) {
+        console.warn("Dashboard: Storage-Wait fehlgeschlagen:", e);
     }
-    setActiveNav();
+
+    // Jetzt lade Projekte sicher
+    await loadProjectList();
+    loadApiKeys(); // API Keys laden
+    setActiveNav('dashboard');
 });
 
-// ========== LOGIN & LOGOUT ==========
-function login() {
-    const user = document.getElementById("username").value.trim();
-    const pass = document.getElementById("password").value.trim();
-
-    if (!user || !pass) return alert("Benutzername und Passwort erforderlich");
-
-    const users = JSON.parse(localStorage.getItem("users") || "{}");
-
-    if (users[user] && users[user].password === pass) {
-        currentUser = user;
-        localStorage.setItem("currentUser", user);
-        document.getElementById("loginBox").style.display = "none";
-        showApp();
-        loadProjectList();
-    } else if (!users[user]) {
-        users[user] = { password: pass, projects: [] };
-        localStorage.setItem("users", JSON.stringify(users));
-        currentUser = user;
-        localStorage.setItem("currentUser", user);
-        document.getElementById("loginBox").style.display = "none";
-        showApp();
-        loadProjectList();
-    } else {
-        alert("Falsches Passwort");
+function showSection(page, event) {
+    if (event) event.preventDefault();
+    document.getElementById('dashboardSection').style.display = page === 'dashboard' ? 'block' : 'none';
+    document.getElementById('plannerSection').style.display = page === 'planner' ? 'block' : 'none';
+    setActiveNav(page);
+    if (page === 'planner') {
+        const iframe = document.getElementById('plannerIframe');
+        iframe.src = iframe.src; // reload iframe if needed
     }
 }
 
-function logout() {
-    if (confirm("Wirklich abmelden?")) {
-        currentUser = null;
-        currentProject = null;
-        localStorage.removeItem("currentUser");
-        localStorage.removeItem("currentProject");
-        document.getElementById("loginBox").style.display = "block";
-        document.getElementById("app").style.display = "none";
-        document.getElementById("username").value = "";
-        document.getElementById("password").value = "";
+function setActiveNav(page) {
+    document.querySelectorAll('nav a[data-page]').forEach(link => {
+        if (link.dataset.page === page) {
+            link.classList.add('active');
+        } else {
+            link.classList.remove('active');
+        }
+    });
+}
+
+window.addEventListener('beforeunload', () => {
+    try {
+        const projects = getAllProjectsSync();
+        window.name = JSON.stringify(projects || {});
+    } catch (e) {
+        console.warn('window.name Fallback konnte Projekte nicht speichern:', e);
     }
+});
+
+// ========== API-KEY VERWALTUNG ==========
+
+// API Keys laden beim Start
+function loadApiKeys() {
+    try {
+        const geminiKey = localStorage.getItem('gemini_api_key');
+        const deepseekKey = localStorage.getItem('deepseek_api_key');
+        const huggingfaceToken = localStorage.getItem('huggingface_token');
+        
+        if (geminiKey) {
+            document.getElementById('geminiApiKey').value = geminiKey;
+        }
+        if (deepseekKey) {
+            document.getElementById('deepseekApiKey').value = deepseekKey;
+        }
+        if (huggingfaceToken) {
+            document.getElementById('huggingfaceToken').value = huggingfaceToken;
+        }
+    } catch (e) {
+        console.warn('API Keys konnten nicht geladen werden:', e);
+    }
+}
+
+// API Keys speichern
+function saveApiKeys() {
+    try {
+        const geminiKey = document.getElementById('geminiApiKey').value.trim();
+        const deepseekKey = document.getElementById('deepseekApiKey').value.trim();
+        const huggingfaceToken = document.getElementById('huggingfaceToken').value.trim();
+        
+        if (geminiKey) {
+            localStorage.setItem('gemini_api_key', geminiKey);
+        } else {
+            localStorage.removeItem('gemini_api_key');
+        }
+        
+        if (deepseekKey) {
+            localStorage.setItem('deepseek_api_key', deepseekKey);
+        } else {
+            localStorage.removeItem('deepseek_api_key');
+        }
+        
+        if (huggingfaceToken) {
+            localStorage.setItem('huggingface_token', huggingfaceToken);
+        } else {
+            localStorage.removeItem('huggingface_token');
+        }
+        
+        showApiStatus('✅ API Keys gespeichert!', 'success');
+    } catch (e) {
+        console.error('API Keys konnten nicht gespeichert werden:', e);
+        showApiStatus('❌ Fehler beim Speichern der API Keys', 'error');
+    }
+}
+
+// API Keys löschen
+function clearApiKeys() {
+    try {
+        localStorage.removeItem('gemini_api_key');
+        localStorage.removeItem('deepseek_api_key');
+        localStorage.removeItem('huggingface_token');
+        document.getElementById('geminiApiKey').value = '';
+        document.getElementById('deepseekApiKey').value = '';
+        document.getElementById('huggingfaceToken').value = '';
+        showApiStatus('🗑️ API Keys gelöscht!', 'info');
+    } catch (e) {
+        console.error('API Keys konnten nicht gelöscht werden:', e);
+        showApiStatus('❌ Fehler beim Löschen der API Keys', 'error');
+    }
+}
+
+// API Keys testen
+async function testApiKeys() {
+    const geminiKey = document.getElementById('geminiApiKey').value.trim();
+    const deepseekKey = document.getElementById('deepseekApiKey').value.trim();
+    const huggingfaceToken = document.getElementById('huggingfaceToken').value.trim();
+    
+    if (!geminiKey && !deepseekKey && !huggingfaceToken) {
+        showApiStatus('❌ Keine API Keys eingegeben', 'error');
+        return;
+    }
+    
+    showApiStatus('🔄 Teste API Keys...', 'info');
+    
+    let geminiOk = false;
+    let deepseekOk = false;
+    
+    // Teste Hugging Face API
+    if (huggingfaceToken) {
+        try {
+            const response = await fetch(
+                "https://api-inference.huggingface.co/models/meta-llama/Llama-2-7b-chat-hf",
+                {
+                    headers: { Authorization: `Bearer ${huggingfaceToken}` },
+                    method: "POST",
+                    body: JSON.stringify({ inputs: "Hello, this is a test." }),
+                }
+            );
+            
+            if (response.ok) {
+                const data = await response.json();
+                if (Array.isArray(data) && data[0]) {
+                    huggingfaceOk = true;
+                    console.log('✅ Hugging Face API funktioniert');
+                }
+            } else if (response.status === 401) {
+                console.warn('❌ Hugging Face Token ungültig');
+            } else {
+                console.warn(`⚠️ Hugging Face API Status: ${response.status} (Modell wird möglicherweise noch geladen)`);
+                // Bei ersten Anfrage: 503 ist normal
+                if (response.status === 503) {
+                    huggingfaceOk = true; // Modell wird geladen, das ist OK
+                }
+            }
+        } catch (e) {
+            console.warn('Hugging Face API Test fehlgeschlagen:', e);
+        }
+    // Teste Gemini API
+    if (geminiKey) {
+        try {
+            // Versuche mehrere Modelle
+            const testModels = ['gemini-pro'];
+            
+            for (const model of testModels) {
+                try {
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            contents: [{
+                                parts: [{
+                                    text: 'Hello, just testing the API connection. Respond with "OK".'
+                                }]
+                            }]
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.candidates && data.candidates[0]) {
+                            console.log(`✅ Gemini Modell ${model} funktioniert`);
+                            geminiOk = true;
+                            break; // Erfolg, stoppe Loop
+                        }
+                    }
+                } catch (e) {
+                    console.warn(`Versuch mit ${model} fehlgeschlagen:`, e.message);
+                    // Weiter zum nächsten Modell
+                }
+            }
+        } catch (e) {
+            console.warn('Gemini API Test fehlgeschlagen:', e);
+        }
+    }
+    
+    // Teste DeepSeek API
+    if (deepseekKey) {
+        try {
+            const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${deepseekKey}`
+                },
+                body: JSON.stringify({
+                    model: 'deepseek-chat',
+                    messages: [{
+                        role: 'user',
+                        content: 'Hello, just testing the API connection. Respond with "OK".'
+                    }],
+                    max_tokens: 10
+                })
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                if (data.choices && data.choices[0]) {
+                    deepseekOk = true;
+                    console.log('✅ DeepSeek API funktioniert');
+                }
+            }
+        } catch (e) {
+            console.warn('DeepSeek API Test fehlgeschlagen:', e);
+        }
+    }
+    
+    // Ergebnis anzeigen
+    let message = '';
+    const results = [];
+    if (geminiOk) results.push('✅ Gemini API');
+    if (deepseekOk) results.push('✅ DeepSeek API');
+    
+    if (results.length > 0) {
+        message = 'Funktionierend: ' + results.join(', ');
+    } else {
+        message = '❌ Keine API Keys funktionieren. Überprüfe deine Keys und Guthaben.';
+    }
+    
+    showApiStatus(message, results.length > 0 ? 'success' : 'error');
+}
+
+// API Status anzeigen
+function showApiStatus(message, type) {
+    const statusDiv = document.getElementById('apiStatus');
+    statusDiv.textContent = message;
+    statusDiv.style.display = 'block';
+    
+    // Farbe basierend auf Typ
+    switch (type) {
+        case 'success':
+            statusDiv.style.background = '#d4edda';
+            statusDiv.style.color = '#155724';
+            statusDiv.style.border = '1px solid #c3e6cb';
+            break;
+        case 'error':
+            statusDiv.style.background = '#f8d7da';
+            statusDiv.style.color = '#721c24';
+            statusDiv.style.border = '1px solid #f5c6cb';
+            break;
+        case 'info':
+            statusDiv.style.background = '#d1ecf1';
+            statusDiv.style.color = '#0c5460';
+            statusDiv.style.border = '1px solid #bee5eb';
+            break;
+    }
+    
+    // Nach 5 Sekunden ausblenden
+    setTimeout(() => {
+        statusDiv.style.display = 'none';
+    }, 5000);
 }
 
 // ========== PROJEKT-VERWALTUNG ==========
-function loadProjectList() {
-    const users = JSON.parse(localStorage.getItem("users") || "{}");
-    const userData = users[currentUser] || { password: "", projects: [] };
-    const projects = userData.projects || [];
+async function loadProjectList() {
+    let projects = await getAllProjects();
+    if (!projects || Object.keys(projects).length === 0) {
+        try {
+            const fallback = JSON.parse(localStorage.getItem("projects") || "{}");
+            projects = fallback;
+            if (Object.keys(projects).length > 0) {
+                console.log("✓ Dashboard: localStorage-Fallback fand Projekte");
+            }
+        } catch (e) {
+            console.warn("Dashboard: localStorage-Fallback fehlgeschlagen:", e);
+            projects = {};
+        }
+    }
+    if ((!projects || Object.keys(projects).length === 0) && window.name) {
+        try {
+            const nameData = JSON.parse(window.name || "{}");
+            if (Object.keys(nameData).length > 0) {
+                projects = nameData;
+                console.log("✓ Dashboard: window.name-Fallback fand Projekte");
+            }
+        } catch (e) {
+            console.warn("Dashboard: window.name-Fallback fehlgeschlagen:", e);
+        }
+    }
+    const projectIds = Object.keys(projects);
 
-    const html = projects.map((pid) => {
-        const p = getProjectById(pid);
-        const name = p ? p.name : "Gelöschtes Projekt";
-        return `<button onclick="selectProject('${pid}')" style="padding: 10px 20px; background: #0d6efd; color: white; border: none; border-radius: 4px; cursor: pointer;">${name}</button>`;
+    const html = projectIds.map((pid) => {
+        const p = projects[pid];
+        return `<button onclick="selectProject('${pid}')" style="padding: 10px 20px; background: #0d6efd; color: white; border: none; border-radius: 4px; cursor: pointer;">${p.name}</button>`;
     }).join("");
 
-    document.getElementById("projectList").innerHTML = html;
+    document.getElementById("projectList").innerHTML = html || "<p>Noch keine Projekte. Erstelle dein erstes Projekt!</p>";
 }
 
 function selectProject(projectId) {
     currentProject = projectId;
-    localStorage.setItem("currentProject", projectId);
     loadProjectData();
     document.getElementById("projectList").parentElement.style.display = "none";
     document.getElementById("projectDetail").style.display = "block";
+    document.getElementById("aiAssistantSection").style.display = "block";
+    document.getElementById("freeAISection").style.display = "block";
     document.getElementById("newProjectForm").style.display = "none";
 }
 
 function goBack() {
     currentProject = null;
     document.getElementById("projectDetail").style.display = "none";
+    document.getElementById("aiAssistantSection").style.display = "none";
+    document.getElementById("freeAISection").style.display = "none";
     document.getElementById("projectList").parentElement.style.display = "block";
     loadProjectList();
 }
 
 function showNewProjectForm() {
     document.getElementById("newProjectForm").style.display = "block";
+    document.getElementById("projectList").parentElement.style.display = "none";
 }
 
 function hideNewProjectForm() {
     document.getElementById("newProjectForm").style.display = "none";
+    document.getElementById("projectList").parentElement.style.display = "block";
     document.getElementById("newProjectName").value = "";
     document.getElementById("newProjectDesc").value = "";
 }
 
-function createProject() {
+async function createProject() {
     const name = document.getElementById("newProjectName").value.trim();
     const desc = document.getElementById("newProjectDesc").value.trim();
 
     if (!name) return alert("Projektname erforderlich");
 
-    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    await window.waitForStorage();
+
+    let projects;
+    try {
+        projects = await getAllProjects();
+    } catch (e) {
+        console.error("Fehler beim Laden der Projekte:", e);
+        projects = {};
+    }
+
     const projectId = "proj_" + Date.now();
 
     projects[projectId] = {
         id: projectId,
         name: name,
         description: desc,
-        owner: currentUser,
-        members: [currentUser],
         startDate: "",
         endDate: "",
         milestones: [],
-        kanban: { todo: [], progress: [], review: [], done: [] },
-        projectPlanning: {}
+        tasks: []
     };
 
-    localStorage.setItem("projects", JSON.stringify(projects));
+    try {
+        await saveProjectsData(projects);
+        try {
+            localStorage.setItem("projects", JSON.stringify(projects));
+        } catch (localError) {
+            console.warn("Dashboard: localStorage nach Projekt-Erstellung fehlgeschlagen:", localError);
+        }
+        try {
+            window.name = JSON.stringify(projects);
+        } catch (nameError) {
+            console.warn("Dashboard: window.name nach Projekt-Erstellung fehlgeschlagen:", nameError);
+        }
+        console.log("✓ Projekt erstellt und Fallback-Daten gespeichert");
+    } catch (e) {
+        console.error("Projekt speichern fehlgeschlagen:", e);
+        return alert("Projekt konnte nicht erstellt werden. Bitte Seite neu laden und erneut versuchen.");
+    }
 
-    const users = JSON.parse(localStorage.getItem("users") || "{}");
-    if (!users[currentUser].projects) users[currentUser].projects = [];
-    users[currentUser].projects.push(projectId);
-    localStorage.setItem("users", JSON.stringify(users));
-
-    hideNewProjectForm();
-    loadProjectList();
+    // Zurück zur Projektliste
+    document.getElementById("newProjectForm").style.display = "none";
+    document.getElementById("projectDetail").style.display = "none";
+    document.getElementById("projectList").parentElement.style.display = "block";
+    document.getElementById("newProjectName").value = "";
+    document.getElementById("newProjectDesc").value = "";
+    
+    // Projekte neu laden
+    await loadProjectList();
+    syncProjectsToWindowName();
 }
 
-function deleteProject() {
-    if (!currentProject) return;
-    if (!confirm("Projekt wirklich löschen?")) return;
-
-    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
-    const p = projects[currentProject];
-
-    if (p && p.owner === currentUser) {
-        delete projects[currentProject];
-        localStorage.setItem("projects", JSON.stringify(projects));
-
-        const users = JSON.parse(localStorage.getItem("users") || "{}");
-        Object.keys(users).forEach(u => {
-            if (users[u].projects) {
-                users[u].projects = users[u].projects.filter(id => id !== currentProject);
-            }
-        });
-        localStorage.setItem("users", JSON.stringify(users));
-
-        goBack();
-    } else {
-        alert("Nur der Projekt-Owner kann löschen");
+function syncProjectsToWindowName() {
+    try {
+        const projects = getAllProjectsSync();
+        window.name = JSON.stringify(projects || {});
+        console.log("✓ window.name für Projektplanung synchronisiert");
+    } catch (e) {
+        console.warn("window.name Sync fehlgeschlagen:", e);
     }
 }
 
-function getProjectById(projectId) {
-    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
-    return projects[projectId] || null;
+async function deleteProject() {
+    if (!currentProject) return;
+    if (!confirm("Projekt wirklich löschen?")) return;
+
+    await deleteProjectData(currentProject);
+    goBack();
 }
 
 // ========== DATEN LADEN/SPEICHERN ==========
-function loadProjectData() {
+async function loadProjectData() {
     const p = getProjectById(currentProject);
     if (!p) {
         alert("Projekt nicht gefunden");
@@ -359,28 +868,27 @@ function loadProjectData() {
     document.getElementById("projectDesc").value = p.description || "";
     document.getElementById("startDate").value = p.startDate || "";
     document.getElementById("endDate").value = p.endDate || "";
+
+    // Budget laden
+    document.getElementById("totalBudget").value = p.planning?.totalBudget || "";
+    document.getElementById("spentBudget").value = p.planning?.spentBudget || "";
+    updateBudgetDisplay();
+
+    // Aufgaben und Meilensteine laden
+    loadTasks();
+    loadMilestones();
     
-    // Meilensteine laden
-    const mRows = document.getElementById("milestoneTable").querySelectorAll("tr");
-    p.milestones.forEach((m, i) => {
-        if (mRows[i + 1]) {
-            mRows[i + 1].querySelectorAll("td")[0].textContent = m.name;
-            mRows[i + 1].querySelectorAll("input")[0].value = m.date;
-            mRows[i + 1].querySelectorAll("td")[2].textContent = m.status;
-        }
-    });
-
-    // Kanban laden
-    loadKanbanBoard();
-
-    // Team-Mitglieder laden
+    // Planungs-Features laden
+    loadGoals();
+    loadMilestonesPlanning();
     loadTeamMembers();
+    loadRisks();
 }
 
-function saveProjectData() {
+async function saveProjectData() {
     if (!currentProject) return;
 
-    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    const projects = await getAllProjects();
     const p = projects[currentProject];
 
     if (!p) return;
@@ -390,184 +898,1287 @@ function saveProjectData() {
     p.startDate = document.getElementById("startDate").value;
     p.endDate = document.getElementById("endDate").value;
 
-    // Meilensteine speichern
-    const milestones = [];
-    document.getElementById("milestoneTable").querySelectorAll("tr").forEach((row, idx) => {
-        if (idx > 0) {
-            const cells = row.querySelectorAll("td");
-            const input = row.querySelector("input");
-            milestones.push({
-                name: cells[0]?.textContent || "",
-                date: input?.value || "",
-                status: cells[2]?.textContent || ""
-            });
-        }
-    });
-    p.milestones = milestones;
+    // Planungs-Daten speichern
+    if (!p.planning) p.planning = {};
+    p.planning.totalBudget = parseFloat(document.getElementById("totalBudget").value) || 0;
+    p.planning.spentBudget = parseFloat(document.getElementById("spentBudget").value) || 0;
 
-    // Kanban speichern
-    const kanban = {};
-    ["todo", "progress", "review", "done"].forEach(col => {
-        const tasks = [];
-        document.getElementById(col).querySelectorAll(".task").forEach(task => {
-            tasks.push(task.textContent.trim());
-        });
-        kanban[col] = tasks;
-    });
-    p.kanban = kanban;
-
-    localStorage.setItem("projects", JSON.stringify(projects));
+    await saveProjectsData(projects);
     console.log("Projekt gespeichert");
 }
 
-// ========== KANBAN ==========
-function loadKanbanBoard() {
-    const p = getProjectById(currentProject);
-    if (!p || !p.kanban) return;
+// ========== AUFGABEN-VERWALTUNG ==========
+function addTask() {
+    const taskText = document.getElementById("newTask").value.trim();
+    if (!taskText) return;
 
-    ["todo", "progress", "review", "done"].forEach(col => {
-        const box = document.getElementById(col);
-        box.innerHTML = "";
-        (p.kanban[col] || []).forEach(task => {
-            const div = document.createElement("div");
-            div.className = "task";
-            div.draggable = true;
-            div.textContent = task;
-            div.ondragstart = (e) => e.dataTransfer.setData("text", e.target.textContent);
-            box.appendChild(div);
-        });
+    const p = getProjectById(currentProject);
+    if (!p) return;
+
+    const task = {
+        id: "task_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9),
+        text: taskText,
+        description: "",
+        status: "todo",
+        priority: "priority-medium",
+        startDate: "",
+        endDate: "",
+        assignedMembers: []
+    };
+
+    if (!p.tasks) p.tasks = [];
+    p.tasks.push(task);
+
+    // Update GlobalCache
+    const projects = getAllProjectsSync();
+    projects[currentProject] = p;
+    saveProjectsData(projects).then(() => {
+        document.getElementById("newTask").value = "";
+        loadTasks();
     });
 }
 
-function addTask() {
-    const task = document.getElementById("newTask").value.trim();
-    if (!task) return;
+async function deleteTask(taskId) {
+    if (!confirm("Aufgabe wirklich löschen?")) return;
 
-    const div = document.createElement("div");
-    div.className = "task";
-    div.draggable = true;
-    div.textContent = task;
-    div.ondragstart = (e) => e.dataTransfer.setData("text", e.target.textContent);
+    // Stelle sicher dass Storage bereit ist
+    await window.waitForStorage();
 
-    document.getElementById("todo").appendChild(div);
-    document.getElementById("newTask").value = "";
-    saveProjectData();
+    // Lade Projekt sicher
+    let p = getProjectById(currentProject);
+    if (!p) {
+        const allProjects = await getAllProjects();
+        p = allProjects[currentProject];
+        if (!p || !p.tasks) return;
+    }
+
+    p.tasks = p.tasks.filter(t => t.id !== taskId);
+
+    const projects = getAllProjectsSync();
+    projects[currentProject] = p;
+
+    try {
+        await saveProjectsData(projects);
+        loadTasks();
+        console.log("✓ Aufgabe erfolgreich gelöscht");
+    } catch (e) {
+        console.error("Fehler beim Löschen der Aufgabe:", e);
+        alert("Fehler beim Löschen. Bitte versuche es erneut.");
+    }
 }
 
+function loadTasks() {
+    const p = getProjectById(currentProject);
+    if (!p || !p.tasks) return;
+
+    // Aufgabenliste links
+    const tasksList = document.getElementById("tasksList");
+    tasksList.innerHTML = "";
+
+    p.tasks.forEach(task => {
+        const div = document.createElement("div");
+        div.className = "task-item";
+        div.draggable = true;
+        div.id = task.id;
+        
+        // Hover-Tooltip vorbereiten
+        const priorityMap = { 'priority-high': '🔴 Hoch', 'priority-medium': '🟡 Mittel', 'priority-low': '🟢 Niedrig' };
+        const statusMap = { 'todo': '📋 To Do', 'progress': '⚙️ In Progress', 'review': '👀 Review', 'done': '✅ Done' };
+        const statusIcons = { 'todo': '📋', 'progress': '⚙️', 'review': '👀', 'done': '✅' };
+        
+        const memberText = task.assignedMembers && task.assignedMembers.length > 0 ? `\nTeam: ${task.assignedMembers.join(', ')}` : '\nTeam: Unzugeordnet';
+        const dateText = task.startDate || task.endDate ? `\nDatum: ${task.startDate || '?'} bis ${task.endDate || '?'}` : '\nDatum: Nicht gesetzt';
+        const tooltipText = `Status: ${statusMap[task.status] || task.status}\nPriorität: ${priorityMap[task.priority] || 'Unbekannt'}${dateText}${memberText}`;
+        
+        div.title = tooltipText;
+        div.style.position = "relative";
+        
+        const statusIcon = statusIcons[task.status] || '📋';
+        const priorityIcon = task.priority === 'priority-high' ? '🔴' : task.priority === 'priority-low' ? '🟢' : '🟡';
+        let taskInfo = `<strong>${statusIcon} ${priorityIcon} ${escapeHtml(task.text)}</strong>`;
+        if (task.startDate) taskInfo += `<br><small>📅 ${task.startDate}${task.endDate ? ' → ' + task.endDate : ''}</small>`;
+        if (task.assignedMembers && task.assignedMembers.length > 0) taskInfo += `<br><small>👥 ${task.assignedMembers.join(', ')}</small>`;
+
+        div.innerHTML = `<div style="display: flex; justify-content: space-between; align-items: start; gap: 8px; padding: 10px; background: white; border-radius: 6px; border: 1px solid #ddd; margin-bottom: 8px;">
+            <div style="flex: 1; cursor: grab;">${taskInfo}</div>
+            <button onclick="event.stopPropagation(); deleteTask('${task.id}')" style="background: #dc3545; color: white; border: none; padding: 4px 6px; border-radius: 3px; cursor: pointer; font-size: 0.75rem; white-space: nowrap;">✕</button>
+        </div>`;
+
+        div.ondragstart = (e) => {
+            e.dataTransfer.effectAllowed = "move";
+            e.dataTransfer.setData("taskId", task.id);
+        };
+        
+        // Klick-Handler zum Anschauen der Details
+        div.style.cursor = "grab";
+        div.addEventListener("click", () => inspectTaskById(task.id));
+
+        tasksList.appendChild(div);
+    });
+
+    // Status-Spalten aktualisieren
+    const statusIcons = { 'todo': '📋', 'progress': '⚙️', 'review': '👀', 'done': '✅' };
+    const priorityMap = { 'priority-high': '🔴', 'priority-medium': '🟡', 'priority-low': '🟢' };
+    
+    ["todo", "progress", "review", "done"].forEach(status => {
+        const statusBox = document.querySelector(`.property-box[data-property="${status}"] .property-items`);
+        statusBox.innerHTML = "";
+
+        p.tasks.filter(t => t.status === status).forEach(task => {
+            const div = document.createElement("div");
+            div.className = "property-item";
+            div.draggable = true;
+            div.id = task.id + "_status";
+            
+            const statusIcon = statusIcons[status];
+            const priorityIcon = priorityMap[task.priority] || '🟡';
+            const dateInfo = task.startDate ? ` | 📅 ${task.startDate}` : '';
+            
+            div.innerHTML = `<div style="display: flex; justify-content: space-between; gap: 5px; align-items: center;">
+                <span title="Klick zum Inspizieren" style="cursor: pointer; flex: 1;">${statusIcon} ${priorityIcon} ${escapeHtml(task.text)}${dateInfo}</span>
+                <button onclick="event.stopPropagation(); deleteTask('${task.id}')" style="background: #dc3545; color: white; border: none; padding: 2px 4px; border-radius: 2px; cursor: pointer; font-size: 0.7rem;">✕</button>
+            </div>`;
+
+            div.ondragstart = (e) => {
+                e.dataTransfer.effectAllowed = "move";
+                e.dataTransfer.setData("taskId", task.id);
+            };
+            
+            // Click zum Inspizieren
+            div.addEventListener("click", () => inspectTaskById(task.id));
+
+            statusBox.appendChild(div);
+        });
+    });
+
+    // Meilensteine-Box mit Aufgaben
+    const milestoneBox = document.getElementById("milestonesList");
+    milestoneBox.innerHTML = "";
+    
+    const milestones = p.milestones || [];
+    if (milestones.length === 0) {
+        milestoneBox.innerHTML = "<p style='color: #999; font-size: 0.9rem; text-align: center; padding: 20px;'>Keine Meilensteine. Füge sie in der Projektplanung hinzu!</p>";
+    } else {
+        milestones.forEach(milestone => {
+            const milestoneTasks = p.tasks.filter(t => t.milestone === milestone.name);
+            const milestoneDiv = document.createElement("div");
+            milestoneDiv.style.cssText = "margin-bottom: 12px; padding: 10px; background: #fff9e5; border: 2px dashed #ff9800; border-radius: 4px;";
+            
+            let milestoneHtml = `<div style="font-weight: bold; font-size: 0.9rem; color: #ff6f00; margin-bottom: 8px;">🏁 ${escapeHtml(milestone.name)}</div>`;
+            
+            if (milestoneTasks.length === 0) {
+                milestoneHtml += `<div style="color: #999; font-size: 0.85rem; text-align: center; padding: 10px;">Drag & Drop hier ablegen</div>`;
+            } else {
+                milestoneTasks.forEach(task => {
+                    const statusIcon = { 'todo': '📋', 'progress': '⚙️', 'review': '👀', 'done': '✅' }[task.status] || '📋';
+                    const priorityIcon = task.priority === 'priority-high' ? '🔴' : task.priority === 'priority-low' ? '🟢' : '🟡';
+                    milestoneHtml += `<div style="padding: 4px; background: white; border-radius: 2px; margin-bottom: 4px; font-size: 0.85rem;">
+                        ${statusIcon} ${priorityIcon} ${escapeHtml(task.text)}
+                    </div>`;
+                });
+            }
+            
+            milestoneDiv.innerHTML = milestoneHtml;
+            milestoneBox.appendChild(milestoneDiv);
+        });
+    }
+}
+
+function loadMilestones() {
+    const p = getProjectById(currentProject);
+    if (!p) return;
+
+    if (!p.milestones) p.milestones = [];
+}
+
+function addMilestone() {
+    // Meilensteine werden nicht mehr verwendet - diese Funktion ist veraltet
+}
+
+function clearTaskProperty(taskId, property) {
+    const p = getProjectById(currentProject);
+    if (!p || !p.tasks) return;
+
+    const task = p.tasks.find(t => t.id === taskId);
+    if (task) {
+        if (property === "startDate") task.startDate = "";
+        if (property === "endDate") task.endDate = "";
+        if (property === "assignedMembers") task.assignedMembers = [];
+
+        const projects = getAllProjectsSync();
+        projects[currentProject] = p;
+        saveProjectsData(projects).then(() => {
+            loadTasks();
+            if (task.id) displayTaskInspector(task);
+        });
+    }
+}
+
+// ========== TASK INSPECTION ==========
+function inspectTaskById(taskId) {
+    const p = getProjectById(currentProject);
+    if (!p || !p.tasks) return;
+    
+    const task = p.tasks.find(t => t.id === taskId);
+    if (!task) return;
+    
+    displayTaskInspector(task);
+}
+
+function inspectTask(e) {
+    e.preventDefault();
+    const taskId = e.dataTransfer.getData("taskId");
+    
+    const p = getProjectById(currentProject);
+    if (!p || !p.tasks) return;
+    
+    const task = p.tasks.find(t => t.id === taskId);
+    if (!task) return;
+    
+    displayTaskInspector(task);
+}
+
+function displayTaskInspector(task) {
+    const priorityMap = { 'priority-high': '🔴 Hoch', 'priority-medium': '🟡 Mittel', 'priority-low': '🟢 Niedrig' };
+    const statusMap = { 'todo': '📋 To Do', 'progress': '⚙️ In Progress', 'review': '👀 Review', 'done': '✅ Done' };
+    
+    const inspector = document.getElementById("propertyInspector");
+    const p = getProjectById(currentProject);
+    const members = (p && p.team) ? p.team : [];
+    
+    // Members HTML
+    let membersHtml = '';
+    if (members.length === 0) {
+        membersHtml = '<p style="color: #999; font-size: 0.85rem; margin-top: 8px;">Kein Team. Füge Mitglieder in der Projektplanung hinzu!</p>';
+    } else {
+        membersHtml = '<div style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px;">';
+        members.forEach((m, idx) => {
+            const isAssigned = task.assignedMembers && task.assignedMembers.includes(m.name);
+            const btnId = 'mem_' + task.id + '_' + idx;
+            membersHtml += `<label style="display: flex; align-items: center; gap: 8px; padding: 8px; background: ${isAssigned ? '#e3f2fd' : '#f5f5f5'}; border: 1px solid #ddd; border-radius: 3px; cursor: pointer;" id="${btnId}">
+                <input type="checkbox" ${isAssigned ? 'checked' : ''} style="cursor: pointer;"> 👤 ${escapeHtml(m.name)}
+            </label>`;
+        });
+        membersHtml += '</div>';
+    }
+    
+    inspector.innerHTML = `
+        <div style="width: 100%; padding: 10px; background: #f9fffe; border-radius: 6px; overflow-y: auto; max-height: 400px;">
+            <h5 style="margin-top: 0; margin-bottom: 15px; color: #028641; border-bottom: 2px solid #028641; padding-bottom: 8px;">📌 ${escapeHtml(task.text)}</h5>
+            
+            <!-- Beschreibung -->
+            <div style="margin: 10px 0; padding: 10px; background: white; border-left: 4px solid #9C27B0; border-radius: 4px;">
+                <strong>📝 Beschreibung:</strong>
+                <textarea id="task_description_${task.id}" style="width: 100%; height: 60px; padding: 8px; border: 1px solid #ddd; border-radius: 3px; font-size: 0.9rem; margin-top: 6px; font-family: Arial, sans-serif; resize: vertical;">${escapeHtml(task.description || '')}</textarea>
+            </div>
+            
+            <!-- Status -->
+            <div style="margin: 10px 0; padding: 10px; background: white; border-left: 4px solid #028641; border-radius: 4px;">
+                <strong>📊 Status:</strong> <em>${statusMap[task.status] || task.status}</em>
+                <div style="margin-top: 8px; display: flex; gap: 3px; flex-wrap: wrap; font-size: 0.85rem;">
+                    <button id="st_todo_${task.id}" style="flex: 1; min-width: 45px; padding: 5px; background: ${task.status === 'todo' ? '#fff3e0' : '#f0f0f0'}; border: 1px solid #ddd; border-radius: 2px; cursor: pointer; font-weight: ${task.status === 'todo' ? 'bold' : 'normal'};">📋 To Do</button>
+                    <button id="st_progress_${task.id}" style="flex: 1; min-width: 45px; padding: 5px; background: ${task.status === 'progress' ? '#fff3e0' : '#f0f0f0'}; border: 1px solid #ddd; border-radius: 2px; cursor: pointer; font-weight: ${task.status === 'progress' ? 'bold' : 'normal'};">⚙️ Work</button>
+                    <button id="st_review_${task.id}" style="flex: 1; min-width: 45px; padding: 5px; background: ${task.status === 'review' ? '#fff3e0' : '#f0f0f0'}; border: 1px solid #ddd; border-radius: 2px; cursor: pointer; font-weight: ${task.status === 'review' ? 'bold' : 'normal'};">👀 Review</button>
+                    <button id="st_done_${task.id}" style="flex: 1; min-width: 45px; padding: 5px; background: ${task.status === 'done' ? '#e5ffe5' : '#f0f0f0'}; border: 1px solid #ddd; border-radius: 2px; cursor: pointer; font-weight: ${task.status === 'done' ? 'bold' : 'normal'};">✅ Done</button>
+                </div>
+            </div>
+            
+            <!-- Priorität -->
+            <div style="margin: 10px 0; padding: 10px; background: white; border-left: 4px solid #ffc107; border-radius: 4px;">
+                <strong>⭐ Priorität:</strong> <em>${priorityMap[task.priority] || 'Unbekannt'}</em>
+                <div style="margin-top: 8px; display: flex; gap: 5px;">
+                    <button id="pr_high_${task.id}" style="flex: 1; padding: 6px; background: ${task.priority === 'priority-high' ? '#ff9999' : '#ffe5e5'}; border: 1px solid #dc3545; border-radius: 3px; cursor: pointer; font-weight: ${task.priority === 'priority-high' ? 'bold' : 'normal'}; font-size: 0.85rem;">🔴 Hoch</button>
+                    <button id="pr_med_${task.id}" style="flex: 1; padding: 6px; background: ${task.priority === 'priority-medium' ? '#ffe680' : '#fff9e5'}; border: 1px solid #ffc107; border-radius: 3px; cursor: pointer; font-weight: ${task.priority === 'priority-medium' ? 'bold' : 'normal'}; font-size: 0.85rem;">🟡 Mittel</button>
+                    <button id="pr_low_${task.id}" style="flex: 1; padding: 6px; background: ${task.priority === 'priority-low' ? '#80d4ff' : '#e5f9ff'}; border: 1px solid #17a2b8; border-radius: 3px; cursor: pointer; font-weight: ${task.priority === 'priority-low' ? 'bold' : 'normal'}; font-size: 0.85rem;">🟢 Niedrig</button>
+                </div>
+            </div>
+            
+            <!-- Datum -->
+            <div style="margin: 10px 0; padding: 10px; background: white; border-left: 4px solid #2196F3; border-radius: 4px;">
+                <strong>📅 Zeitraum:</strong>
+                <div style="margin-top: 8px; display: flex; gap: 8px;">
+                    <div style="flex: 1;">
+                        <label style="font-size: 0.85rem; color: #666;">Start:</label>
+                        <input id="task_startDate_${task.id}" type="date" value="${task.startDate || ''}" style="width: 100%; padding: 5px; border: 1px solid #ddd; border-radius: 3px; font-size: 0.9rem;">
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="font-size: 0.85rem; color: #666;">End:</label>
+                        <input id="task_endDate_${task.id}" type="date" value="${task.endDate || ''}" style="width: 100%; padding: 5px; border: 1px solid #ddd; border-radius: 3px; font-size: 0.9rem;">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Team Members -->
+            <div style="margin: 10px 0; padding: 10px; background: white; border-left: 4px solid #4CAF50; border-radius: 4px;">
+                <strong>👥 Team-Mitglieder:</strong>
+                <div id="membersContainer_${task.id}" style="margin-top: 8px;">
+                    ${membersHtml}
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Status, Priorität auf Button-Clicks befestigen
+    ['todo', 'progress', 'review', 'done'].forEach(st => {
+        const btn = document.getElementById('st_' + st + '_' + task.id);
+        if (btn) btn.onclick = () => changeTaskStatus(task.id, st);
+    });
+    
+    document.getElementById('pr_high_' + task.id)?.addEventListener('click', () => changeTaskPriority(task.id, 'priority-high'));
+    document.getElementById('pr_med_' + task.id)?.addEventListener('click', () => changeTaskPriority(task.id, 'priority-medium'));
+    document.getElementById('pr_low_' + task.id)?.addEventListener('click', () => changeTaskPriority(task.id, 'priority-low'));
+    
+    // Beschreibungs-Change Listener
+    document.getElementById('task_description_' + task.id)?.addEventListener('change', (e) => changeTaskDescription(task.id, e.target.value));
+    
+    // Datum-Change Listener
+    document.getElementById('task_startDate_' + task.id)?.addEventListener('change', (e) => changeTaskDate(task.id, 'startDate', e.target.value));
+    document.getElementById('task_endDate_' + task.id)?.addEventListener('change', (e) => changeTaskDate(task.id, 'endDate', e.target.value));
+    
+    // Team-Member Checkboxes
+    members.forEach((m, idx) => {
+        const label = document.getElementById('mem_' + task.id + '_' + idx);
+        if (label) {
+            const checkbox = label.querySelector('input[type="checkbox"]');
+            checkbox.addEventListener('change', (e) => toggleTaskMember(task.id, m.name, e.target.checked));
+        }
+    });
+}
+
+function changeTaskPriority(taskId, newPriority) {
+    const p = getProjectById(currentProject);
+    if (!p || !p.tasks) return;
+    
+    const task = p.tasks.find(t => t.id === taskId);
+    if (!task) return;
+    
+    task.priority = newPriority;
+    
+    const projects = getAllProjectsSync();
+    projects[currentProject] = p;
+    saveProjectsData(projects).then(() => {
+        displayTaskInspector(task);
+        loadTasks();
+    });
+}
+
+function changeTaskStatus(taskId, newStatus) {
+    const p = getProjectById(currentProject);
+    if (!p || !p.tasks) return;
+    
+    const task = p.tasks.find(t => t.id === taskId);
+    if (!task) return;
+    
+    task.status = newStatus;
+    
+    const projects = getAllProjectsSync();
+    projects[currentProject] = p;
+    saveProjectsData(projects).then(() => {
+        displayTaskInspector(task);
+        loadTasks();
+    });
+}
+
+function changeTaskDate(taskId, dateField, dateValue) {
+    const p = getProjectById(currentProject);
+    if (!p || !p.tasks) return;
+    
+    const task = p.tasks.find(t => t.id === taskId);
+    if (!task) return;
+    
+    if (dateField === 'startDate') task.startDate = dateValue;
+    if (dateField === 'endDate') task.endDate = dateValue;
+    
+    const projects = getAllProjectsSync();
+    projects[currentProject] = p;
+    saveProjectsData(projects).then(() => {
+        displayTaskInspector(task);
+        loadTasks();
+    });
+}
+
+function changeTaskDescription(taskId, description) {
+    const p = getProjectById(currentProject);
+    if (!p || !p.tasks) return;
+    
+    const task = p.tasks.find(t => t.id === taskId);
+    if (!task) return;
+    
+    task.description = description;
+    
+    const projects = getAllProjectsSync();
+    projects[currentProject] = p;
+    saveProjectsData(projects);
+}
+
+function toggleTaskMember(taskId, memberName, isChecked) {
+    const p = getProjectById(currentProject);
+    if (!p || !p.tasks) return;
+    
+    const task = p.tasks.find(t => t.id === taskId);
+    if (!task) return;
+    
+    if (!task.assignedMembers) task.assignedMembers = [];
+    
+    if (isChecked) {
+        if (!task.assignedMembers.includes(memberName)) {
+            task.assignedMembers.push(memberName);
+        }
+    } else {
+        task.assignedMembers = task.assignedMembers.filter(m => m !== memberName);
+    }
+    
+    const projects = getAllProjectsSync();
+    projects[currentProject] = p;
+    saveProjectsData(projects).then(() => {
+        loadTasks();
+    });
+}
+
+// ========== DRAG & DROP ==========
 function allowDrop(e) {
     e.preventDefault();
 }
 
-function drop(e) {
+function dropTask(e, target) {
     e.preventDefault();
-    const task = e.dataTransfer.getData("text");
-    const targetBox = e.target.closest(".kanban-box");
+    const taskId = e.dataTransfer.getData("taskId");
 
-    if (!targetBox) return;
+    const p = getProjectById(currentProject);
+    if (!p || !p.tasks) return;
 
-    const allTasks = document.querySelectorAll(".task");
-    allTasks.forEach(t => {
-        if (t.textContent === task) {
-            t.remove();
+    const task = p.tasks.find(t => t.id === taskId);
+    if (!task) return;
+
+    // Status-Änderung
+    if (["todo", "progress", "review", "done"].includes(target)) {
+        task.status = target;
+    }
+
+    // Priorität-Zuordnung
+    if (target.startsWith("priority-")) {
+        task.priority = target;
+    }
+
+    // Meilenstein-Zuordnung
+    if (target === "milestone") {
+        const milestones = p.milestones || [];
+        const unassignedMilestone = milestones.find(m => !p.tasks.some(t => t.milestone === m.name && t.id !== taskId));
+        if (unassignedMilestone) {
+            task.milestone = unassignedMilestone.name;
+        } else if (milestones.length > 0) {
+            task.milestone = milestones[0].name;
         }
-    });
+    }
 
-    const div = document.createElement("div");
-    div.className = "task";
-    div.draggable = true;
-    div.textContent = task;
-    div.ondragstart = (e) => e.dataTransfer.setData("text", e.target.textContent);
-     
-    targetBox.appendChild(div);
+    const projects = getAllProjectsSync();
+    projects[currentProject] = p;
+    saveProjectsData(projects).then(() => {
+        loadTasks();
+    });
+}
+
+// ========== HELPERS ==========
+function escapeHtml(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, m => map[m]);
+}
+
+// ========== ZIELE ==========
+function addGoal() {
+    if (!currentProject) return;
+    const text = document.getElementById("goalText").value.trim();
+    const deadline = document.getElementById("goalDeadline").value;
+    if (!text) return;
+    
+    const p = getProjectById(currentProject);
+    if (!p.planning) p.planning = {};
+    if (!p.planning.goals) p.planning.goals = [];
+    
+    p.planning.goals.push({ id: "goal_" + Date.now(), text, deadline, completed: false });
     saveProjectData();
+    document.getElementById("goalText").value = "";
+    document.getElementById("goalDeadline").value = "";
+    loadGoals();
+}
+
+function loadGoals() {
+    const p = getProjectById(currentProject);
+    const goals = p?.planning?.goals || [];
+    const list = document.getElementById("goalsList");
+    list.innerHTML = goals.map(g => `
+        <div style="padding: 8px; background: #fff9e6; border: 1px solid #ffc107; border-radius: 4px; display: flex; gap: 10px; align-items: center;">
+            <input type="checkbox" ${g.completed ? "checked" : ""} onchange="toggleGoal('${g.id}', this.checked)" style="cursor: pointer;">
+            <span style="flex: 1; text-decoration: ${g.completed ? 'line-through' : 'none'};">${escapeHtml(g.text)}${g.deadline ? ` (${g.deadline})` : ''}</span>
+            <button onclick="deleteGoal('${g.id}')" style="padding: 4px 8px; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 0.85rem;">✕</button>
+        </div>
+    `).join("");
+}
+
+function toggleGoal(goalId, completed) {
+    const p = getProjectById(currentProject);
+    const goal = p?.planning?.goals?.find(g => g.id === goalId);
+    if (goal) { goal.completed = completed; saveProjectData(); loadGoals(); }
+}
+
+function deleteGoal(goalId) {
+    const p = getProjectById(currentProject);
+    if (p?.planning?.goals) {
+        p.planning.goals = p.planning.goals.filter(g => g.id !== goalId);
+        saveProjectData();
+        loadGoals();
+    }
+}
+
+// ========== MEILENSTEINE ==========
+function addMilestonePlanning() {
+    if (!currentProject) return;
+    const text = document.getElementById("milestoneTextPlanning").value.trim();
+    const date = document.getElementById("milestoneDatePlanning").value;
+    if (!text) return;
+    
+    const p = getProjectById(currentProject);
+    if (!p.planning) p.planning = {};
+    if (!p.planning.milestones) p.planning.milestones = [];
+    
+    p.planning.milestones.push({ id: "milestone_" + Date.now(), name: text, date });
+    saveProjectData();
+    document.getElementById("milestoneTextPlanning").value = "";
+    document.getElementById("milestoneDatePlanning").value = "";
+    loadMilestonesPlanning();
+}
+
+function loadMilestonesPlanning() {
+    const p = getProjectById(currentProject);
+    const milestones = p?.planning?.milestones || [];
+    const list = document.getElementById("milestonesListPlanning");
+    list.innerHTML = milestones.map(m => `
+        <div style="padding: 8px; background: #fff3e0; border: 1px solid #ff9800; border-radius: 4px; display: flex; gap: 10px; align-items: center;">
+            <span style="flex: 1;">🏁 ${escapeHtml(m.name)}${m.date ? ` (${m.date})` : ''}</span>
+            <button onclick="deleteMilestonePlanning('${m.id}')" style="padding: 4px 8px; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 0.85rem;">✕</button>
+        </div>
+    `).join("");
+}
+
+function deleteMilestonePlanning(milestoneId) {
+    const p = getProjectById(currentProject);
+    if (p?.planning?.milestones) {
+        p.planning.milestones = p.planning.milestones.filter(m => m.id !== milestoneId);
+        saveProjectData();
+        loadMilestonesPlanning();
+    }
 }
 
 // ========== TEAM-MITGLIEDER ==========
+function addTeamMember() {
+    if (!currentProject) return;
+    const name = document.getElementById("memberName").value.trim();
+    const role = document.getElementById("memberRole").value.trim();
+    if (!name || !role) return;
+    
+    const p = getProjectById(currentProject);
+    if (!p.planning) p.planning = {};
+    if (!p.planning.team) p.planning.team = [];
+    
+    p.planning.team.push({ id: "member_" + Date.now(), name, role, availability: 100 });
+    saveProjectData();
+    document.getElementById("memberName").value = "";
+    document.getElementById("memberRole").value = "";
+    loadTeamMembers();
+}
+
 function loadTeamMembers() {
     const p = getProjectById(currentProject);
-    if (!p) return;
-
-    const list = document.getElementById("teamMembers");
-    list.innerHTML = (p.members || []).map(m => {
-        const isOwner = m === p.owner;
-        const isMe = m === currentUser;
-        let action = "";
-        if (isMe && !isOwner && p.owner === currentUser) {
-            action = `<button onclick="removeMember('${m}')" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; margin-left: 10px;">✕</button>`;
-        }
-        return `<li style="padding: 8px; border-bottom: 1px solid #ddd;">${m} ${isOwner ? "(Owner)" : ""} ${action}</li>`;
-    }).join("");
+    const team = p?.planning?.team || [];
+    const tbody = document.getElementById("teamTable");
+    tbody.innerHTML = team.map(m => `
+        <tr>
+            <td style="padding: 8px; border: 1px solid #ddd;">${escapeHtml(m.name)}</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">${escapeHtml(m.role)}</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">
+                <button onclick="removeTeamMember('${m.id}')" style="padding: 4px 8px; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 0.85rem;">Löschen</button>
+            </td>
+        </tr>
+    `).join("");
 }
 
-function addMemberToProject() {
+function removeTeamMember(memberId) {
     const p = getProjectById(currentProject);
-    if (!p) return;
-    if (p.owner !== currentUser) return alert("Nur der Owner kann Mitglieder hinzufügen");
-
-    const username = document.getElementById("memberToAdd").value.trim();
-    if (!username) return alert("Benutzername erforderlich");
-
-    const users = JSON.parse(localStorage.getItem("users") || "{}");
-    if (!users[username]) return alert("Benutzer nicht gefunden");
-
-    if (p.members.includes(username)) return alert("Benutzer ist bereits Mitglied");
-
-    p.members.push(username);
-
-    if (!users[username].projects) users[username].projects = [];
-    if (!users[username].projects.includes(currentProject)) {
-        users[username].projects.push(currentProject);
+    if (p?.planning?.team) {
+        p.planning.team = p.planning.team.filter(m => m.id !== memberId);
+        saveProjectData();
+        loadTeamMembers();
     }
-
-    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
-    projects[currentProject] = p;
-    localStorage.setItem("projects", JSON.stringify(projects));
-    localStorage.setItem("users", JSON.stringify(users));
-
-    document.getElementById("memberToAdd").value = "";
-    loadTeamMembers();
 }
 
-function removeMember(username) {
-    if (!confirm(`${username} wirklich entfernen?`)) return;
+// ========== BUDGET ==========
+function updateBudgetDisplay() {
+    const total = parseFloat(document.getElementById("totalBudget").value) || 0;
+    const spent = parseFloat(document.getElementById("spentBudget").value) || 0;
+    const remaining = total - spent;
+    const percentage = total === 0 ? 0 : (spent / total) * 100;
+    document.getElementById("budgetRemaining").textContent = remaining.toFixed(2);
+    document.getElementById("budgetUsage").textContent = percentage.toFixed(0);
+}
 
+// ========== RISIKEN ==========
+function addRisk() {
+    if (!currentProject) return;
+    const name = document.getElementById("riskName").value.trim();
+    const level = document.getElementById("riskLevel").value;
+    if (!name) return;
+    
     const p = getProjectById(currentProject);
-    if (!p || p.owner !== currentUser) return;
+    if (!p.planning) p.planning = {};
+    if (!p.planning.risks) p.planning.risks = [];
+    
+    p.planning.risks.push({ id: "risk_" + Date.now(), name, level, status: "Offen" });
+    saveProjectData();
+    document.getElementById("riskName").value = "";
+    document.getElementById("riskLevel").value = "Mittel";
+    loadRisks();
+}
 
-    p.members = p.members.filter(m => m !== username);
+function loadRisks() {
+    const p = getProjectById(currentProject);
+    const risks = p?.planning?.risks || [];
+    const tbody = document.getElementById("riskTable");
+    tbody.innerHTML = risks.map(r => `
+        <tr>
+            <td style="padding: 8px; border: 1px solid #ddd;">${escapeHtml(r.name)}</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">${r.level}</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">
+                <select onchange="updateRiskStatus('${r.id}', this.value)" style="padding: 4px;">
+                    <option ${r.status === "Offen" ? "selected" : ""}>Offen</option>
+                    <option ${r.status === "Mitigiert" ? "selected" : ""}>Mitigiert</option>
+                    <option ${r.status === "Gelöst" ? "selected" : ""}>Gelöst</option>
+                </select>
+            </td>
+            <td style="padding: 8px; border: 1px solid #ddd;">
+                <button onclick="deleteRisk('${r.id}')" style="padding: 4px 8px; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 0.85rem;">Löschen</button>
+            </td>
+        </tr>
+    `).join("");
+}
 
-    const users = JSON.parse(localStorage.getItem("users") || "{}");
-    if (users[username].projects) {
-        users[username].projects = users[username].projects.filter(id => id !== currentProject);
+function updateRiskStatus(riskId, status) {
+    const p = getProjectById(currentProject);
+    const risk = p?.planning?.risks?.find(r => r.id === riskId);
+    if (risk) { risk.status = status; saveProjectData(); }
+}
+
+function deleteRisk(riskId) {
+    const p = getProjectById(currentProject);
+    if (p?.planning?.risks) {
+        p.planning.risks = p.planning.risks.filter(r => r.id !== riskId);
+        saveProjectData();
+        loadRisks();
     }
-
-    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
-    projects[currentProject] = p;
-    localStorage.setItem("projects", JSON.stringify(projects));
-    localStorage.setItem("users", JSON.stringify(users));
-
-    loadTeamMembers();
 }
 
-// ========== UI HELPERS ==========
-function showApp() {
-    document.getElementById("app").style.display = "block";
-}
+// ========== KI-FUNKTIONEN ==========
 
-function showUserInfo() {
-    const users = JSON.parse(localStorage.getItem("users") || "{}");
-    const allUsers = Object.keys(users).map(u => `${u} ${u === currentUser ? "(Sie)" : ""}`).join(", ");
-    alert(`Angemeldet als: ${currentUser}\n\nAlle Benutzer: ${allUsers}`);
-}
-
-function setActiveNav() {
-    document.querySelectorAll("nav a").forEach(link => {
-        link.classList.remove("active");
-        if (link.href.includes("index.html")) {
-            link.classList.add("active");
+// KI-Aufgaben-Vorschläge generieren
+function generateTaskSuggestions() {
+    console.log("🎯 generateTaskSuggestions aufgerufen, currentProject:", currentProject);
+    if (!currentProject) {
+        console.warn("❌ Kein currentProject gesetzt!");
+        return;
+    }
+    
+    const p = getProjectById(currentProject);
+    console.log("📋 Projekt gefunden:", p);
+    if (!p) {
+        console.warn("❌ Projekt nicht gefunden!");
+        return;
+    }
+    
+    const suggestions = [];
+    
+    // Basierend auf Projekt-Typ und bestehenden Aufgaben intelligente Vorschläge generieren
+    const projectType = p.name.toLowerCase();
+    const existingTasks = p.tasks || [];
+    const existingTaskNames = existingTasks.map(t => t.title.toLowerCase());
+    
+    // Allgemeine Projekt-Aufgaben
+    if (!existingTaskNames.some(name => name.includes('planung') || name.includes('planning'))) {
+        suggestions.push("📋 Projektplanung erstellen");
+    }
+    if (!existingTaskNames.some(name => name.includes('budget') || name.includes('kosten'))) {
+        suggestions.push("💰 Budget planen und genehmigen");
+    }
+    if (!existingTaskNames.some(name => name.includes('team') || name.includes('mitarbeiter'))) {
+        suggestions.push("👥 Team zusammenstellen");
+    }
+    
+    // Spezifische Vorschläge basierend auf Projekt-Typ
+    if (projectType.includes('event') || projectType.includes('veranstaltung')) {
+        if (!existingTaskNames.some(name => name.includes('location') || name.includes('ort'))) {
+            suggestions.push("📍 Veranstaltungsort buchen");
         }
+        if (!existingTaskNames.some(name => name.includes('catering') || name.includes('essen'))) {
+            suggestions.push("🍽️ Catering organisieren");
+        }
+        if (!existingTaskNames.some(name => name.includes('marketing') || name.includes('werbung'))) {
+            suggestions.push("📢 Marketing und Werbung planen");
+        }
+    }
+    
+    if (projectType.includes('web') || projectType.includes('website')) {
+        if (!existingTaskNames.some(name => name.includes('design'))) {
+            suggestions.push("🎨 UI/UX Design erstellen");
+        }
+        if (!existingTaskNames.some(name => name.includes('entwicklung') || name.includes('development'))) {
+            suggestions.push("💻 Frontend Entwicklung");
+        }
+        if (!existingTaskNames.some(name => name.includes('test'))) {
+            suggestions.push("🧪 Testing und Qualitätssicherung");
+        }
+    }
+    
+    // Zusätzliche intelligente Vorschläge
+    if (p.planning?.goals && p.planning.goals.length > 0) {
+        suggestions.push("🎯 Ziele überprüfen und anpassen");
+    }
+    if (p.planning?.milestones && p.planning.milestones.length > 0) {
+        suggestions.push("🏁 Meilensteine überwachen");
+    }
+    if (p.planning?.risks && p.planning.risks.length > 0) {
+        suggestions.push("⚠️ Risiken mitigieren");
+    }
+    
+    // Anzeige der Vorschläge
+    const container = document.getElementById("taskSuggestions");
+    container.innerHTML = suggestions.map(suggestion => `
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background: #e9ecef; border-radius: 4px;">
+            <span>${suggestion}</span>
+            <button onclick="addSuggestedTask('${suggestion.replace(/'/g, "\\'")}')" style="padding: 4px 8px; background: #28a745; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 12px;">+</button>
+        </div>
+    `).join("");
+}
+
+// Vorgeschlagene Aufgabe hinzufügen
+function addSuggestedTask(taskText) {
+    if (!currentProject) return;
+    
+    const p = getProjectById(currentProject);
+    if (!p.tasks) p.tasks = [];
+    
+    // Erstelle neue Aufgabe
+    const newTask = {
+        id: "task_" + Date.now(),
+        title: taskText,
+        description: "KI-generierte Aufgabe",
+        status: "todo",
+        priority: "medium",
+        created: new Date().toISOString()
+    };
+    
+    p.tasks.push(newTask);
+    saveProjectData();
+    loadProjectData();
+    
+    // Entferne den Vorschlag aus der Liste
+    const container = document.getElementById("taskSuggestions");
+    const suggestions = Array.from(container.children);
+    const suggestionToRemove = suggestions.find(s => s.textContent.includes(taskText));
+    if (suggestionToRemove) {
+        suggestionToRemove.remove();
+    }
+}
+
+// KI-Risiko-Analyse
+function analyzeRisksAI() {
+    if (!currentProject) return;
+    
+    const p = getProjectById(currentProject);
+    const risks = p?.planning?.risks || [];
+    const tasks = p?.tasks || [];
+    
+    let analysis = "<h4>🤖 KI-Risiko-Bewertung</h4>";
+    
+    if (risks.length === 0) {
+        analysis += "<p>✅ Keine Risiken identifiziert - gut!</p>";
+    } else {
+        const highRisks = risks.filter(r => r.level === 'Hoch');
+        const mediumRisks = risks.filter(r => r.level === 'Mittel');
+        
+        analysis += `<p><strong>Risiko-Übersicht:</strong></p>
+        <ul>
+            <li>Hohe Risiken: ${highRisks.length}</li>
+            <li>Mittlere Risiken: ${mediumRisks.length}</li>
+            <li>Offene Risiken: ${risks.filter(r => r.status === 'Offen').length}</li>
+        </ul>`;
+        
+        if (highRisks.length > 0) {
+            analysis += "<p>⚠️ <strong>Empfehlung:</strong> Hohe Risiken priorisieren und sofort mitigieren.</p>";
+        }
+        
+        if (tasks.length > 10) {
+            analysis += "<p>📊 <strong>Projekt-Komplexität:</strong> Hohe Aufgabenzahl erhöht Risiko von Verzögerungen.</p>";
+        }
+    }
+    
+    // Zusätzliche KI-Empfehlungen
+    analysis += "<p><strong>💡 KI-Empfehlungen:</strong></p><ul>";
+    if (!p.planning?.budget || p.planning.budget.total <= 0) {
+        analysis += "<li>Budget-Risiko: Budget definieren um finanzielle Risiken zu minimieren</li>";
+    }
+    if (!p.planning?.team || p.planning.team.length < 2) {
+        analysis += "<li>Team-Risiko: Mehr Team-Mitglieder für bessere Risiko-Verteilung</li>";
+    }
+    if (tasks.filter(t => t.status === 'todo').length > tasks.length * 0.7) {
+        analysis += "<li>Fortschritts-Risiko: Zu viele offene Aufgaben - Prioritäten setzen</li>";
+    }
+    analysis += "</ul>";
+    
+    document.getElementById("riskAnalysis").innerHTML = analysis;
+}
+
+// KI-Budget-Optimierung
+function optimizeBudgetAI() {
+    if (!currentProject) return;
+    
+    const p = getProjectById(currentProject);
+    const budget = p?.planning?.budget || {};
+    const tasks = p?.tasks || [];
+    const team = p?.planning?.team || [];
+    
+    let optimization = "<h4>🤖 KI-Budget-Analyse</h4>";
+    
+    if (!budget.total || budget.total <= 0) {
+        optimization += "<p>❌ Kein Budget definiert - Budget zuerst festlegen!</p>";
+        document.getElementById("budgetOptimization").innerHTML = optimization;
+        return;
+    }
+    
+    const spent = budget.spent || 0;
+    const remaining = budget.total - spent;
+    const usagePercent = (spent / budget.total) * 100;
+    
+    optimization += `<p><strong>Aktuelle Budget-Situation:</strong></p>
+    <ul>
+        <li>Gesamtbudget: ${budget.total}€</li>
+        <li>Ausgegeben: ${spent}€ (${usagePercent.toFixed(1)}%)</li>
+        <li>Verbleibend: ${remaining}€</li>
+    </ul>`;
+    
+    // KI-basierte Empfehlungen
+    optimization += "<p><strong>💡 KI-Optimierungsvorschläge:</strong></p><ul>";
+    
+    if (usagePercent > 80) {
+        optimization += "<li>⚠️ Budget-Alarm: Über 80% verbraucht - Ausgaben überprüfen!</li>";
+    }
+    
+    if (team.length > 0) {
+        const avgCostPerMember = budget.total / team.length;
+        optimization += `<li>👥 Team-Kosten: ~${avgCostPerMember.toFixed(0)}€ pro Team-Mitglied budgetiert</li>`;
+    }
+    
+    if (tasks.length > 0) {
+        const avgCostPerTask = budget.total / tasks.length;
+        optimization += `<li>📋 Aufgaben-Kosten: ~${avgCostPerTask.toFixed(0)}€ pro Aufgabe budgetiert</li>`;
+    }
+    
+    if (remaining > budget.total * 0.3) {
+        optimization += "<li>💰 Sparpotenzial: Noch 30%+ Budget verfügbar - für unerwartete Kosten reservieren</li>";
+    }
+    
+    if (p.planning?.risks && p.planning.risks.some(r => r.level === 'Hoch')) {
+        optimization += "<li>⚠️ Risiko-Puffer: Hohe Risiken erfordern Budget-Reserven</li>";
+    }
+    
+    optimization += "</ul>";
+    
+    document.getElementById("budgetOptimization").innerHTML = optimization;
+}
+
+// KI-Zeitplan-Optimierung
+function optimizeScheduleAI() {
+    if (!currentProject) return;
+    
+    const p = getProjectById(currentProject);
+    const tasks = p?.tasks || [];
+    const milestones = p?.planning?.milestones || [];
+    const goals = p?.planning?.goals || [];
+    
+    let optimization = "<h4>🤖 KI-Zeitplan-Analyse</h4>";
+    
+    if (tasks.length === 0) {
+        optimization += "<p>❌ Keine Aufgaben definiert - Aufgaben zuerst erstellen!</p>";
+        document.getElementById("scheduleOptimization").innerHTML = optimization;
+        return;
+    }
+    
+    const todoTasks = tasks.filter(t => t.status === 'todo');
+    const inProgressTasks = tasks.filter(t => t.status === 'in-progress');
+    const doneTasks = tasks.filter(t => t.status === 'done');
+    
+    optimization += `<p><strong>Aktueller Projekt-Status:</strong></p>
+    <ul>
+        <li>Offene Aufgaben: ${todoTasks.length}</li>
+        <li>In Bearbeitung: ${inProgressTasks.length}</li>
+        <li>Abgeschlossen: ${doneTasks.length}</li>
+        <li>Gesamtfortschritt: ${((doneTasks.length / tasks.length) * 100).toFixed(1)}%</li>
+    </ul>`;
+    
+    // KI-basierte Zeitplan-Empfehlungen
+    optimization += "<p><strong>💡 KI-Zeitplan-Optimierungen:</strong></p><ul>";
+    
+    if (todoTasks.length > inProgressTasks.length * 3) {
+        optimization += "<li>⚡ Bottleneck: Zu viele offene Aufgaben - mehr parallel bearbeiten</li>";
+    }
+    
+    if (inProgressTasks.length > 3) {
+        optimization += "<li>🔄 Überlastung: Zu viele Aufgaben gleichzeitig - Prioritäten setzen</li>";
+    }
+    
+    if (milestones.length > 0) {
+        const upcomingMilestones = milestones.filter(m => new Date(m.date) > new Date());
+        if (upcomingMilestones.length > 0) {
+            optimization += `<li>🏁 Meilensteine: ${upcomingMilestones.length} anstehende Meilensteine überwachen</li>`;
+        }
+    }
+    
+    if (goals.length > 0) {
+        const upcomingGoals = goals.filter(g => g.deadline && new Date(g.deadline) > new Date());
+        if (upcomingGoals.length > 0) {
+            optimization += `<li>🎯 Ziele: ${upcomingGoals.length} Ziele mit Deadline - Fortschritt prüfen</li>`;
+        }
+    }
+    
+    // Kritische Pfad Analyse (vereinfacht)
+    const highPriorityTasks = tasks.filter(t => t.priority === 'high' && t.status !== 'done');
+    if (highPriorityTasks.length > 0) {
+        optimization += `<li>🚨 Kritisch: ${highPriorityTasks.length} hohe Priorität Aufgaben noch offen</li>`;
+    }
+    
+    // Zeitbasierte Empfehlungen
+    const overdueTasks = tasks.filter(t => t.dueDate && new Date(t.dueDate) < new Date() && t.status !== 'done');
+    if (overdueTasks.length > 0) {
+        optimization += `<li>⏰ Überfällig: ${overdueTasks.length} Aufgaben überschreiten Deadline</li>`;
+    }
+    
+    optimization += "</ul>";
+    
+    document.getElementById("scheduleOptimization").innerHTML = optimization;
+}
+
+// ========== FREIE KI-FRAGEN ==========
+
+// Frage an KI senden
+async function askAI() {
+    const question = document.getElementById('aiQuestionInput').value.trim();
+    const model = document.getElementById('aiModelSelect').value;
+    
+    if (!question) {
+        showApiStatus('❌ Bitte gib eine Frage ein', 'error');
+        return;
+    }
+    
+    if (!currentProject) {
+        showApiStatus('❌ Kein Projekt ausgewählt', 'error');
+        return;
+    }
+    
+    // Prüfe welches Modell
+    let apiKey = null;
+    if (model === 'gemini') {
+        apiKey = localStorage.getItem('gemini_api_key');
+        if (!apiKey) {
+            showApiStatus(`❌ Kein Gemini API Key gespeichert. Gib ihn oben ein!`, 'error');
+            return;
+        }
+    } else if (model === 'deepseek') {
+        apiKey = localStorage.getItem('deepseek_api_key');
+        if (!apiKey) {
+            showApiStatus(`❌ Kein DeepSeek API Key gespeichert. Gib ihn oben ein!`, 'error');
+            return;
+        }
+    }
+    
+    // Loading-Status
+    document.getElementById('aiLoadingIndicator').style.display = 'block';
+    document.getElementById('aiResponse').style.display = 'none';
+    
+    try {
+        let response;
+        
+        if (model === 'gemini') {
+            response = await callGeminiAPI(question, apiKey);
+        } else {
+            response = await callDeepSeekAPI(question, apiKey);
+        }
+        
+        document.getElementById('aiResponse').innerHTML = response;
+        document.getElementById('aiResponse').style.display = 'block';
+        document.getElementById('aiLoadingIndicator').style.display = 'none';
+        
+    } catch (error) {
+        console.error('KI-API Fehler:', error);
+        let errorMsg = error.message;
+        
+        document.getElementById('aiResponse').innerHTML = errorMsg;
+        document.getElementById('aiResponse').style.display = 'block';
+        document.getElementById('aiLoadingIndicator').style.display = 'none';
+        showApiStatus('❌ KI-Anfrage fehlgeschlagen', 'error');
+    }
+}
+
+// Gemini API aufrufen (mit intelligenter Fallback-Strategie)
+async function callGeminiAPI(question, apiKey) {
+    // Projekt-Kontext hinzufügen
+    const p = getProjectById(currentProject);
+    const context = `Projekt: ${p.name}
+Beschreibung: ${p.description || 'Keine Beschreibung'}
+Aufgaben: ${p.tasks?.length || 0} Aufgaben
+Ziele: ${p.planning?.goals?.length || 0} Ziele
+Risiken: ${p.planning?.risks?.length || 0} Risiken
+Budget: ${p.planning?.budget?.total ? p.planning.budget.total + '€' : 'Nicht definiert'}
+Team: ${p.planning?.team?.length || 0} Mitglieder
+
+Frage: ${question}
+
+Bitte antworte hilfreich und bezugnehmend auf das Projekt.`;
+    
+    // Versuche verschiedene Modelle in dieser Reihenfolge
+    const models = ['gemini-pro'];
+    let lastError = null;
+    
+    for (let i = 0; i < models.length; i++) {
+        const model = models[i];
+        try {
+            console.log(`🤖 Versuche Modell: ${model}`);
+            
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [{
+                            text: context
+                        }]
+                    }],
+                    generationConfig: {
+                        temperature: 0.7,
+                        maxOutputTokens: 1000,
+                    }
+                })
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                
+                // Speichere Fehler, versuche nächstes Modell
+                lastError = `${model}: ${response.status} ${errorData.error?.message || ''}`;
+                console.warn(`⚠️ ${lastError}`);
+                
+                // Bei 503 oder 404, versuche nächstes Modell
+                if ((response.status === 503 || response.status === 404) && i < models.length - 1) {
+                    console.log(`📌 Versuche nächstes Modell...`);
+                    continue;
+                }
+                
+                throw new Error(`Gemini API (${model}) Fehler: ${errorData.error?.message || response.status}. Überprüfe deinen API-Key auf https://makersuite.google.com/app/apikey`);
+            }
+            
+            const data = await response.json();
+            
+            if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+                console.log(`✅ Erfolgreich mit Modell: ${model}`);
+                return data.candidates[0].content.parts[0].text;
+            } else {
+                lastError = `${model}: Unerwartete Antwortstruktur`;
+                if (i < models.length - 1) {
+                    console.warn(`⚠️ ${lastError}, versuche nächstes Modell...`);
+                    continue;
+                }
+                throw new Error(lastError);
+            }
+        } catch (error) {
+            lastError = error.message;
+            console.warn(`Modell ${model} fehlgeschlagen:`, error.message);
+            
+            // Wenn letztes Modell fehlgeschlagen, werfen
+            if (i === models.length - 1) {
+                throw new Error(`Alle Gemini Modelle fehlgeschlagen. Letzter Fehler: ${lastError}`);
+            }
+        }
+    }
+}
+
+// DeepSeek API aufrufen
+async function callDeepSeekAPI(question, apiKey) {
+    // Projekt-Kontext hinzufügen
+    const p = getProjectById(currentProject);
+    const context = `Projekt: ${p.name}
+Beschreibung: ${p.description || 'Keine Beschreibung'}
+Aufgaben: ${p.tasks?.length || 0} Aufgaben
+Ziele: ${p.planning?.goals?.length || 0} Ziele
+Risiken: ${p.planning?.risks?.length || 0} Risiken
+Budget: ${p.planning?.budget?.total ? p.planning.budget.total + '€' : 'Nicht definiert'}
+Team: ${p.planning?.team?.length || 0} Mitglieder
+
+Frage: ${question}
+
+Bitte antworte hilfreich und bezugnehmend auf das Projekt.`;
+    
+    const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+            model: 'deepseek-chat',
+            messages: [{
+                role: 'user',
+                content: context
+            }],
+            max_tokens: 1000,
+            temperature: 0.7
+        })
     });
+    
+    if (!response.ok) {
+        const errorData = await response.text();
+        if (response.status === 402) {
+            throw new Error(`DeepSeek API: Kein Guthaben oder kostenloses Kontingent aufgebraucht. Bitte Guthaben aufladen.`);
+        } else {
+            throw new Error(`DeepSeek API Fehler ${response.status}: ${errorData}`);
+        }
+    }
+    
+    const data = await response.json();
+    
+    if (data.choices && data.choices[0] && data.choices[0].message) {
+        return data.choices[0].message.content;
+    } else {
+        throw new Error('Unerwartete DeepSeek API Antwort');
+    }
 }
+
+// Hugging Face Inference API aufrufen (KOSTENLOS & ZUVERLÄSSIG)
+async function callHuggingFaceAPI(question, token) {
+    // Projekt-Kontext hinzufügen
+    const p = getProjectById(currentProject);
+    const context = `Projekt: ${p.name}
+Beschreibung: ${p.description || 'Keine Beschreibung'}
+Aufgaben: ${p.tasks?.length || 0} Aufgaben
+Ziele: ${p.planning?.goals?.length || 0} Ziele
+Risiken: ${p.planning?.risks?.length || 0} Risiken
+Budget: ${p.planning?.budget?.total ? p.planning.budget.total + '€' : 'Nicht definiert'}
+Team: ${p.planning?.team?.length || 0} Mitglieder
+
+Frage: ${question}
+
+Bitte antworte hilfreich und bezugnehmend auf das Projekt.`;
+
+    try {
+        const response = await fetch(
+            "https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium",
+            {
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                method: "POST",
+                body: JSON.stringify({
+                    inputs: context,
+                    parameters: {
+                        max_length: 500,
+                        temperature: 0.7,
+                        do_sample: true
+                    }
+                }),
+            }
+        );
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            if (response.status === 401) {
+                throw new Error('❌ Ungültiger Hugging Face Token. Erstelle einen kostenlosen Token auf https://huggingface.co/settings/tokens');
+            } else if (response.status === 503) {
+                throw new Error('⚠️ Hugging Face Modell wird gerade geladen. Das dauert beim ersten Mal ~30 Sekunden. Versuche es in 1 Minute erneut.');
+            } else if (response.status === 403) {
+                throw new Error('🚫 CORS-Fehler: Diese App kann nicht direkt auf Hugging Face zugreifen. Verwende bitte Gemini API oder hoste die App auf einem Server.');
+            } else {
+                throw new Error(`Hugging Face API Fehler ${response.status}: ${errorData.error || 'Unbekannter Fehler'}`);
+            }
+        }
+
+        const result = await response.json();
+
+        if (Array.isArray(result) && result[0] && result[0].generated_text) {
+            // DialoGPT gibt oft den Input zurück, also extrahieren wir nur die neue Antwort
+            const generated = result[0].generated_text;
+            const responseStart = generated.lastIndexOf(question);
+            if (responseStart !== -1) {
+                return generated.substring(responseStart + question.length).trim();
+            }
+            return generated;
+        } else if (result.generated_text) {
+            return result.generated_text;
+        } else {
+            throw new Error('Unerwartete Hugging Face API Antwort');
+        }
+    } catch (error) {
+        // Spezielle Behandlung für NetworkError (CORS)
+        if (error.message.includes('NetworkError') || error.name === 'TypeError') {
+            throw new Error('🚫 CORS-Fehler: Hugging Face API ist aus Sicherheitsgründen von lokalen Dateien blockiert. Verwende bitte Gemini API oder hoste diese App auf einem Webserver (z.B. GitHub Pages, Vercel).');
+        }
+        throw error;
+    }
+}
+
+// KI-Antwort löschen
+function clearAIResponse() {
+    document.getElementById('aiQuestionInput').value = '';
+    document.getElementById('aiResponse').innerHTML = '';
+    document.getElementById('aiResponse').style.display = 'none';
+    document.getElementById('aiLoadingIndicator').style.display = 'none';
+}
+
+// Debug-Informationen anzeigen
+function showApiDebugInfo() {
+    const geminiKey = localStorage.getItem('gemini_api_key') ? 'Vorhanden' : 'Fehlt';
+    const huggingfaceToken = localStorage.getItem('huggingface_token') ? 'Vorhanden' : 'Fehlt';
+    const deepseekKey = localStorage.getItem('deepseek_api_key') ? 'Vorhanden' : 'Fehlt';
+    
+    const debugInfo = `
+API-Status:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🤖 Gemini (Google): ${geminiKey} ✅ FUNKTIONIERT (empfohlen)
+🤗 Hugging Face (Kostenlos): ${huggingfaceToken} ❌ CORS blockiert bei lokaler Datei
+🧠 DeepSeek (Bezahlt): ${deepseekKey}
+
+Empfehlung:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+👉 Verwende Gemini API!
+- Funktioniert zuverlässig
+- Große Textausgabe (größer & scrollbar)
+- Mit rotierendem Lade-Indikator
+
+Für Hugging Face:
+- Hoste diese App auf einem Webserver (GitHub Pages, Vercel, etc.)
+- Dann funktioniert Hugging Face ohne CORS-Probleme
+
+Browser Console (F12):
+${window.location.href}
+    `;
+    
+    document.getElementById('debugInfo').textContent = debugInfo;
+    document.getElementById('debugInfo').style.display = 'block';
+}
+
 </script>
 
 </body>
