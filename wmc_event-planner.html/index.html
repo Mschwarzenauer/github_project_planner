@@ -767,10 +767,13 @@ function goBack() {
 }
 
 function showNewProjectForm() {
+    // 1. Formular anzeigen
     document.getElementById("newProjectForm").style.display = "block";
+    
+    // 2. Liste verstecken
+    // Hinweis: .parentElement blendet den Container um die Liste aus
     document.getElementById("projectList").parentElement.style.display = "none";
 }
-
 function hideNewProjectForm() {
     document.getElementById("newProjectForm").style.display = "none";
     document.getElementById("projectList").parentElement.style.display = "block";
