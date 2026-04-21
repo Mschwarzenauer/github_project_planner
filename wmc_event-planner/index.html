@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Projektplaner</title>
+    <title>Projektplaner - mit Groq KI (kostenlos)</title>
     <link rel="stylesheet" href="style.css">
     <style>
         @keyframes spin {
@@ -57,7 +57,7 @@
             width: 20px;
             height: 20px;
             border: 3px solid #f3f3f3;
-            border-top: 3px solid #3498db;
+            border-top: 3px solid #6f42c1;
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin-right: 10px;
@@ -115,6 +115,9 @@
             transition: all 0.3s;
             font-size: 0.9rem;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .property-item:hover {
             border-color: #028641;
@@ -131,18 +134,18 @@
             border: 1px solid #ddd;
             border-radius: 6px;
             margin-bottom: 8px;
-            cursor: grab;
+            cursor: pointer;
             transition: all 0.3s;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .task-item:hover {
             border-color: #028641;
             box-shadow: 0 3px 8px rgba(2, 140, 65, 0.15);
             transform: translateY(-2px);
             background: #f0fdf9;
-        }
-        .task-item:active {
-            cursor: grabbing;
         }
         .grid-2 {
             display: grid;
@@ -211,6 +214,7 @@
             display: flex;
             gap: 0;
             border-bottom: 3px solid #037217;
+            flex-wrap: wrap;
         }
         nav a {
             color: white;
@@ -219,6 +223,7 @@
             font-weight: bold;
             transition: all 0.3s;
             border-bottom: 3px solid transparent;
+            cursor: pointer;
         }
         nav a:hover {
             background: rgba(0, 0, 0, 0.1);
@@ -235,7 +240,7 @@
         }
         header h1 {
             margin: 0;
-            font-size: 2.5rem;
+            font-size: 2rem;
         }
         .form-section {
             width: 90%;
@@ -255,27 +260,45 @@
             border-top: 1px solid #ddd;
             background: #f9f9f9;
         }
+        .api-config {
+            background: #f0f8ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #007bff;
+        }
+        .test-btn {
+            background: #17a2b8;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .test-btn:hover { background: #138496; }
+        .test-success { color: #28a745; font-weight: bold; }
+        .test-error { color: #dc3545; font-weight: bold; }
         @media (max-width: 1000px) {
             .grid-2 { grid-template-columns: 1fr; }
         }
         @media (max-width: 600px) {
-            header h1 { font-size: 1.8rem; }
-            nav { flex-direction: column; }
-            nav a { padding: 12px 15px; }
+            header h1 { font-size: 1.5rem; }
+            nav a { padding: 10px 15px; font-size: 14px; }
         }
     </style>
 </head>
 <body>
 
 <nav>
-    <a href="#" data-page="dashboard" class="active" onclick="showSection('dashboard', event)">📋 Dashboard</a>
-    <a href="projektplanung.html">📊 Projektplanung</a>
+    <a onclick="showTab('dashboard')" class="active">📋 Dashboard</a>
+    <a onclick="showTab('planning')">📊 Projektplanung</a>
+    <a onclick="showTab('ai')">⚡ Groq KI (kostenlos)</a>
     <a href="info.html">ℹ️ Info</a>
 </nav>
 
 <header>
-    <h1>📋 Projektplaner</h1>
-    <p>Projektplanung zur besseren Organisation</p>
+    <h1>📋 Projektplaner mit integrierter Groq KI</h1>
+    <p>Projektmanagement mit kostenloser Groq KI - Keine Kreditkarte, kein Guthaben, komplett kostenlos!</p>
 </header>
 
 <!-- Modal für neues Projekt -->
@@ -293,291 +316,241 @@
     </div>
 </div>
 
-<!-- APP -->
-<div id="dashboardSection">
-    <div id="app">
-
-<!-- Projektwahl -->
-<section class="form-section">
-    <h2>🎯 Meine Projekte</h2>
-    <div id="projectList" style="display: flex; gap: 10px; flex-wrap: wrap; margin: 15px 0;">
+<!-- DASHBOARD TAB -->
+<div id="dashboardTab">
+    <div class="form-section">
+        <h2>🎯 Meine Projekte</h2>
+        <button onclick="showNewProjectModal()" style="margin-bottom: 15px; background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">➕ Neues Projekt erstellen</button>
+        <div id="projectList"></div>
     </div>
-    
-    <button onclick="showNewProjectModal()" style="margin-top: 10px; background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">➕ Neues Projekt erstellen</button>
-</section>
+</div>
 
-<!-- Projekt-Details -->
-<div id="projectDetail" style="display: none;">
-
-<section class="form-section">
-    <h2>📌 Projekt: <span id="projectNameDisplay"></span></h2>
-    <button onclick="goBack()" style="margin-bottom: 15px; background: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">← Zurück zur Projektliste</button>
-</section>
-
-<section class="form-section">
-    <h2>ℹ️ Projektinformationen</h2>
-    <label>Projektname</label>
-    <input id="projectNameInput" type="text" onchange="saveProjectData()">
-    <label>Projektbeschreibung</label>
-    <textarea id="projectDesc" rows="4" onchange="saveProjectData()"></textarea>
-    <div class="grid-2">
-        <div>
-            <label>Startdatum</label>
-            <input id="startDate" type="date" onchange="saveProjectData()">
-        </div>
-        <div>
-            <label>Enddatum</label>
-            <input id="endDate" type="date" onchange="saveProjectData()">
-        </div>
-    </div> 
-</section>
-
-<section class="form-section">
-    <h2>🎯 Aufgaben & Meilensteine</h2>
-
-    <div style="margin-bottom: 20px;">
-        <label>Neue Aufgabe hinzufügen</label>
-        <div style="display: flex; gap: 5px;">
-            <input id="newTask" placeholder="z.B. Design fertigstellen" style="flex: 1;">
-            <button onclick="addTask()" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">➕ Hinzufügen</button>
-        </div>
+<!-- PROJEKTPLANUNG TAB -->
+<div id="planningTab" style="display: none;">
+    <div class="form-section">
+        <h2>📌 Projekt auswählen</h2>
+        <div id="planningProjectList"></div>
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 2.5fr 1fr; gap: 15px; margin-top: 20px;">
+    <div id="planningDetail" style="display: none;">
+        <div class="form-section">
+            <h2>📌 Projekt: <span id="projectNameDisplay"></span></h2>
+            <button onclick="closePlanningDetail()" style="margin-bottom: 15px; background: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">← Zurück</button>
+        </div>
+
+        <div class="form-section">
+            <h2>ℹ️ Projektinformationen</h2>
+            <label>Projektname</label>
+            <input id="projectNameInput" type="text" onchange="saveProjectData()">
+            <label>Projektbeschreibung</label>
+            <textarea id="projectDesc" rows="4" onchange="saveProjectData()"></textarea>
+            <div class="grid-2">
+                <div><label>Startdatum</label><input id="startDate" type="date" onchange="saveProjectData()"></div>
+                <div><label>Enddatum</label><input id="endDate" type="date" onchange="saveProjectData()"></div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>🎯 Aufgaben & Kanban</h2>
+            <div style="margin-bottom: 20px;">
+                <label>Neue Aufgabe hinzufügen</label>
+                <div style="display: flex; gap: 5px;">
+                    <input id="newTask" placeholder="z.B. Design fertigstellen" style="flex: 1;">
+                    <button onclick="addTask()" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">➕ Hinzufügen</button>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 2.5fr 1fr; gap: 15px;">
+                <div style="border: 2px solid #028641; border-radius: 8px; padding: 15px; background: #f9fffe;">
+                    <h4 style="margin-top: 0; color: #028641;">📝 Alle Aufgaben</h4>
+                    <div id="tasksList" style="min-height: 300px; max-height: 600px; overflow-y: auto;"></div>
+                </div>
+                <div>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px;">
+                        <div class="property-box" data-property="todo"><h4>📋 To Do</h4><div class="property-items" ondrop="dropTask(event, 'todo')" ondragover="allowDrop(event)" style="min-height: 200px;"></div></div>
+                        <div class="property-box" data-property="progress"><h4>⚙️ In Progress</h4><div class="property-items" ondrop="dropTask(event, 'progress')" ondragover="allowDrop(event)" style="min-height: 200px;"></div></div>
+                        <div class="property-box" data-property="review"><h4>👀 Review</h4><div class="property-items" ondrop="dropTask(event, 'review')" ondragover="allowDrop(event)" style="min-height: 200px;"></div></div>
+                        <div class="property-box" data-property="done"><h4>✅ Done</h4><div class="property-items" ondrop="dropTask(event, 'done')" ondragover="allowDrop(event)" style="min-height: 200px;"></div></div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div class="property-box"><h4>🏁 Meilensteine</h4><div style="margin-bottom: 10px;"><input id="newMilestone" type="text" placeholder="Hinzufügen" style="width: 100%;"><button onclick="addMilestone()" style="width: 100%; margin-top: 5px; padding: 6px; background: #0d6efd; color: white; border: none; border-radius: 4px; cursor: pointer;">➕</button></div><div id="milestonesList" class="property-items" style="min-height: 100px;"></div></div>
+                        <div class="property-box"><h4>⭐ Priorität</h4><div id="priorityList" class="property-items"><div class="property-item" ondrop="dropTask(event, 'priority-high')" ondragover="allowDrop(event)" style="background: #ffe5e5; text-align: center; padding: 10px;">🔴 Hoch</div><div class="property-item" ondrop="dropTask(event, 'priority-medium')" ondragover="allowDrop(event)" style="background: #fff9e5; text-align: center; padding: 10px;">🟡 Mittel</div><div class="property-item" ondrop="dropTask(event, 'priority-low')" ondragover="allowDrop(event)" style="background: #e5f9ff; text-align: center; padding: 10px;">🟢 Niedrig</div></div></div>
+                    </div>
+                </div>
+                <div style="border: 3px dashed #028641; border-radius: 8px; padding: 15px; background: #f0fff8; height: fit-content;">
+                    <h4 style="margin-top: 0; color: #028641;">🔍 Eigenschafts-Details</h4>
+                    <p style="color: #666; font-size: 0.9rem;">Klicke auf eine Aufgabe</p>
+                    <div id="propertyInspector" style="min-height: 300px; padding: 10px; background: white; border-radius: 6px; border: 2px dashed #999;"><p style="color: #999; text-align: center;">Noch keine Aufgabe gewählt</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>🎯 Ziele & Planung</h2>
+            <div class="grid-2">
+                <div><h3>🎯 Ziele</h3><div style="display: flex; gap: 5px;"><input id="goalText" type="text" placeholder="Ziel" style="flex: 2;"><input id="goalDeadline" type="date" style="flex: 1;"><button onclick="addGoal()" style="padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">➕</button></div><div id="goalsList" style="margin-top: 10px;"></div></div>
+                <div><h3>🏁 Meilensteine</h3><div style="display: flex; gap: 5px;"><input id="milestoneTextPlanning" type="text" placeholder="Meilenstein" style="flex: 2;"><input id="milestoneDatePlanning" type="date" style="flex: 1;"><button onclick="addMilestonePlanning()" style="padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">➕</button></div><div id="milestonesListPlanning" style="margin-top: 10px;"></div></div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>💰 Budget & Team</h2>
+            <div class="grid-2">
+                <div><h3>💰 Budget</h3><div class="grid-2"><div><label>Gesamt (€)</label><input id="totalBudget" type="number" min="0" onchange="updateBudgetDisplay(); saveProjectData();"></div><div><label>Ausgegeben (€)</label><input id="spentBudget" type="number" min="0" onchange="updateBudgetDisplay(); saveProjectData();"></div></div><div style="padding: 10px; background: #f0f0f0; border-radius: 4px;"><p><strong>Verbleibend:</strong> <span id="budgetRemaining">0</span> €</p><p><strong>Auslastung:</strong> <span id="budgetUsage">0</span>%</p></div></div>
+                <div><h3>👥 Team</h3><div style="display: flex; gap: 5px;"><input id="memberName" type="text" placeholder="Name" style="flex: 1;"><input id="memberRole" type="text" placeholder="Rolle" style="flex: 1;"><button onclick="addTeamMember()" style="padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">➕</button></div><table style="width:100%; margin-top: 10px;"><tr><th>Name</th><th>Rolle</th><th>Aktion</th></tr><tbody id="teamTable"></tbody></table></div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>⚠️ Risikoanalyse</h2>
+            <div style="display: flex; gap: 10px;"><input id="riskName" type="text" placeholder="Risiko" style="flex: 2;"><select id="riskLevel" style="flex: 1;"><option value="Niedrig">Niedrig</option><option value="Mittel" selected>Mittel</option><option value="Hoch">Hoch</option></select><button onclick="addRisk()" style="padding: 8px 15px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">➕</button></div>
+            <table style="width:100%; margin-top: 15px;"><tr style="background: #ffe5e5;"><th>Risiko</th><th>Stufe</th><th>Status</th><th>Aktion</th></tr><tbody id="riskTable"></tbody></table>
+        </div>
+
+        <div class="form-section">
+            <div class="button-group">
+                <button onclick="saveProjectData()" class="save-btn">💾 Speichern</button>
+                <button onclick="deleteProject()" style="background: #dc3545; color: white; padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer;">🗑️ Projekt löschen</button>
+                <button onclick="closePlanningDetail()" style="background: #6c757d; color: white; padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer;">← Zurück</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- GROQ KI TAB (KOMPLETT KOSTENLOS) -->
+<div id="aiTab" style="display: none;">
+    <div class="form-section">
+        <h2>⚡ Groq KI-Assistent (komplett kostenlos)</h2>
+        <p>Stelle Fragen zu deinen Projekten - Groq ist extrem schnell und komplett kostenlos! Keine Kreditkarte, kein Guthaben.</p>
         
-        <!-- Linke Seite: Aufgabenliste -->
-        <div style="border: 2px solid #028641; border-radius: 8px; padding: 15px; background: #f9fffe;">
-            <h4 style="margin-top: 0; color: #028641;">📝 Alle Aufgaben</h4>
-            <div id="tasksList" style="min-height: 300px; max-height: 600px; overflow-y: auto;"></div>
-        </div>
-
-        <!-- Mittlere Seite: Status Spalten -->
-        <div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px;">
-                <div class="property-box" data-property="todo">
-                    <h4>📋 To Do</h4>
-                    <div class="property-items" ondrop="dropTask(event, 'todo')" ondragover="allowDrop(event)" style="min-height: 200px;"></div>
-                </div>
-                <div class="property-box" data-property="progress">
-                    <h4>⚙️ In Progress</h4>
-                    <div class="property-items" ondrop="dropTask(event, 'progress')" ondragover="allowDrop(event)" style="min-height: 200px;"></div>
-                </div>
-                <div class="property-box" data-property="review">
-                    <h4>👀 Review</h4>
-                    <div class="property-items" ondrop="dropTask(event, 'review')" ondragover="allowDrop(event)" style="min-height: 200px;"></div>
-                </div>
-                <div class="property-box" data-property="done">
-                    <h4>✅ Done</h4>
-                    <div class="property-items" ondrop="dropTask(event, 'done')" ondragover="allowDrop(event)" style="min-height: 200px;"></div>
-                </div>
+        <div class="api-config">
+            <h3>🔑 Groq API-Key für dieses Projekt</h3>
+            <p>Hole dir einen kostenlosen API-Key auf <a href="https://console.groq.com" target="_blank">console.groq.com</a> – registrieren, API Key erstellen, fertig! <strong>Komplett kostenlos, keine Kreditkarte!</strong></p>
+            
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                <select id="aiProjectSelect" style="flex: 2; margin: 0;">
+                    <option value="">-- Projekt auswählen --</option>
+                </select>
+                <input type="password" id="groqApiKey" placeholder="Groq API-Key für dieses Projekt" style="flex: 3; margin: 0;">
+                <button onclick="saveProjectApiKey()" class="save-btn" style="margin: 0;">💾 Speichern</button>
+                <button onclick="testGroqApiKey()" class="test-btn" style="margin: 0;">🔍 Testen</button>
             </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div class="property-box">
-                    <h4>🏁 Meilensteine</h4>
-                    <div style="margin-bottom: 10px;">
-                        <input id="newMilestone" type="text" placeholder="Hinzufügen" style="width: 100%; margin-bottom: 5px; padding: 5px; border: 1px solid #ddd; border-radius: 4px;">
-                        <button onclick="addMilestone()" style="width: 100%; padding: 6px; background: #0d6efd; color: white; border: none; border-radius: 4px; cursor: pointer;">➕</button>
-                    </div>
-                    <div id="milestonesList" class="property-items" style="min-height: 100px;"></div>
-                </div>
-
-                <div class="property-box">
-                    <h4>⭐ Priorität</h4>
-                    <div id="priorityList" class="property-items">
-                        <div class="property-item" ondrop="dropTask(event, 'priority-high')" ondragover="allowDrop(event)" style="background: #ffe5e5; border: 2px dashed #dc3545; cursor: pointer; text-align: center; padding: 10px;">🔴 Hoch</div>
-                        <div class="property-item" ondrop="dropTask(event, 'priority-medium')" ondragover="allowDrop(event)" style="background: #fff9e5; border: 2px dashed #ffc107; cursor: pointer; text-align: center; padding: 10px;">🟡 Mittel</div>
-                        <div class="property-item" ondrop="dropTask(event, 'priority-low')" ondragover="allowDrop(event)" style="background: #e5f9ff; border: 2px dashed #17a2b8; cursor: pointer; text-align: center; padding: 10px;">🟢 Niedrig</div>
-                    </div>
-                </div>
+            <div id="apiKeyStatus" style="margin-top: 10px; font-size: 12px;"></div>
+            <p style="font-size: 12px; color: #666; margin-top: 10px;">💡 <strong>Groq ist komplett kostenlos!</strong> ~14.400 Anfragen pro Tag. Jedes Projekt kann seinen eigenen API-Key haben.</p>
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+            <label>💡 Beispiel-Fragen (klick zum Übernehmen)</label>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                <button onclick="setQuestion('Wie ist der aktuelle Projektfortschritt? Bitte analysiere alle Bereiche.')" class="test-btn">📊 Fortschritt</button>
+                <button onclick="setQuestion('Welche Risiken sollte ich beachten und wie kann ich sie mitigieren?')" class="test-btn">⚠️ Risiken</button>
+                <button onclick="setQuestion('Wie kann ich das Budget optimieren? Gib konkrete, praktische Tipps.')" class="test-btn">💰 Budget</button>
+                <button onclick="setQuestion('Gib mir eine Priorisierung der offenen Aufgaben mit Begründung.')" class="test-btn">🎯 Prioritäten</button>
+                <button onclick="setQuestion('Analysiere den Zeitplan und gib Verbesserungsvorschläge für Verzögerungen.')" class="test-btn">📅 Zeitplan</button>
+                <button onclick="setQuestion('Erstelle eine vollständige Projektzusammenfassung mit Handlungsempfehlungen.')" class="test-btn">📋 Zusammenfassung</button>
+                <button onclick="setQuestion('Wie kann ich das Team besser einbinden und motivieren?')" class="test-btn">👥 Team</button>
             </div>
         </div>
-
-        <!-- Rechte Seite: Property Inspector -->
-        <div style="border: 3px dashed #028641; border-radius: 8px; padding: 15px; background: #f0fff8; height: fit-content;">
-            <h4 style="margin-top: 0; color: #028641;">🔍 Eigenschafts-Details</h4>
-            <p style="color: #666; font-size: 0.9rem;">Klicke auf eine Aufgabe um ihre Eigenschaften zu bearbeiten</p>
-            <div id="propertyInspector" style="min-height: 300px; padding: 10px; background: white; border-radius: 6px; border: 2px dashed #999;">
-                <p style="color: #999; text-align: center;">Noch keine Aufgabe gewählt</p>
-            </div>
+        
+        <div style="margin-bottom: 15px;">
+            <label>💭 Deine Frage an Groq KI</label>
+            <textarea id="aiQuestion" rows="4" placeholder="z.B.: Welche Risiken sollte ich bei diesem Projekt beachten? Wie kann ich das Team besser einbinden? Gib mir Tipps zur Optimierung des Zeitplans..." style="width: 100%; padding: 10px;"></textarea>
         </div>
-    </div>
-</section>
-
-<!-- Ziele & Meilensteine -->
-<section class="form-section">
-    <h2>🎯 Ziele & Planung</h2>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-        <div>
-            <h3>🎯 Ziele</h3>
-            <div style="display: flex; gap: 5px; margin-bottom: 10px;">
-                <input id="goalText" type="text" placeholder="Ziel eingeben" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                <input id="goalDeadline" type="date" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                <button onclick="addGoal()" style="padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">➕</button>
-            </div>
-            <div id="goalsList" style="display: flex; flex-direction: column; gap: 8px;"></div>
+        
+        <button onclick="askGroq()" style="background: #6f42c1; color: white; padding: 12px 24px; border: none; border-radius: 4px; cursor: pointer;">🚀 Frage Groq KI (kostenlos)</button>
+        
+        <div id="aiLoading" style="display: none; margin-top: 15px; padding: 15px; text-align: center;">
+            <div class="ai-loading"></div> Groq KI analysiert dein Projekt (extrem schnell!)...
         </div>
-        <div>
-            <h3>🏁 Meilensteine</h3>
-            <div style="display: flex; gap: 5px; margin-bottom: 10px;">
-                <input id="milestoneTextPlanning" type="text" placeholder="Meilenstein eingeben" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                <input id="milestoneDatePlanning" type="date" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                <button onclick="addMilestonePlanning()" style="padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">➕</button>
-            </div>
-            <div id="milestonesListPlanning" style="display: flex; flex-direction: column; gap: 8px;"></div>
-        </div>
+        
+        <div id="aiResponse" class="ai-response-box" style="display: none;"></div>
     </div>
-</section>
-
-<!-- Budget & Team -->
-<section class="form-section">
-    <h2>💰 Budget & Team</h2>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-        <div>
-            <h3>💰 Budget-Planung</h3>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-                <div>
-                    <label>Gesamtbudget (€)</label>
-                    <input id="totalBudget" type="number" min="0" onchange="updateBudgetDisplay(); saveProjectData();">
-                </div>
-                <div>
-                    <label>Ausgegeben (€)</label>
-                    <input id="spentBudget" type="number" min="0" onchange="updateBudgetDisplay(); saveProjectData();">
-                </div>
-            </div>
-            <div style="padding: 10px; background: #f0f0f0; border-radius: 4px;">
-                <p><strong>Verbleibend:</strong> <span id="budgetRemaining">0</span> €</p>
-                <p><strong>Auslastung:</strong> <span id="budgetUsage">0</span>%</p>
-            </div>
-        </div>
-        <div>
-            <h3>👥 Team-Mitglieder</h3>
-            <div style="display: flex; gap: 5px; margin-bottom: 10px;">
-                <input id="memberName" type="text" placeholder="Name" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                <input id="memberRole" type="text" placeholder="Rolle" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                <button onclick="addTeamMember()" style="padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">➕</button>
-            </div>
-            <table>
-                <tr style="background: #f0f0f0;">
-                    <th>Name</th>
-                    <th>Rolle</th>
-                    <th>Aktion</th>
-                </tr>
-                <tbody id="teamTable"></tbody>
-            </table>
-        </div>
-    </div>
-</section>
-
-<!-- Risikoanalyse -->
-<section class="form-section">
-    <h2>⚠️ Risikoanalyse</h2>
-    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-        <input id="riskName" type="text" placeholder="Risiko-Beschreibung" style="flex: 2;">
-        <select id="riskLevel" style="flex: 1;">
-            <option value="Niedrig">Niedrig</option>
-            <option value="Mittel" selected>Mittel</option>
-            <option value="Hoch">Hoch</option>
-        </select>
-        <button onclick="addRisk()" style="padding: 8px 15px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">➕</button>
-    </div>
-    <table>
-        <tr style="background: #ffe5e5;">
-            <th>Risiko</th>
-            <th>Stufe</th>
-            <th>Status</th>
-            <th>Aktion</th>
-        </tr>
-        <tbody id="riskTable"></tbody>
-    </table>
-</section>
-
-<!-- KI-Assistent -->
-<section class="form-section">
-    <h2>🤖 KI-Projektassistent</h2>
-    <p style="color: #666; margin-bottom: 15px;">Analysiere dein Projekt lokal - kein API-Key erforderlich!</p>
-    
-    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px;">
-        <button onclick="analyzeProjectStatus()" style="padding: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">📊 Projektstatus</button>
-        <button onclick="analyzeBudgetStatus()" style="padding: 10px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">💰 Budgetanalyse</button>
-        <button onclick="analyzeRiskStatus()" style="padding: 10px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">⚠️ Risikoanalyse</button>
-        <button onclick="analyzeTimelineStatus()" style="padding: 10px; background: #ffc107; color: black; border: none; border-radius: 4px; cursor: pointer;">📅 Zeitplananalyse</button>
-    </div>
-    
-    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-        <input id="aiQuestionInput" type="text" placeholder="Frage zum Projekt (z.B. 'Wie kann ich das Budget optimieren?')" style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
-        <button onclick="askCustomQuestion()" style="padding: 10px 20px; background: #6f42c1; color: white; border: none; border-radius: 4px; cursor: pointer;">🔍 Fragen</button>
-    </div>
-    
-    <div id="aiResponse" class="ai-response-box" style="display: none;"></div>
-    <div id="aiLoading" style="display: none; text-align: center; padding: 20px;">
-        <div class="ai-loading"></div> KI analysiert...
-    </div>
-</section>
-
-<!-- Navigation Footer -->
-<section class="form-section">
-    <div class="button-group">
-        <button onclick="saveProjectData()" class="save-btn">💾 Speichern</button>
-        <button onclick="deleteProject()" style="background: #dc3545; color: white; padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer;">🗑️ Projekt löschen</button>
-        <button onclick="goBack()" style="background: #6c757d; color: white; padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer;">← Zurück</button>
-    </div>
-</section>
-
-</div><!-- end projectDetail -->
-
-    </div><!-- end app -->
-</div><!-- end dashboardSection -->
-
-<div id="plannerSection" style="display: none; padding: 20px;">
-    <div style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
-        <button onclick="showSection('dashboard', event)" style="padding: 10px 15px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">← Zurück zum Dashboard</button>
-        <h2 style="margin: 0;">📊 Projektplanung</h2>
-    </div>
-    <iframe id="plannerIframe" src="projektplanung.html" style="width: 100%; min-height: 900px; border: 1px solid #ccc; border-radius: 8px;" title="Projektplanung"></iframe>
 </div>
 
 <footer>
-    <p>© 2025 Projektplaner • Projektmanagement & Task-Verwaltung</p>
+    <p>© 2025 Projektplaner • Projektmanagement mit Groq KI - Komplett kostenlos!</p>
 </footer>
 
 <script src="storage.js"></script>
 <script>
 // ========== GLOBALE VARIABLEN ==========
 let currentProject = null;
+let allProjects = {};
 
 // ========== INITIALISIERUNG ==========
 document.addEventListener("DOMContentLoaded", async () => {
-    console.log("🔄 Dashboard: Initialisiere...");
+    console.log("🔄 Initialisiere...");
     try {
         await window.waitForStorage();
-        console.log("✓ Storage bereit");
-    } catch (e) {
-        console.warn("Storage-Wait fehlgeschlagen:", e);
-    }
-    await loadProjectList();
-    setActiveNav('dashboard');
+    } catch (e) {}
+    await loadAllProjects();
+    showTab('dashboard');
 });
 
-function showSection(page, event) {
-    if (event) event.preventDefault();
-    document.getElementById('dashboardSection').style.display = page === 'dashboard' ? 'block' : 'none';
-    document.getElementById('plannerSection').style.display = page === 'planner' ? 'block' : 'none';
-    setActiveNav(page);
-    if (page === 'planner') {
-        const iframe = document.getElementById('plannerIframe');
-        iframe.src = iframe.src;
+async function loadAllProjects() {
+    let projects = await getAllProjects();
+    if (!projects || Object.keys(projects).length === 0) {
+        try { projects = JSON.parse(localStorage.getItem('projects') || '{}'); } catch(e) {}
+    }
+    if ((!projects || Object.keys(projects).length === 0) && window.name) {
+        try { projects = JSON.parse(window.name || '{}'); } catch(e) {}
+    }
+    allProjects = projects || {};
+    renderProjectLists();
+    updateAiProjectSelect();
+}
+
+function saveAllProjects() {
+    saveProjectsData(allProjects);
+    localStorage.setItem('projects', JSON.stringify(allProjects));
+    window.name = JSON.stringify(allProjects);
+    renderProjectLists();
+    updateAiProjectSelect();
+}
+
+function renderProjectLists() {
+    const dashboardContainer = document.getElementById('projectList');
+    const planningContainer = document.getElementById('planningProjectList');
+    const projectIds = Object.keys(allProjects);
+    
+    if (projectIds.length === 0) {
+        if (dashboardContainer) dashboardContainer.innerHTML = '<p>Keine Projekte. Klicke auf "Neues Projekt erstellen".</p>';
+        if (planningContainer) planningContainer.innerHTML = '<p>Keine Projekte vorhanden.</p>';
+        return;
+    }
+    
+    if (dashboardContainer) {
+        dashboardContainer.innerHTML = '';
+        for (const id of projectIds) {
+            const p = allProjects[id];
+            const card = document.createElement('div');
+            card.className = 'project-card';
+            card.innerHTML = `<div><strong>${escapeHtml(p.name)}</strong>${p.description ? `<br><small>${escapeHtml(p.description.substring(0, 50))}</small>` : ''}</div>
+                <div><button onclick="selectProject('${id}')" style="background:#007bff;">📊 Öffnen</button><button onclick="deleteProjectById('${id}')" style="background:#dc3545; margin-left:5px;">🗑️</button></div>`;
+            dashboardContainer.appendChild(card);
+        }
+    }
+    
+    if (planningContainer) {
+        planningContainer.innerHTML = '';
+        for (const id of projectIds) {
+            const p = allProjects[id];
+            const card = document.createElement('div');
+            card.className = 'project-card';
+            card.innerHTML = `<div><strong>${escapeHtml(p.name)}</strong></div>
+                <div><button onclick="selectProject('${id}')" style="background:#28a745;">📊 Planen</button></div>`;
+            planningContainer.appendChild(card);
+        }
     }
 }
 
-function setActiveNav(page) {
-    document.querySelectorAll('nav a[data-page]').forEach(link => {
-        if (link.dataset.page === page) {
-            link.classList.add('active');
-        } else {
-            link.classList.remove('active');
-        }
-    });
+function updateAiProjectSelect() {
+    const select = document.getElementById('aiProjectSelect');
+    if (!select) return;
+    select.innerHTML = '<option value="">-- Projekt auswählen --</option>';
+    for (const [id, p] of Object.entries(allProjects)) {
+        select.innerHTML += `<option value="${id}">${escapeHtml(p.name)}</option>`;
+    }
 }
 
 // ========== PROJEKT-VERWALTUNG ==========
@@ -593,169 +566,69 @@ function closeNewProjectModal() {
 
 async function createProject() {
     const name = document.getElementById('newProjectName').value.trim();
-    const desc = document.getElementById('newProjectDesc').value.trim();
-
-    if (!name) {
-        alert('Bitte einen Projektnamen eingeben');
-        return;
-    }
-
-    await window.waitForStorage();
-
-    let projects = await getAllProjects();
-    if (!projects) projects = {};
-
-    const projectId = 'proj_' + Date.now();
-
-    projects[projectId] = {
-        id: projectId,
-        name: name,
-        description: desc,
-        startDate: '',
-        endDate: '',
-        tasks: [],
-        milestones: [],
-        planning: {
-            goals: [],
-            milestones: [],
-            team: [],
-            risks: [],
-            totalBudget: 0,
-            spentBudget: 0
-        }
+    if (!name) { alert('Bitte Namen eingeben'); return; }
+    
+    const id = 'proj_' + Date.now();
+    allProjects[id] = {
+        id: id, name: name, description: document.getElementById('newProjectDesc').value || '',
+        startDate: '', endDate: '', tasks: [], milestones: [], planning: { goals: [], milestones: [], team: [], risks: [], totalBudget: 0, spentBudget: 0, groqApiKey: '' }
     };
-
-    try {
-        await saveProjectsData(projects);
-        localStorage.setItem('projects', JSON.stringify(projects));
-        window.name = JSON.stringify(projects);
-        
-        closeNewProjectModal();
-        await loadProjectList();
-        console.log('✓ Projekt erstellt:', name);
-    } catch (e) {
-        console.error('Fehler beim Erstellen:', e);
-        alert('Projekt konnte nicht erstellt werden: ' + e.message);
-    }
-}
-
-async function loadProjectList() {
-    let projects = await getAllProjects();
-    
-    if (!projects || Object.keys(projects).length === 0) {
-        try {
-            const fallback = JSON.parse(localStorage.getItem('projects') || '{}');
-            projects = fallback;
-        } catch (e) {
-            projects = {};
-        }
-    }
-    
-    if ((!projects || Object.keys(projects).length === 0) && window.name) {
-        try {
-            const nameData = JSON.parse(window.name || '{}');
-            if (Object.keys(nameData).length > 0) {
-                projects = nameData;
-            }
-        } catch (e) {}
-    }
-
-    const container = document.getElementById('projectList');
-    
-    if (Object.keys(projects).length === 0) {
-        container.innerHTML = '<p style="color: #666;">Keine Projekte vorhanden. Klicke auf "Neues Projekt erstellen" um zu beginnen.</p>';
-        return;
-    }
-
-    container.innerHTML = '';
-    for (const [id, project] of Object.entries(projects)) {
-        const card = document.createElement('div');
-        card.className = 'project-card';
-        card.innerHTML = `
-            <div>
-                <strong>${escapeHtml(project.name)}</strong>
-                ${project.description ? `<br><small style="color: #666;">${escapeHtml(project.description.substring(0, 50))}${project.description.length > 50 ? '...' : ''}</small>` : ''}
-            </div>
-            <div>
-                <button onclick="selectProject('${id}')" style="background: #007bff; color: white; border: none; border-radius: 4px; padding: 8px 15px; cursor: pointer;">Öffnen</button>
-                <button onclick="deleteProjectById('${id}')" style="background: #dc3545; color: white; border: none; border-radius: 4px; padding: 8px 15px; cursor: pointer;">Löschen</button>
-            </div>
-        `;
-        container.appendChild(card);
-    }
+    saveAllProjects();
+    closeNewProjectModal();
+    alert('Projekt "' + name + '" erstellt!');
 }
 
 async function deleteProjectById(projectId) {
-    if (!confirm('Projekt wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.')) return;
-    await deleteProjectData(projectId);
-    await loadProjectList();
+    if (!confirm('Projekt wirklich löschen?')) return;
+    delete allProjects[projectId];
+    saveAllProjects();
+    if (currentProject === projectId) closePlanningDetail();
 }
 
 function selectProject(projectId) {
     currentProject = projectId;
     loadProjectData();
-    document.querySelector('#projectList').parentElement.style.display = 'none';
-    document.getElementById('projectDetail').style.display = 'block';
+    document.getElementById('planningTab').querySelector('.form-section:first-child').style.display = 'none';
+    document.getElementById('planningDetail').style.display = 'block';
+    showTab('planning');
 }
 
-function goBack() {
+function closePlanningDetail() {
     currentProject = null;
-    document.getElementById('projectDetail').style.display = 'none';
-    document.querySelector('#projectList').parentElement.style.display = 'block';
-    loadProjectList();
+    document.getElementById('planningTab').querySelector('.form-section:first-child').style.display = 'block';
+    document.getElementById('planningDetail').style.display = 'none';
+    loadAllProjects();
 }
 
-async function deleteProject() {
-    if (!currentProject) return;
-    if (!confirm('Projekt wirklich löschen?')) return;
-    await deleteProjectData(currentProject);
-    goBack();
-}
-
-// ========== DATEN LADEN/SPEICHERN ==========
-function getProject() {
-    const projects = getAllProjectsSync();
-    return projects[currentProject] || null;
+function getCurrentProject() {
+    return allProjects[currentProject] || null;
 }
 
 async function saveProjectData() {
     if (!currentProject) return;
-
-    const projects = getAllProjectsSync();
-    const p = projects[currentProject];
+    const p = allProjects[currentProject];
     if (!p) return;
-
     p.name = document.getElementById('projectNameInput').value;
     p.description = document.getElementById('projectDesc').value;
     p.startDate = document.getElementById('startDate').value;
     p.endDate = document.getElementById('endDate').value;
-
     if (!p.planning) p.planning = {};
     p.planning.totalBudget = parseFloat(document.getElementById('totalBudget').value) || 0;
     p.planning.spentBudget = parseFloat(document.getElementById('spentBudget').value) || 0;
-
-    await saveProjectsData(projects);
-    console.log('✓ Projekt gespeichert');
+    saveAllProjects();
 }
 
 function loadProjectData() {
-    const p = getProject();
-    if (!p) {
-        alert('Projekt nicht gefunden');
-        goBack();
-        return;
-    }
-
+    const p = getCurrentProject();
+    if (!p) return;
     document.getElementById('projectNameDisplay').textContent = p.name;
     document.getElementById('projectNameInput').value = p.name || '';
     document.getElementById('projectDesc').value = p.description || '';
     document.getElementById('startDate').value = p.startDate || '';
     document.getElementById('endDate').value = p.endDate || '';
-
     document.getElementById('totalBudget').value = p.planning?.totalBudget || '';
     document.getElementById('spentBudget').value = p.planning?.spentBudget || '';
     updateBudgetDisplay();
-
     loadTasks();
     loadMilestones();
     loadGoals();
@@ -764,80 +637,52 @@ function loadProjectData() {
     loadRisks();
 }
 
+async function deleteProject() {
+    if (!currentProject) return;
+    if (!confirm('Projekt wirklich löschen?')) return;
+    delete allProjects[currentProject];
+    saveAllProjects();
+    closePlanningDetail();
+}
+
 // ========== AUFGABEN ==========
 function addTask() {
-    const taskText = document.getElementById('newTask').value.trim();
-    if (!taskText) return;
-
-    const projects = getAllProjectsSync();
-    const p = projects[currentProject];
+    const text = document.getElementById('newTask').value.trim();
+    if (!text) return;
+    const p = getCurrentProject();
     if (!p) return;
     if (!p.tasks) p.tasks = [];
-
-    const task = {
-        id: 'task_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
-        text: taskText,
-        description: '',
-        status: 'todo',
-        priority: 'priority-medium',
-        startDate: '',
-        endDate: '',
-        assignedMembers: []
-    };
-
-    p.tasks.push(task);
-    saveProjectsData(projects).then(() => {
-        document.getElementById('newTask').value = '';
-        loadTasks();
-    });
+    p.tasks.push({ id: 'task_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6), text: text, description: '', status: 'todo', priority: 'priority-medium', startDate: '', endDate: '' });
+    saveAllProjects();
+    document.getElementById('newTask').value = '';
+    loadTasks();
 }
 
 async function deleteTask(taskId) {
-    if (!confirm('Aufgabe wirklich löschen?')) return;
-
-    const projects = getAllProjectsSync();
-    const p = projects[currentProject];
+    if (!confirm('Aufgabe löschen?')) return;
+    const p = getCurrentProject();
     if (!p || !p.tasks) return;
-
     p.tasks = p.tasks.filter(t => t.id !== taskId);
-    await saveProjectsData(projects);
+    saveAllProjects();
     loadTasks();
 }
 
 function loadTasks() {
-    const p = getProject();
+    const p = getCurrentProject();
     if (!p || !p.tasks) return;
-
     const tasksList = document.getElementById('tasksList');
     tasksList.innerHTML = '';
-
     p.tasks.forEach(task => {
         const div = document.createElement('div');
         div.className = 'task-item';
-        div.setAttribute('data-task-id', task.id);
-        
         const statusIcon = { 'todo': '📋', 'progress': '⚙️', 'review': '👀', 'done': '✅' }[task.status] || '📋';
         const priorityIcon = task.priority === 'priority-high' ? '🔴' : task.priority === 'priority-low' ? '🟢' : '🟡';
-        
-        div.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
-                <div style="flex: 1; cursor: pointer;" onclick="inspectTaskById('${task.id}')">
-                    <strong>${statusIcon} ${priorityIcon} ${escapeHtml(task.text)}</strong>
-                    ${task.startDate ? `<br><small>📅 ${task.startDate}</small>` : ''}
-                </div>
-                <button onclick="event.stopPropagation(); deleteTask('${task.id}')" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer;">✕</button>
-            </div>
-        `;
-        
+        div.innerHTML = `<div style="flex:1; cursor:pointer;" onclick="inspectTaskById('${task.id}')"><strong>${statusIcon} ${priorityIcon} ${escapeHtml(task.text)}</strong>${task.startDate ? `<br><small>📅 ${task.startDate}</small>` : ''}</div>
+            <button onclick="event.stopPropagation(); deleteTask('${task.id}')" style="background:#dc3545; color:white; border:none; padding:4px 8px; border-radius:3px; cursor:pointer;">✕</button>`;
         div.draggable = true;
-        div.ondragstart = (e) => {
-            e.dataTransfer.setData('taskId', task.id);
-        };
-        
+        div.ondragstart = (e) => e.dataTransfer.setData('taskId', task.id);
         tasksList.appendChild(div);
     });
-
-    // Status-Spalten
     ['todo', 'progress', 'review', 'done'].forEach(status => {
         const container = document.querySelector(`.property-box[data-property="${status}"] .property-items`);
         if (container) {
@@ -845,16 +690,10 @@ function loadTasks() {
             p.tasks.filter(t => t.status === status).forEach(task => {
                 const item = document.createElement('div');
                 item.className = 'property-item';
-                item.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span onclick="inspectTaskById('${task.id}')" style="cursor: pointer; flex: 1;">${escapeHtml(task.text)}</span>
-                        <button onclick="event.stopPropagation(); deleteTask('${task.id}')" style="background: #dc3545; color: white; border: none; padding: 2px 6px; border-radius: 3px; cursor: pointer;">✕</button>
-                    </div>
-                `;
+                item.innerHTML = `<span onclick="inspectTaskById('${task.id}')" style="cursor:pointer; flex:1;">${escapeHtml(task.text)}</span>
+                    <button onclick="event.stopPropagation(); deleteTask('${task.id}')" style="background:#dc3545; color:white; border:none; padding:2px 6px; border-radius:3px;">✕</button>`;
                 item.draggable = true;
-                item.ondragstart = (e) => {
-                    e.dataTransfer.setData('taskId', task.id);
-                };
+                item.ondragstart = (e) => e.dataTransfer.setData('taskId', task.id);
                 container.appendChild(item);
             });
         }
@@ -862,156 +701,83 @@ function loadTasks() {
 }
 
 function inspectTaskById(taskId) {
-    const p = getProject();
+    const p = getCurrentProject();
     if (!p || !p.tasks) return;
-    
     const task = p.tasks.find(t => t.id === taskId);
     if (!task) return;
-    
-    displayTaskInspector(task);
-}
-
-function displayTaskInspector(task) {
-    const statusMap = { 'todo': '📋 To Do', 'progress': '⚙️ In Progress', 'review': '👀 Review', 'done': '✅ Done' };
-    const priorityMap = { 'priority-high': '🔴 Hoch', 'priority-medium': '🟡 Mittel', 'priority-low': '🟢 Niedrig' };
-    
     const inspector = document.getElementById('propertyInspector');
-    inspector.innerHTML = `
-        <div style="padding: 10px;">
-            <h4 style="margin-top: 0; color: #028641;">✏️ ${escapeHtml(task.text)}</h4>
-            
-            <label>Beschreibung:</label>
-            <textarea id="taskDesc_${task.id}" rows="2" style="width:100%; padding:8px; margin-bottom:10px;">${escapeHtml(task.description || '')}</textarea>
-            
-            <label>Status:</label>
-            <select id="taskStatus_${task.id}" onchange="updateTaskField('${task.id}', 'status', this.value)" style="width:100%; margin-bottom:10px;">
-                <option value="todo" ${task.status === 'todo' ? 'selected' : ''}>📋 To Do</option>
-                <option value="progress" ${task.status === 'progress' ? 'selected' : ''}>⚙️ In Progress</option>
-                <option value="review" ${task.status === 'review' ? 'selected' : ''}>👀 Review</option>
-                <option value="done" ${task.status === 'done' ? 'selected' : ''}>✅ Done</option>
-            </select>
-            
-            <label>Priorität:</label>
-            <select id="taskPriority_${task.id}" onchange="updateTaskField('${task.id}', 'priority', this.value)" style="width:100%; margin-bottom:10px;">
-                <option value="priority-high" ${task.priority === 'priority-high' ? 'selected' : ''}>🔴 Hoch</option>
-                <option value="priority-medium" ${task.priority === 'priority-medium' ? 'selected' : ''}>🟡 Mittel</option>
-                <option value="priority-low" ${task.priority === 'priority-low' ? 'selected' : ''}>🟢 Niedrig</option>
-            </select>
-            
-            <div class="grid-2">
-                <div>
-                    <label>Startdatum:</label>
-                    <input type="date" id="taskStart_${task.id}" value="${task.startDate || ''}" onchange="updateTaskField('${task.id}', 'startDate', this.value)">
-                </div>
-                <div>
-                    <label>Enddatum:</label>
-                    <input type="date" id="taskEnd_${task.id}" value="${task.endDate || ''}" onchange="updateTaskField('${task.id}', 'endDate', this.value)">
-                </div>
-            </div>
-            
-            <button onclick="saveTaskDescription('${task.id}')" style="margin-top:10px; background:#28a745; color:white; border:none; padding:8px; border-radius:4px; cursor:pointer;">💾 Beschreibung speichern</button>
-        </div>
-    `;
+    inspector.innerHTML = `<div style="padding:10px;"><h4>✏️ ${escapeHtml(task.text)}</h4>
+        <label>Beschreibung:</label><textarea id="taskDesc_${task.id}" rows="2" style="width:100%; padding:8px; margin-bottom:10px;">${escapeHtml(task.description || '')}</textarea>
+        <label>Status:</label><select id="taskStatus_${task.id}" onchange="updateTaskField('${task.id}', 'status', this.value)" style="width:100%; margin-bottom:10px;">
+            <option value="todo" ${task.status === 'todo' ? 'selected' : ''}>📋 To Do</option><option value="progress" ${task.status === 'progress' ? 'selected' : ''}>⚙️ In Progress</option>
+            <option value="review" ${task.status === 'review' ? 'selected' : ''}>👀 Review</option><option value="done" ${task.status === 'done' ? 'selected' : ''}>✅ Done</option></select>
+        <label>Priorität:</label><select id="taskPriority_${task.id}" onchange="updateTaskField('${task.id}', 'priority', this.value)" style="width:100%; margin-bottom:10px;">
+            <option value="priority-high" ${task.priority === 'priority-high' ? 'selected' : ''}>🔴 Hoch</option><option value="priority-medium" ${task.priority === 'priority-medium' ? 'selected' : ''}>🟡 Mittel</option>
+            <option value="priority-low" ${task.priority === 'priority-low' ? 'selected' : ''}>🟢 Niedrig</option></select>
+        <div class="grid-2"><div><label>Start:</label><input type="date" id="taskStart_${task.id}" value="${task.startDate || ''}" onchange="updateTaskField('${task.id}', 'startDate', this.value)"></div>
+        <div><label>Ende:</label><input type="date" id="taskEnd_${task.id}" value="${task.endDate || ''}" onchange="updateTaskField('${task.id}', 'endDate', this.value)"></div></div>
+        <button onclick="saveTaskDescription('${task.id}')" style="margin-top:10px; background:#28a745; color:white; border:none; padding:8px; border-radius:4px; cursor:pointer;">💾 Speichern</button></div>`;
 }
 
 function updateTaskField(taskId, field, value) {
-    const projects = getAllProjectsSync();
-    const p = projects[currentProject];
+    const p = getCurrentProject();
     if (!p || !p.tasks) return;
-    
     const task = p.tasks.find(t => t.id === taskId);
-    if (task) {
-        task[field] = value;
-        saveProjectsData(projects).then(() => {
-            loadTasks();
-        });
-    }
+    if (task) { task[field] = value; saveAllProjects(); loadTasks(); }
 }
 
-function saveTaskDescription(taskId) {
-    const desc = document.getElementById(`taskDesc_${taskId}`).value;
-    updateTaskField(taskId, 'description', desc);
-}
+function saveTaskDescription(taskId) { updateTaskField(taskId, 'description', document.getElementById(`taskDesc_${taskId}`).value); }
 
-function allowDrop(e) {
-    e.preventDefault();
-}
+function allowDrop(e) { e.preventDefault(); }
 
 function dropTask(e, target) {
     e.preventDefault();
     const taskId = e.dataTransfer.getData('taskId');
-    
-    const projects = getAllProjectsSync();
-    const p = projects[currentProject];
+    const p = getCurrentProject();
     if (!p || !p.tasks) return;
-    
     const task = p.tasks.find(t => t.id === taskId);
     if (!task) return;
-    
-    if (['todo', 'progress', 'review', 'done'].includes(target)) {
-        task.status = target;
-    } else if (target === 'priority-high') {
-        task.priority = 'priority-high';
-    } else if (target === 'priority-medium') {
-        task.priority = 'priority-medium';
-    } else if (target === 'priority-low') {
-        task.priority = 'priority-low';
-    }
-    
-    saveProjectsData(projects).then(() => {
-        loadTasks();
-    });
+    if (['todo', 'progress', 'review', 'done'].includes(target)) task.status = target;
+    else if (target === 'priority-high') task.priority = 'priority-high';
+    else if (target === 'priority-medium') task.priority = 'priority-medium';
+    else if (target === 'priority-low') task.priority = 'priority-low';
+    saveAllProjects();
+    loadTasks();
 }
 
 // ========== MEILENSTEINE ==========
 function addMilestone() {
-    const milestoneText = document.getElementById('newMilestone').value.trim();
-    if (!milestoneText) return;
-    
-    const projects = getAllProjectsSync();
-    const p = projects[currentProject];
+    const text = document.getElementById('newMilestone').value.trim();
+    if (!text) return;
+    const p = getCurrentProject();
     if (!p) return;
     if (!p.milestones) p.milestones = [];
-    
-    p.milestones.push({
-        id: 'ms_' + Date.now(),
-        name: milestoneText
-    });
-    
-    saveProjectsData(projects).then(() => {
-        document.getElementById('newMilestone').value = '';
-        loadMilestones();
-    });
+    p.milestones.push({ id: 'ms_' + Date.now(), name: text });
+    saveAllProjects();
+    document.getElementById('newMilestone').value = '';
+    loadMilestones();
 }
 
 function loadMilestones() {
-    const p = getProject();
+    const p = getCurrentProject();
     if (!p) return;
-    
     const container = document.getElementById('milestonesList');
     if (!container) return;
-    
     container.innerHTML = '';
     (p.milestones || []).forEach(ms => {
         const div = document.createElement('div');
         div.className = 'property-item';
-        div.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span>🏁 ${escapeHtml(ms.name)}</span>
-                <button onclick="deleteMilestone('${ms.id}')" style="background:#dc3545; color:white; border:none; padding:2px 6px; border-radius:3px; cursor:pointer;">✕</button>
-            </div>
-        `;
+        div.innerHTML = `<span>🏁 ${escapeHtml(ms.name)}</span><button onclick="deleteMilestone('${ms.id}')" style="background:#dc3545; color:white; border:none; padding:2px 6px; border-radius:3px;">✕</button>`;
         container.appendChild(div);
     });
 }
 
 function deleteMilestone(msId) {
-    const projects = getAllProjectsSync();
-    const p = projects[currentProject];
+    const p = getCurrentProject();
     if (!p || !p.milestones) return;
-    
     p.milestones = p.milestones.filter(m => m.id !== msId);
-    saveProjectsData(projects).then(() => loadMilestones());
+    saveAllProjects();
+    loadMilestones();
 }
 
 // ========== ZIELE ==========
@@ -1019,68 +785,45 @@ function addGoal() {
     const text = document.getElementById('goalText').value.trim();
     const deadline = document.getElementById('goalDeadline').value;
     if (!text) return;
-    
-    const projects = getAllProjectsSync();
-    const p = projects[currentProject];
+    const p = getCurrentProject();
     if (!p) return;
     if (!p.planning) p.planning = {};
     if (!p.planning.goals) p.planning.goals = [];
-    
-    p.planning.goals.push({
-        id: 'goal_' + Date.now(),
-        text: text,
-        deadline: deadline,
-        completed: false
-    });
-    
-    saveProjectsData(projects).then(() => {
-        document.getElementById('goalText').value = '';
-        document.getElementById('goalDeadline').value = '';
-        loadGoals();
-    });
+    p.planning.goals.push({ id: 'goal_' + Date.now(), text: text, deadline: deadline, completed: false });
+    saveAllProjects();
+    document.getElementById('goalText').value = '';
+    document.getElementById('goalDeadline').value = '';
+    loadGoals();
 }
 
 function loadGoals() {
-    const p = getProject();
+    const p = getCurrentProject();
     if (!p) return;
-    
     const container = document.getElementById('goalsList');
     if (!container) return;
-    
     container.innerHTML = '';
     (p.planning?.goals || []).forEach(goal => {
         const div = document.createElement('div');
-        div.style.cssText = 'padding: 8px; background: #fff9e6; border: 1px solid #ffc107; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;';
-        div.innerHTML = `
-            <div>
-                <input type="checkbox" ${goal.completed ? 'checked' : ''} onchange="toggleGoal('${goal.id}', this.checked)" style="margin-right: 8px;">
-                <span style="text-decoration: ${goal.completed ? 'line-through' : 'none'};">🎯 ${escapeHtml(goal.text)} ${goal.deadline ? `(${goal.deadline})` : ''}</span>
-            </div>
-            <button onclick="deleteGoal('${goal.id}')" style="background:#dc3545; color:white; border:none; padding:4px 8px; border-radius:3px; cursor:pointer;">✕</button>
-        `;
+        div.style.cssText = 'padding:8px; background:#fff9e6; border:1px solid #ffc107; border-radius:4px; display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;';
+        div.innerHTML = `<div><input type="checkbox" ${goal.completed ? 'checked' : ''} onchange="toggleGoal('${goal.id}', this.checked)"> <span style="text-decoration:${goal.completed ? 'line-through' : 'none'}">🎯 ${escapeHtml(goal.text)}</span> ${goal.deadline ? `(${goal.deadline})` : ''}</div>
+            <button onclick="deleteGoal('${goal.id}')" style="background:#dc3545; color:white; border:none; padding:4px 8px; border-radius:3px;">✕</button>`;
         container.appendChild(div);
     });
 }
 
 function toggleGoal(goalId, completed) {
-    const projects = getAllProjectsSync();
-    const p = projects[currentProject];
+    const p = getCurrentProject();
     if (!p || !p.planning?.goals) return;
-    
     const goal = p.planning.goals.find(g => g.id === goalId);
-    if (goal) {
-        goal.completed = completed;
-        saveProjectsData(projects).then(() => loadGoals());
-    }
+    if (goal) { goal.completed = completed; saveAllProjects(); loadGoals(); }
 }
 
 function deleteGoal(goalId) {
-    const projects = getAllProjectsSync();
-    const p = projects[currentProject];
+    const p = getCurrentProject();
     if (!p || !p.planning?.goals) return;
-    
     p.planning.goals = p.planning.goals.filter(g => g.id !== goalId);
-    saveProjectsData(projects).then(() => loadGoals());
+    saveAllProjects();
+    loadGoals();
 }
 
 // ========== PLANUNGS-MEILENSTEINE ==========
@@ -1088,105 +831,74 @@ function addMilestonePlanning() {
     const text = document.getElementById('milestoneTextPlanning').value.trim();
     const date = document.getElementById('milestoneDatePlanning').value;
     if (!text) return;
-    
-    const projects = getAllProjectsSync();
-    const p = projects[currentProject];
+    const p = getCurrentProject();
     if (!p) return;
     if (!p.planning) p.planning = {};
     if (!p.planning.milestones) p.planning.milestones = [];
-    
-    p.planning.milestones.push({
-        id: 'plan_ms_' + Date.now(),
-        name: text,
-        date: date
-    });
-    
-    saveProjectsData(projects).then(() => {
-        document.getElementById('milestoneTextPlanning').value = '';
-        document.getElementById('milestoneDatePlanning').value = '';
-        loadMilestonesPlanning();
-    });
+    p.planning.milestones.push({ id: 'plan_ms_' + Date.now(), name: text, date: date });
+    saveAllProjects();
+    document.getElementById('milestoneTextPlanning').value = '';
+    document.getElementById('milestoneDatePlanning').value = '';
+    loadMilestonesPlanning();
 }
 
 function loadMilestonesPlanning() {
-    const p = getProject();
+    const p = getCurrentProject();
     if (!p) return;
-    
     const container = document.getElementById('milestonesListPlanning');
     if (!container) return;
-    
     container.innerHTML = '';
     (p.planning?.milestones || []).forEach(ms => {
         const div = document.createElement('div');
-        div.style.cssText = 'padding: 8px; background: #fff3e0; border: 1px solid #ff9800; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;';
-        div.innerHTML = `
-            <span>🏁 ${escapeHtml(ms.name)} ${ms.date ? `(${ms.date})` : ''}</span>
-            <button onclick="deleteMilestonePlanning('${ms.id}')" style="background:#dc3545; color:white; border:none; padding:4px 8px; border-radius:3px; cursor:pointer;">✕</button>
-        `;
+        div.style.cssText = 'padding:8px; background:#fff3e0; border:1px solid #ff9800; border-radius:4px; display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;';
+        div.innerHTML = `<span>🏁 ${escapeHtml(ms.name)} ${ms.date ? `(${ms.date})` : ''}</span><button onclick="deleteMilestonePlanning('${ms.id}')" style="background:#dc3545; color:white; border:none; padding:4px 8px; border-radius:3px;">✕</button>`;
         container.appendChild(div);
     });
 }
 
 function deleteMilestonePlanning(msId) {
-    const projects = getAllProjectsSync();
-    const p = projects[currentProject];
+    const p = getCurrentProject();
     if (!p || !p.planning?.milestones) return;
-    
     p.planning.milestones = p.planning.milestones.filter(m => m.id !== msId);
-    saveProjectsData(projects).then(() => loadMilestonesPlanning());
+    saveAllProjects();
+    loadMilestonesPlanning();
 }
 
-// ========== TEAM-MITGLIEDER ==========
+// ========== TEAM ==========
 function addTeamMember() {
     const name = document.getElementById('memberName').value.trim();
     const role = document.getElementById('memberRole').value.trim();
     if (!name || !role) return;
-    
-    const projects = getAllProjectsSync();
-    const p = projects[currentProject];
+    const p = getCurrentProject();
     if (!p) return;
     if (!p.planning) p.planning = {};
     if (!p.planning.team) p.planning.team = [];
-    
-    p.planning.team.push({
-        id: 'member_' + Date.now(),
-        name: name,
-        role: role
-    });
-    
-    saveProjectsData(projects).then(() => {
-        document.getElementById('memberName').value = '';
-        document.getElementById('memberRole').value = '';
-        loadTeamMembers();
-    });
+    p.planning.team.push({ id: 'member_' + Date.now(), name: name, role: role });
+    saveAllProjects();
+    document.getElementById('memberName').value = '';
+    document.getElementById('memberRole').value = '';
+    loadTeamMembers();
 }
 
 function loadTeamMembers() {
-    const p = getProject();
+    const p = getCurrentProject();
     if (!p) return;
-    
     const tbody = document.getElementById('teamTable');
     if (!tbody) return;
-    
     tbody.innerHTML = '';
     (p.planning?.team || []).forEach(member => {
         const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${escapeHtml(member.name)}</td>
-            <td>${escapeHtml(member.role)}</td>
-            <td><button onclick="removeTeamMember('${member.id}')" style="background:#dc3545; color:white; border:none; padding:4px 8px; border-radius:3px; cursor:pointer;">Löschen</button></td>
-        `;
+        row.innerHTML = `<td>${escapeHtml(member.name)}</td><td>${escapeHtml(member.role)}</td><td><button onclick="removeTeamMember('${member.id}')" style="background:#dc3545; color:white; border:none; padding:4px 8px; border-radius:3px;">Löschen</button></td>`;
         tbody.appendChild(row);
     });
 }
 
 function removeTeamMember(memberId) {
-    const projects = getAllProjectsSync();
-    const p = projects[currentProject];
+    const p = getCurrentProject();
     if (!p || !p.planning?.team) return;
-    
     p.planning.team = p.planning.team.filter(m => m.id !== memberId);
-    saveProjectsData(projects).then(() => loadTeamMembers());
+    saveAllProjects();
+    loadTeamMembers();
 }
 
 // ========== RISIKEN ==========
@@ -1194,447 +906,191 @@ function addRisk() {
     const name = document.getElementById('riskName').value.trim();
     const level = document.getElementById('riskLevel').value;
     if (!name) return;
-    
-    const projects = getAllProjectsSync();
-    const p = projects[currentProject];
+    const p = getCurrentProject();
     if (!p) return;
     if (!p.planning) p.planning = {};
     if (!p.planning.risks) p.planning.risks = [];
-    
-    p.planning.risks.push({
-        id: 'risk_' + Date.now(),
-        name: name,
-        level: level,
-        status: 'Offen'
-    });
-    
-    saveProjectsData(projects).then(() => {
-        document.getElementById('riskName').value = '';
-        document.getElementById('riskLevel').value = 'Mittel';
-        loadRisks();
-    });
+    p.planning.risks.push({ id: 'risk_' + Date.now(), name: name, level: level, status: 'Offen' });
+    saveAllProjects();
+    document.getElementById('riskName').value = '';
+    loadRisks();
 }
 
 function loadRisks() {
-    const p = getProject();
+    const p = getCurrentProject();
     if (!p) return;
-    
     const tbody = document.getElementById('riskTable');
     if (!tbody) return;
-    
     tbody.innerHTML = '';
     (p.planning?.risks || []).forEach(risk => {
         const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${escapeHtml(risk.name)}</td>
-            <td><span class="status-badge ${risk.level === 'Hoch' ? 'priority-high' : risk.level === 'Mittel' ? 'priority-medium' : 'priority-low'}">${risk.level}</span></td>
-            <td>
-                <select onchange="updateRiskStatus('${risk.id}', this.value)" style="padding:4px;">
-                    <option ${risk.status === 'Offen' ? 'selected' : ''}>Offen</option>
-                    <option ${risk.status === 'Mitigiert' ? 'selected' : ''}>Mitigiert</option>
-                    <option ${risk.status === 'Gelöst' ? 'selected' : ''}>Gelöst</option>
-                </select>
-            </td>
-            <td><button onclick="deleteRisk('${risk.id}')" style="background:#dc3545; color:white; border:none; padding:4px 8px; border-radius:3px; cursor:pointer;">✕</button></td>
-        `;
+        row.innerHTML = `<td>${escapeHtml(risk.name)}</td><td><span class="status-badge ${risk.level === 'Hoch' ? 'priority-high' : risk.level === 'Mittel' ? 'priority-medium' : 'priority-low'}">${risk.level}</span></td>
+            <td><select onchange="updateRiskStatus('${risk.id}', this.value)"><option ${risk.status === 'Offen' ? 'selected' : ''}>Offen</option><option ${risk.status === 'Mitigiert' ? 'selected' : ''}>Mitigiert</option><option ${risk.status === 'Gelöst' ? 'selected' : ''}>Gelöst</option></select></td>
+            <td><button onclick="deleteRisk('${risk.id}')" style="background:#dc3545; color:white; border:none; padding:4px 8px; border-radius:3px;">✕</button></td>`;
         tbody.appendChild(row);
     });
 }
 
 function updateRiskStatus(riskId, status) {
-    const projects = getAllProjectsSync();
-    const p = projects[currentProject];
+    const p = getCurrentProject();
     if (!p || !p.planning?.risks) return;
-    
     const risk = p.planning.risks.find(r => r.id === riskId);
-    if (risk) {
-        risk.status = status;
-        saveProjectsData(projects);
-    }
+    if (risk) { risk.status = status; saveAllProjects(); }
 }
 
 function deleteRisk(riskId) {
-    const projects = getAllProjectsSync();
-    const p = projects[currentProject];
+    const p = getCurrentProject();
     if (!p || !p.planning?.risks) return;
-    
     p.planning.risks = p.planning.risks.filter(r => r.id !== riskId);
-    saveProjectsData(projects).then(() => loadRisks());
+    saveAllProjects();
+    loadRisks();
 }
 
 // ========== BUDGET ==========
 function updateBudgetDisplay() {
     const total = parseFloat(document.getElementById('totalBudget').value) || 0;
     const spent = parseFloat(document.getElementById('spentBudget').value) || 0;
-    const remaining = total - spent;
-    const percentage = total === 0 ? 0 : (spent / total) * 100;
+    document.getElementById('budgetRemaining').textContent = (total - spent).toFixed(2);
+    document.getElementById('budgetUsage').textContent = total === 0 ? 0 : ((spent / total) * 100).toFixed(0);
+}
+
+// ========== GROQ KI (KOMPLETT KOSTENLOS) ==========
+function saveProjectApiKey() {
+    const projectId = document.getElementById('aiProjectSelect').value;
+    const apiKey = document.getElementById('groqApiKey').value.trim();
+    if (!projectId) { document.getElementById('apiKeyStatus').innerHTML = '<span class="test-error">❌ Bitte zuerst ein Projekt auswählen</span>'; return; }
+    if (!apiKey) { document.getElementById('apiKeyStatus').innerHTML = '<span class="test-error">❌ Bitte API-Key eingeben</span>'; return; }
+    if (!allProjects[projectId]) { document.getElementById('apiKeyStatus').innerHTML = '<span class="test-error">❌ Projekt nicht gefunden</span>'; return; }
+    if (!allProjects[projectId].planning) allProjects[projectId].planning = {};
+    allProjects[projectId].planning.groqApiKey = apiKey;
+    saveAllProjects();
+    document.getElementById('apiKeyStatus').innerHTML = '<span class="test-success">✅ Groq API-Key für dieses Projekt gespeichert! Groq ist komplett kostenlos.</span>';
+}
+
+async function testGroqApiKey() {
+    const projectId = document.getElementById('aiProjectSelect').value;
+    if (!projectId) { document.getElementById('apiKeyStatus').innerHTML = '<span class="test-error">❌ Bitte zuerst ein Projekt auswählen</span>'; return; }
+    const apiKey = allProjects[projectId]?.planning?.groqApiKey;
+    if (!apiKey) { document.getElementById('apiKeyStatus').innerHTML = '<span class="test-error">❌ Kein API-Key für dieses Projekt gespeichert</span>'; return; }
     
-    document.getElementById('budgetRemaining').textContent = remaining.toFixed(2);
-    document.getElementById('budgetUsage').textContent = percentage.toFixed(0);
-}
-
-// ========== KI-ANALYSE-FUNKTIONEN (lokal) ==========
-
-function showAILoading() {
-    document.getElementById('aiLoading').style.display = 'block';
-    document.getElementById('aiResponse').style.display = 'none';
-}
-
-function hideAILoading() {
-    document.getElementById('aiLoading').style.display = 'none';
-}
-
-function showAIResponse(html) {
-    const responseDiv = document.getElementById('aiResponse');
-    responseDiv.innerHTML = html;
-    responseDiv.style.display = 'block';
-    hideAILoading();
-}
-
-function analyzeProjectStatus() {
-    if (!currentProject) {
-        showAIResponse('<p style="color: red;">❌ Kein Projekt ausgewählt. Bitte wähle zuerst ein Projekt aus.</p>');
-        return;
-    }
+    document.getElementById('apiKeyStatus').innerHTML = '<span style="color:blue;">🔄 Teste Verbindung zu Groq...</span>';
     
-    showAILoading();
-    setTimeout(() => {
-        const p = getProject();
-        if (!p) {
-            showAIResponse('<p style="color: red;">❌ Projekt nicht gefunden.</p>');
-            return;
-        }
-        
-        const tasks = p.tasks || [];
-        const goals = p.planning?.goals || [];
-        const milestones = p.planning?.milestones || [];
-        const team = p.planning?.team || [];
-        const risks = p.planning?.risks || [];
-        
-        const completedTasks = tasks.filter(t => t.status === 'done').length;
-        const inProgressTasks = tasks.filter(t => t.status === 'progress').length;
-        const todoTasks = tasks.filter(t => t.status === 'todo').length;
-        const completedGoals = goals.filter(g => g.completed).length;
-        
-        const progressPercent = tasks.length > 0 ? (completedTasks / tasks.length * 100).toFixed(1) : 0;
-        
-        let statusColor = '#28a745';
-        let statusText = 'Auf gutem Weg';
-        if (progressPercent < 30) { statusColor = '#dc3545'; statusText = 'Am Anfang'; }
-        else if (progressPercent < 70) { statusColor = '#ffc107'; statusText = 'In Bearbeitung'; }
-        
-        const html = `
-            <div style="background: white; border-radius: 8px; padding: 15px;">
-                <h3 style="color: #028641; margin-top: 0;">📊 Projektstatus: ${escapeHtml(p.name)}</h3>
-                
-                <div style="background: ${statusColor}20; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid ${statusColor};">
-                    <strong>Gesamtfortschritt:</strong> ${progressPercent}% - ${statusText}
-                </div>
-                
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px;">
-                    <div style="background: #e9ecef; padding: 10px; border-radius: 6px; text-align: center;">
-                        <div style="font-size: 24px;">✅</div>
-                        <strong>${completedTasks}</strong><br>Abgeschlossen
-                    </div>
-                    <div style="background: #fff3cd; padding: 10px; border-radius: 6px; text-align: center;">
-                        <div style="font-size: 24px;">⚙️</div>
-                        <strong>${inProgressTasks}</strong><br>In Arbeit
-                    </div>
-                    <div style="background: #e9ecef; padding: 10px; border-radius: 6px; text-align: center;">
-                        <div style="font-size: 24px;">📋</div>
-                        <strong>${todoTasks}</strong><br>Offen
-                    </div>
-                </div>
-                
-                <div style="margin-top: 15px;">
-                    <p><strong>🎯 Ziele:</strong> ${completedGoals}/${goals.length} erreicht</p>
-                    <p><strong>🏁 Meilensteine:</strong> ${milestones.length} geplant</p>
-                    <p><strong>👥 Team:</strong> ${team.length} Mitglieder</p>
-                    <p><strong>⚠️ Risiken:</strong> ${risks.length} identifiziert</p>
-                </div>
-                
-                <div style="margin-top: 15px; padding: 10px; background: #e8f5e9; border-radius: 6px;">
-                    <strong>💡 Empfehlung:</strong>
-                    ${todoTasks > inProgressTasks * 2 ? 'Priorisiere Aufgaben, um Engpässe zu vermeiden.' : ''}
-                    ${completedGoals < goals.length / 2 ? 'Fokussiere dich auf die verbleibenden Ziele.' : ''}
-                    ${risks.filter(r => r.level === 'Hoch' && r.status === 'Offen').length > 0 ? 'Behandle hohe Risiken sofort!' : 'Alles im grünen Bereich, weiter so!'}
-                </div>
-            </div>
-        `;
-        showAIResponse(html);
-    }, 500);
-}
-
-function analyzeBudgetStatus() {
-    if (!currentProject) {
-        showAIResponse('<p style="color: red;">❌ Kein Projekt ausgewählt.</p>');
-        return;
-    }
-    
-    showAILoading();
-    setTimeout(() => {
-        const p = getProject();
-        if (!p) {
-            showAIResponse('<p style="color: red;">❌ Projekt nicht gefunden.</p>');
-            return;
-        }
-        
-        const total = p.planning?.totalBudget || 0;
-        const spent = p.planning?.spentBudget || 0;
-        const remaining = total - spent;
-        const percentage = total === 0 ? 0 : (spent / total) * 100;
-        
-        let statusColor = '#28a745';
-        let statusText = 'Budget im Rahmen';
-        if (percentage > 90) { statusColor = '#dc3545'; statusText = 'Budget fast aufgebraucht!'; }
-        else if (percentage > 70) { statusColor = '#ffc107'; statusText = 'Budget wird knapp'; }
-        
-        const html = `
-            <div style="background: white; border-radius: 8px; padding: 15px;">
-                <h3 style="color: #028641; margin-top: 0;">💰 Budgetanalyse: ${escapeHtml(p.name)}</h3>
-                
-                <div style="background: ${statusColor}20; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid ${statusColor};">
-                    <strong>Budgetauslastung:</strong> ${percentage.toFixed(1)}% - ${statusText}
-                </div>
-                
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px;">
-                    <div style="background: #28a74520; padding: 10px; border-radius: 6px; text-align: center;">
-                        <div style="font-size: 20px;">💰</div>
-                        <strong>${total.toFixed(2)} €</strong><br>Gesamt
-                    </div>
-                    <div style="background: #dc354520; padding: 10px; border-radius: 6px; text-align: center;">
-                        <div style="font-size: 20px;">📤</div>
-                        <strong>${spent.toFixed(2)} €</strong><br>Ausgegeben
-                    </div>
-                    <div style="background: #17a2b820; padding: 10px; border-radius: 6px; text-align: center;">
-                        <div style="font-size: 20px;">📥</div>
-                        <strong>${remaining.toFixed(2)} €</strong><br>Verbleibend
-                    </div>
-                </div>
-                
-                <div style="margin-top: 15px; padding: 10px; background: ${percentage > 80 ? '#fff3cd' : '#e8f5e9'}; border-radius: 6px;">
-                    <strong>💡 Empfehlung:</strong>
-                    ${remaining < 0 ? '⚠️ Budget überschritten! Sofort Maßnahmen ergreifen.' : 
-                      percentage > 80 ? '⚠️ Budget wird knapp. Überprüfe alle geplanten Ausgaben.' :
-                      percentage > 50 ? 'Budget zur Hälfte verbraucht. Weiter so planvoll wirtschaften.' :
-                      'Budget ausreichend. Plane die nächsten Investitionen.'}
-                </div>
-            </div>
-        `;
-        showAIResponse(html);
-    }, 500);
-}
-
-function analyzeRiskStatus() {
-    if (!currentProject) {
-        showAIResponse('<p style="color: red;">❌ Kein Projekt ausgewählt.</p>');
-        return;
-    }
-    
-    showAILoading();
-    setTimeout(() => {
-        const p = getProject();
-        if (!p) {
-            showAIResponse('<p style="color: red;">❌ Projekt nicht gefunden.</p>');
-            return;
-        }
-        
-        const risks = p.planning?.risks || [];
-        const highRisks = risks.filter(r => r.level === 'Hoch' && r.status === 'Offen');
-        const openRisks = risks.filter(r => r.status === 'Offen');
-        const mitigatedRisks = risks.filter(r => r.status === 'Mitigiert');
-        const resolvedRisks = risks.filter(r => r.status === 'Gelöst');
-        
-        const html = `
-            <div style="background: white; border-radius: 8px; padding: 15px;">
-                <h3 style="color: #028641; margin-top: 0;">⚠️ Risikoanalyse: ${escapeHtml(p.name)}</h3>
-                
-                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 15px;">
-                    <div style="background: #dc354520; padding: 10px; border-radius: 6px; text-align: center;">
-                        <div style="font-size: 20px;">🔴</div>
-                        <strong>${highRisks.length}</strong><br>Hohe Risiken
-                    </div>
-                    <div style="background: #ffc10720; padding: 10px; border-radius: 6px; text-align: center;">
-                        <div style="font-size: 20px;">⚠️</div>
-                        <strong>${openRisks.length}</strong><br>Offen
-                    </div>
-                    <div style="background: #17a2b820; padding: 10px; border-radius: 6px; text-align: center;">
-                        <div style="font-size: 20px;">🛡️</div>
-                        <strong>${mitigatedRisks.length}</strong><br>Mitigiert
-                    </div>
-                    <div style="background: #28a74520; padding: 10px; border-radius: 6px; text-align: center;">
-                        <div style="font-size: 20px;">✅</div>
-                        <strong>${resolvedRisks.length}</strong><br>Gelöst
-                    </div>
-                </div>
-                
-                ${risks.length > 0 ? `
-                <div style="margin-top: 15px;">
-                    <strong>📋 Risikoliste:</strong>
-                    <ul style="margin-top: 10px;">
-                        ${risks.map(r => `<li><span class="status-badge ${r.level === 'Hoch' ? 'priority-high' : r.level === 'Mittel' ? 'priority-medium' : 'priority-low'}">${r.level}</span> ${escapeHtml(r.name)} - Status: ${r.status}</li>`).join('')}
-                    </ul>
-                </div>
-                ` : '<p>Keine Risiken definiert. Füge Risiken in der Risikoanalyse hinzu.</p>'}
-                
-                <div style="margin-top: 15px; padding: 10px; background: ${highRisks.length > 0 ? '#fff3cd' : '#e8f5e9'}; border-radius: 6px;">
-                    <strong>💡 Empfehlung:</strong>
-                    ${highRisks.length > 0 ? `⚠️ ${highRisks.length} hohe offene Risiken erfordern sofortige Maßnahmen!` :
-                      openRisks.length > 0 ? 'Bearbeite die offenen Risiken mit einem Aktionsplan.' :
-                      'Alle Risiken sind mitigiert oder gelöst. Gut gemacht!'}
-                </div>
-            </div>
-        `;
-        showAIResponse(html);
-    }, 500);
-}
-
-function analyzeTimelineStatus() {
-    if (!currentProject) {
-        showAIResponse('<p style="color: red;">❌ Kein Projekt ausgewählt.</p>');
-        return;
-    }
-    
-    showAILoading();
-    setTimeout(() => {
-        const p = getProject();
-        if (!p) {
-            showAIResponse('<p style="color: red;">❌ Projekt nicht gefunden.</p>');
-            return;
-        }
-        
-        const tasks = p.tasks || [];
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        
-        let overdueTasks = 0;
-        let upcomingTasks = 0;
-        
-        tasks.forEach(task => {
-            if (task.endDate && task.status !== 'done') {
-                const endDate = new Date(task.endDate);
-                if (endDate < today) overdueTasks++;
-                else if (endDate - today < 7 * 24 * 60 * 60 * 1000) upcomingTasks++;
-            }
+    try {
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+                model: 'llama-3.3-70b-versatile',
+                messages: [{ role: 'user', content: 'Antworte nur mit: OK' }],
+                max_tokens: 5
+            })
         });
         
-        const completedTasks = tasks.filter(t => t.status === 'done').length;
-        const progressPercent = tasks.length > 0 ? (completedTasks / tasks.length * 100).toFixed(1) : 0;
-        
-        const html = `
-            <div style="background: white; border-radius: 8px; padding: 15px;">
-                <h3 style="color: #028641; margin-top: 0;">📅 Zeitplananalyse: ${escapeHtml(p.name)}</h3>
-                
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px;">
-                    <div style="background: #dc354520; padding: 10px; border-radius: 6px; text-align: center;">
-                        <div style="font-size: 20px;">⏰</div>
-                        <strong>${overdueTasks}</strong><br>Überfällig
-                    </div>
-                    <div style="background: #ffc10720; padding: 10px; border-radius: 6px; text-align: center;">
-                        <div style="font-size: 20px;">📅</div>
-                        <strong>${upcomingTasks}</strong><br>Diese Woche fällig
-                    </div>
-                    <div style="background: #28a74520; padding: 10px; border-radius: 6px; text-align: center;">
-                        <div style="font-size: 20px;">✅</div>
-                        <strong>${progressPercent}%</strong><br>Fortschritt
-                    </div>
-                </div>
-                
-                ${p.startDate || p.endDate ? `
-                <div style="margin-top: 15px; padding: 10px; background: #e9ecef; border-radius: 6px;">
-                    <strong>📆 Projektzeitraum:</strong><br>
-                    ${p.startDate ? `Start: ${p.startDate}` : 'Start: Nicht definiert'}<br>
-                    ${p.endDate ? `Ende: ${p.endDate}` : 'Ende: Nicht definiert'}
-                </div>
-                ` : ''}
-                
-                <div style="margin-top: 15px; padding: 10px; background: ${overdueTasks > 0 ? '#fff3cd' : '#e8f5e9'}; border-radius: 6px;">
-                    <strong>💡 Empfehlung:</strong>
-                    ${overdueTasks > 0 ? `⚠️ ${overdueTasks} überfällige Aufgaben! Priorisiere diese sofort.` :
-                      upcomingTasks > 0 ? `📅 ${upcomingTasks} Aufgaben werden diese Woche fällig. Bereite dich vor.` :
-                      'Keine überfälligen Aufgaben. Zeitplan ist im Griff!'}
-                </div>
-            </div>
-        `;
-        showAIResponse(html);
-    }, 500);
+        if (response.ok) {
+            document.getElementById('apiKeyStatus').innerHTML = '<span class="test-success">✅ Groq API-Key funktioniert! Du kannst Fragen stellen. (Komplett kostenlos!)</span>';
+        } else if (response.status === 401) {
+            document.getElementById('apiKeyStatus').innerHTML = '<span class="test-error">❌ Ungültiger API-Key. Hole dir einen kostenlosen Key auf console.groq.com (keine Kreditkarte!)</span>';
+        } else {
+            const error = await response.text();
+            document.getElementById('apiKeyStatus').innerHTML = `<span class="test-error">❌ Fehler ${response.status}</span>`;
+        }
+    } catch(e) {
+        document.getElementById('apiKeyStatus').innerHTML = `<span class="test-error">❌ Netzwerkfehler: ${e.message}</span>`;
+    }
 }
 
-function askCustomQuestion() {
-    const question = document.getElementById('aiQuestionInput').value.trim();
-    if (!question) {
-        alert('Bitte eine Frage eingeben.');
-        return;
-    }
-    if (!currentProject) {
-        alert('Bitte zuerst ein Projekt auswählen.');
-        return;
-    }
+function setQuestion(question) { document.getElementById('aiQuestion').value = question; }
+
+async function askGroq() {
+    const projectId = document.getElementById('aiProjectSelect').value;
+    const question = document.getElementById('aiQuestion').value.trim();
+    if (!projectId) { alert('Bitte Projekt auswählen'); return; }
+    if (!question) { alert('Bitte Frage eingeben'); return; }
+    const apiKey = allProjects[projectId]?.planning?.groqApiKey;
+    if (!apiKey) { alert('Kein API-Key für dieses Projekt. Bitte zuerst speichern und testen.'); return; }
     
-    showAILoading();
-    setTimeout(() => {
-        const p = getProject();
-        if (!p) {
-            showAIResponse('<p style="color: red;">❌ Projekt nicht gefunden.</p>');
-            return;
+    const project = allProjects[projectId];
+    document.getElementById('aiLoading').style.display = 'block';
+    document.getElementById('aiResponse').style.display = 'none';
+    
+    const context = `Du bist ein professioneller Projektmanagement-Berater. Antworte auf Deutsch, hilfreich und konkret.
+
+PROJEKT: ${project.name}
+Beschreibung: ${project.description || 'Keine Beschreibung'}
+Start: ${project.startDate || 'Nicht gesetzt'} | Ende: ${project.endDate || 'Nicht gesetzt'}
+
+AUFGABEN (${project.tasks?.length || 0}):
+${(project.tasks || []).map(t => `- ${t.text} [${t.status}] [Priorität: ${t.priority}]`).join('\n') || 'Keine Aufgaben'}
+
+ZIELE (${project.planning?.goals?.length || 0}):
+${(project.planning?.goals || []).map(g => `- ${g.text} ${g.completed ? '✅ ERREICHT' : '⏳ OFFEN'} ${g.deadline ? `(bis ${g.deadline})` : ''}`).join('\n') || 'Keine Ziele'}
+
+MEILENSTEINE (${project.planning?.milestones?.length || 0}):
+${(project.planning?.milestones || []).map(m => `- ${m.name} ${m.date ? `(${m.date})` : ''}`).join('\n') || 'Keine Meilensteine'}
+
+TEAM (${project.planning?.team?.length || 0}):
+${(project.planning?.team || []).map(m => `- ${m.name} (${m.role})`).join('\n') || 'Kein Team'}
+
+BUDGET: Gesamt: ${project.planning?.totalBudget || 0}€ | Ausgegeben: ${project.planning?.spentBudget || 0}€
+
+RISIKEN (${project.planning?.risks?.length || 0}):
+${(project.planning?.risks || []).map(r => `- ${r.name} (${r.level}) - Status: ${r.status}`).join('\n') || 'Keine Risiken'}
+
+FRAGE: ${question}
+
+Gib eine ausführliche, hilfreiche Antwort mit konkreten Handlungsempfehlungen.`;
+
+    try {
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+                model: 'llama-3.3-70b-versatile',
+                messages: [{ role: 'user', content: context }],
+                temperature: 0.7,
+                max_tokens: 2000
+            })
+        });
+        
+        if (!response.ok) {
+            if (response.status === 401) throw new Error('Ungültiger API-Key');
+            if (response.status === 429) throw new Error('Rate Limit erreicht. Bitte warte einen Moment.');
+            throw new Error(`API Fehler ${response.status}`);
         }
         
-        const lowerQuestion = question.toLowerCase();
-        let answer = '';
-        
-        if (lowerQuestion.includes('budget') || lowerQuestion.includes('kosten') || lowerQuestion.includes('geld')) {
-            const total = p.planning?.totalBudget || 0;
-            const spent = p.planning?.spentBudget || 0;
-            answer = `💰 **Budget-Informationen für "${p.name}":**\n\n• Gesamtbudget: ${total.toFixed(2)} €\n• Ausgegeben: ${spent.toFixed(2)} €\n• Verbleibend: ${(total - spent).toFixed(2)} €\n• Auslastung: ${total === 0 ? 0 : ((spent / total) * 100).toFixed(1)}%\n\n${total === 0 ? '⚠️ Es wurde noch kein Budget festgelegt.' : ''}`;
-        }
-        else if (lowerQuestion.includes('aufgabe') || lowerQuestion.includes('task') || lowerQuestion.includes('arbeit')) {
-            const tasks = p.tasks || [];
-            const todo = tasks.filter(t => t.status === 'todo').length;
-            const progress = tasks.filter(t => t.status === 'progress').length;
-            const done = tasks.filter(t => t.status === 'done').length;
-            answer = `📋 **Aufgabenübersicht für "${p.name}":**\n\n• Offen (To Do): ${todo}\n• In Bearbeitung: ${progress}\n• Abgeschlossen: ${done}\n• Gesamt: ${tasks.length}\n\n${tasks.length === 0 ? 'Es wurden noch keine Aufgaben erstellt.' : `Fortschritt: ${((done / tasks.length) * 100).toFixed(1)}%`}`;
-        }
-        else if (lowerQuestion.includes('risiko') || lowerQuestion.includes('gefahr')) {
-            const risks = p.planning?.risks || [];
-            const high = risks.filter(r => r.level === 'Hoch' && r.status === 'Offen').length;
-            answer = `⚠️ **Risikoanalyse für "${p.name}":**\n\n• Gesamtrisiken: ${risks.length}\n• Offene hohe Risiken: ${high}\n\n${risks.length === 0 ? 'Keine Risiken definiert. Füge Risiken in der Risikoanalyse hinzu.' : risks.map(r => `- ${r.name} (${r.level}) - ${r.status}`).join('\n')}`;
-        }
-        else if (lowerQuestion.includes('team') || lowerQuestion.includes('mitarbeiter')) {
-            const team = p.planning?.team || [];
-            answer = `👥 **Team-Informationen für "${p.name}":**\n\n• Teamgröße: ${team.length} Mitglieder\n\n${team.length === 0 ? 'Keine Teammitglieder definiert.' : team.map(m => `- ${m.name} (${m.role})`).join('\n')}`;
-        }
-        else if (lowerQuestion.includes('ziel') || lowerQuestion.includes('goal')) {
-            const goals = p.planning?.goals || [];
-            const completed = goals.filter(g => g.completed).length;
-            answer = `🎯 **Ziele für "${p.name}":**\n\n• Gesamtziele: ${goals.length}\n• Erreicht: ${completed}\n• Offen: ${goals.length - completed}\n\n${goals.length === 0 ? 'Keine Ziele definiert.' : goals.map(g => `- ${g.text} ${g.completed ? '✅' : '⏳'} ${g.deadline ? `(bis ${g.deadline})` : ''}`).join('\n')}`;
-        }
-        else {
-            const tasks = p.tasks || [];
-            const goals = p.planning?.goals || [];
-            const team = p.planning?.team || [];
-            const risks = p.planning?.risks || [];
-            const total = p.planning?.totalBudget || 0;
-            
-            answer = `📊 **Projektzusammenfassung für "${p.name}":**\n\n📝 **Beschreibung:** ${p.description || 'Keine Beschreibung'}\n\n📋 **Aufgaben:** ${tasks.length} (${tasks.filter(t => t.status === 'done').length} abgeschlossen)\n🎯 **Ziele:** ${goals.length} (${goals.filter(g => g.completed).length} erreicht)\n👥 **Team:** ${team.length} Mitglieder\n⚠️ **Risiken:** ${risks.length}\n💰 **Budget:** ${total.toFixed(2)} €\n\n📅 **Zeitraum:** ${p.startDate || '?'} - ${p.endDate || '?'}\n\n💡 **Tipp:** Für detailliertere Fragen zu Budget, Aufgaben, Risiken oder Team, stelle bitte spezifischere Fragen!`;
-        }
-        
-        showAIResponse(`<div style="background: white; border-radius: 8px; padding: 15px; white-space: pre-wrap;">🤖 <strong>Antwort auf deine Frage:</strong><br><br>${answer.replace(/\n/g, '<br>')}</div>`);
-    }, 500);
+        const data = await response.json();
+        const answer = data.choices[0].message.content;
+        document.getElementById('aiResponse').innerHTML = `<strong>⚡ Groq KI Antwort (kostenlos, extrem schnell):</strong><br><br>${answer.replace(/\n/g, '<br>')}`;
+        document.getElementById('aiResponse').style.display = 'block';
+    } catch(e) {
+        document.getElementById('aiResponse').innerHTML = `<strong>❌ Fehler:</strong><br>${e.message}<br><br>💡 <strong>Groq ist komplett kostenlos!</strong><br>• Hole dir einen kostenlosen Key auf <a href="https://console.groq.com" target="_blank">console.groq.com</a><br>• Keine Kreditkarte, kein Guthaben, komplett kostenlos!<br>• ~14.400 Anfragen pro Tag gratis!`;
+        document.getElementById('aiResponse').style.display = 'block';
+    } finally { 
+        document.getElementById('aiLoading').style.display = 'none'; 
+    }
+}
+
+// ========== TABS ==========
+function showTab(tab) {
+    document.getElementById('dashboardTab').style.display = tab === 'dashboard' ? 'block' : 'none';
+    document.getElementById('planningTab').style.display = tab === 'planning' ? 'block' : 'none';
+    document.getElementById('aiTab').style.display = tab === 'ai' ? 'block' : 'none';
+    document.querySelectorAll('nav a').forEach((a, i) => { a.classList.toggle('active', (tab === 'dashboard' && i === 0) || (tab === 'planning' && i === 1) || (tab === 'ai' && i === 2)); });
+    if (tab === 'planning') loadAllProjects();
+    if (tab === 'ai') { loadAllProjects(); updateAiProjectSelect(); }
 }
 
 // ========== HELPER ==========
 function escapeHtml(text) {
     if (!text) return '';
-    const map = {
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#039;'
-    };
-    return text.replace(/[&<>"']/g, m => map[m]);
+    return text.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
 }
 </script>
-
 </body>
 </html>

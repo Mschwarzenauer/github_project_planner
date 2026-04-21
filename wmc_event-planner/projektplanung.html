@@ -6,41 +6,13 @@
     <title>Projektplanung - Detaillierte Planung</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        .planning-section {
-            margin-bottom: 30px;
-        }
-        .budget-bar {
-            height: 20px;
-            background: #e9ecef;
-            border-radius: 10px;
-            overflow: hidden;
-            margin: 10px 0;
-        }
-        .budget-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #28a745, #20c997);
-            border-radius: 10px;
-            transition: width 0.3s;
-        }
-        .risk-high { background: #dc3545; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; }
-        .risk-medium { background: #ffc107; padding: 2px 8px; border-radius: 12px; font-size: 12px; }
-        .risk-low { background: #28a745; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; }
-        .project-card {
-            background: white;
-            border-radius: 8px;
-            padding: 15px;
-            margin: 10px 0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .project-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
+        .planning-section { margin-bottom: 30px; }
+        .budget-bar { height: 20px; background: #e9ecef; border-radius: 10px; overflow: hidden; margin: 10px 0; }
+        .budget-fill { height: 100%; background: linear-gradient(90deg, #28a745, #20c997); border-radius: 10px; transition: width 0.3s; }
+        .project-card { background: white; border-radius: 8px; padding: 15px; margin: 10px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: all 0.3s; }
+        .project-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .sync-btn { background: #17a2b8; color: white; border: none; border-radius: 4px; padding: 8px 16px; cursor: pointer; margin-left: 10px; }
+        .sync-btn:hover { background: #138496; }
     </style>
 </head>
 <body>
@@ -58,18 +30,18 @@
 
 <div id="app">
 
-<!-- Projekt-Wahl -->
 <div id="projectSelectView">
     <section class="form-section">
         <h2>🎯 Projekt auswählen</h2>
+        <div style="margin-bottom: 15px;">
+            <button onclick="syncFromDashboard()" class="sync-btn">🔄 Projekte vom Dashboard synchronisieren</button>
+            <button onclick="createProjectHere()" style="background: #28a745; color: white; border: none; border-radius: 4px; padding: 8px 16px; cursor: pointer;">➕ Neues Projekt erstellen</button>
+        </div>
         <div id="projectList" style="margin: 15px 0;"></div>
-        <p style="color: #666; margin-top: 15px;">💡 Tipp: Erstelle neue Projekte im <a href="index.html">Dashboard</a></p>
-        <button onclick="window.location.href='index.html'" style="background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">📋 Zum Dashboard</button>
-        <button onclick="forceReloadProjects()" style="background: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;">🔄 Projekte neu laden</button>
+        <p style="color: #666; margin-top: 15px;">💡 Tipp: Klicke auf "Synchronisieren" um Projekte vom Dashboard zu laden.</p>
     </section>
 </div>
 
-<!-- Projekt-Detail -->
 <div id="projectDetailView" style="display: none;">
 
 <section class="form-section">
@@ -77,7 +49,6 @@
     <button onclick="changeProject()" style="margin-top: 10px; background: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">← Projekt wechseln</button>
 </section>
 
-<!-- Ziele -->
 <section class="form-section planning-section">
     <h2>🎯 Ziele</h2>
     <div style="display: flex; gap: 10px; margin-bottom: 15px;">
@@ -88,7 +59,6 @@
     <div id="goalsList"></div>
 </section>
 
-<!-- Meilensteine -->
 <section class="form-section planning-section">
     <h2>🏁 Meilensteine</h2>
     <div style="display: flex; gap: 10px; margin-bottom: 15px;">
@@ -99,7 +69,6 @@
     <div id="milestonesList"></div>
 </section>
 
-<!-- Team -->
 <section class="form-section planning-section">
     <h2>👥 Team</h2>
     <div style="display: flex; gap: 10px; margin-bottom: 15px;">
@@ -110,29 +79,19 @@
     <div id="teamList"></div>
 </section>
 
-<!-- Budget -->
 <section class="form-section planning-section">
     <h2>💰 Budget</h2>
     <div class="grid-2">
-        <div>
-            <label>Gesamtbudget (€)</label>
-            <input id="totalBudget" type="number" min="0" onchange="saveBudget()">
-        </div>
-        <div>
-            <label>Bisherige Ausgaben (€)</label>
-            <input id="spentBudget" type="number" min="0" onchange="saveBudget()">
-        </div>
+        <div><label>Gesamtbudget (€)</label><input id="totalBudget" type="number" min="0" onchange="saveBudget()"></div>
+        <div><label>Bisherige Ausgaben (€)</label><input id="spentBudget" type="number" min="0" onchange="saveBudget()"></div>
     </div>
-    <div class="budget-bar">
-        <div id="budgetFill" class="budget-fill" style="width: 0%"></div>
-    </div>
+    <div class="budget-bar"><div id="budgetFill" class="budget-fill" style="width: 0%"></div></div>
     <div class="grid-2">
         <div><strong>Verbleibend:</strong> <span id="budgetRemaining">0</span> €</div>
         <div><strong>Auslastung:</strong> <span id="budgetUsage">0</span>%</div>
     </div>
 </section>
 
-<!-- Risiken -->
 <section class="form-section planning-section">
     <h2>⚠️ Risiken</h2>
     <div style="display: flex; gap: 10px; margin-bottom: 15px;">
@@ -147,7 +106,6 @@
     <div id="risksList"></div>
 </section>
 
-<!-- Notizen -->
 <section class="form-section planning-section">
     <h2>📝 Notizen & Blockaden</h2>
     <textarea id="notes" rows="4" placeholder="Wichtige Notizen, Blockaden, Abhängigkeiten..." onchange="saveNotes()"></textarea>
@@ -161,69 +119,112 @@
 </footer>
 
 <script>
-// ========== DIREKTER LOCALSTORAGE ZUGRIFF - KEIN STORAGE.JS NÖTIG ==========
-
 let currentProject = null;
 let currentProjectData = null;
 
-// ========== INITIALISIERUNG ==========
-document.addEventListener("DOMContentLoaded", () => {
-    console.log("🔄 Projektplanung: Starte Initialisierung...");
-    console.log("📍 Aktuelle URL:", window.location.href);
-    
-    // Direkt aus localStorage laden
-    loadProjectsDirectly();
-});
-
-function loadProjectsDirectly() {
-    console.log("📂 Lade Projekte direkt aus localStorage...");
-    
-    let projects = {};
+// ========== SYNCHRONISIERUNG VOM DASHBOARD ==========
+function syncFromDashboard() {
+    console.log("🔄 Synchronisiere Projekte vom Dashboard...");
     
     try {
+        // Versuche aus localStorage zu laden
         const data = localStorage.getItem('projects');
-        console.log("localStorage raw data:", data);
+        console.log("localStorage data:", data);
         
-        if (data && data !== 'null' && data !== 'undefined') {
-            projects = JSON.parse(data);
-            console.log("✅ Erfolgreich geladen:", Object.keys(projects).length, "Projekte");
-            console.log("Projektnamen:", Object.values(projects).map(p => p.name));
-        } else {
-            console.log("❌ Keine Daten in localStorage (data ist", data, ")");
+        if (data && data !== 'null') {
+            const projects = JSON.parse(data);
+            const count = Object.keys(projects).length;
+            console.log("✅ Gefunden:", count, "Projekte");
+            
+            if (count > 0) {
+                displayProjectList(projects);
+                alert(count + " Projekt(e) wurden geladen!");
+                return;
+            }
         }
+        
+        // Fallback: Versuche über window.name (falls Dashboard im anderen Tab)
+        if (window.name && window.name !== '') {
+            try {
+                const nameData = JSON.parse(window.name);
+                if (Object.keys(nameData).length > 0) {
+                    localStorage.setItem('projects', window.name);
+                    displayProjectList(nameData);
+                    alert(Object.keys(nameData).length + " Projekt(e) aus anderem Tab geladen!");
+                    return;
+                }
+            } catch(e) {}
+        }
+        
+        alert("Keine Projekte gefunden. Erstelle zuerst ein Projekt im Dashboard oder klicke auf 'Neues Projekt erstellen'.");
+        
     } catch (e) {
-        console.error("Fehler beim Laden aus localStorage:", e);
+        console.error("Sync fehlgeschlagen:", e);
+        alert("Fehler beim Synchronisieren: " + e.message);
     }
+}
+
+// ========== NEUES PROJEKT DIREKT HIER ==========
+function createProjectHere() {
+    const name = prompt("📁 Projektname eingeben:", "Mein neues Projekt");
+    if (!name) return;
     
+    const desc = prompt("📝 Projektbeschreibung (optional):");
+    
+    let projects = {};
+    try {
+        const existing = localStorage.getItem('projects');
+        if (existing && existing !== 'null') {
+            projects = JSON.parse(existing);
+        }
+    } catch(e) {}
+    
+    const projectId = 'proj_' + Date.now();
+    projects[projectId] = {
+        id: projectId,
+        name: name,
+        description: desc || '',
+        startDate: '',
+        endDate: '',
+        tasks: [],
+        milestones: [],
+        planning: {
+            goals: [],
+            milestones: [],
+            team: [],
+            risks: [],
+            totalBudget: 0,
+            spentBudget: 0,
+            notes: ''
+        }
+    };
+    
+    localStorage.setItem('projects', JSON.stringify(projects));
+    console.log("✅ Projekt erstellt:", name);
+    alert("Projekt '" + name + "' wurde erstellt!");
+    
+    // Projekte neu anzeigen
     displayProjectList(projects);
 }
 
-function forceReloadProjects() {
-    console.log("🔄 Force Reload...");
-    loadProjectsDirectly();
-}
-
+// ========== PROJEKTE ANZEIGEN ==========
 function displayProjectList(projects) {
     const container = document.getElementById('projectList');
     container.innerHTML = '';
     
     const projectIds = Object.keys(projects);
-    console.log("📋 Projekte anzeigen:", projectIds.length, "Stück");
+    console.log("📋 Anzeigen:", projectIds.length, "Projekte");
     
     if (projectIds.length === 0) {
         container.innerHTML = `
             <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 20px; text-align: center;">
-                <p style="margin: 0 0 10px 0;">⚠️ Keine Projekte im localStorage gefunden.</p>
-                <p style="margin: 0;">Erstelle zuerst ein Projekt im <a href="index.html" style="color: #007bff;">Dashboard</a>.</p>
-                <hr style="margin: 15px 0;">
-                <p style="font-size: 12px; color: #666;">Debug: localStorage hat ${localStorage.getItem('projects') ? 'Daten' : 'keine Daten'}</p>
-                <button onclick="forceReloadProjects()" style="background: #007bff; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px;">🔄 Erneut laden</button>
+                <p style="margin: 0 0 10px 0;">⚠️ Keine Projekte vorhanden.</p>
+                <p style="margin: 0;">Klicke auf "Projekte vom Dashboard synchronisieren" oder erstelle ein neues Projekt.</p>
             </div>
         `;
         return;
     }
     
-    // Projekte als Karten anzeigen
     for (const [id, project] of Object.entries(projects)) {
         const card = document.createElement('div');
         card.className = 'project-card';
@@ -231,25 +232,17 @@ function displayProjectList(projects) {
         card.innerHTML = `
             <div>
                 <strong>📁 ${escapeHtml(project.name)}</strong>
-                ${project.description ? `<br><small style="color: #666;">${escapeHtml(project.description.substring(0, 80))}${project.description.length > 80 ? '...' : ''}</small>` : ''}
-                ${project.startDate ? `<br><small>📅 ab ${project.startDate}</small>` : ''}
+                ${project.description ? `<br><small style="color: #666;">${escapeHtml(project.description.substring(0, 80))}</small>` : ''}
             </div>
-            <div>
-                <span style="background: #0d6efd; color: white; padding: 5px 10px; border-radius: 20px; font-size: 12px;">Öffnen →</span>
-            </div>
+            <div><span style="background: #0d6efd; color: white; padding: 5px 10px; border-radius: 20px;">Öffnen →</span></div>
         `;
         container.appendChild(card);
     }
 }
 
 function selectProject(projectId, allProjects) {
-    console.log("📂 Öffne Projekt:", projectId);
-    
     const project = allProjects[projectId];
-    if (!project) {
-        alert('Projekt konnte nicht geladen werden.');
-        return;
-    }
+    if (!project) return;
     
     currentProject = projectId;
     currentProjectData = JSON.parse(JSON.stringify(project));
@@ -264,7 +257,7 @@ function changeProject() {
     currentProjectData = null;
     document.getElementById('projectSelectView').style.display = 'block';
     document.getElementById('projectDetailView').style.display = 'none';
-    loadProjectsDirectly();
+    syncFromDashboard(); // Beim Zurückkehren neu laden
 }
 
 function loadProjectDetail() {
@@ -273,15 +266,7 @@ function loadProjectDetail() {
     document.getElementById('currentProjectName').textContent = currentProjectData.name;
     
     if (!currentProjectData.planning) {
-        currentProjectData.planning = {
-            goals: [],
-            milestones: [],
-            team: [],
-            risks: [],
-            totalBudget: 0,
-            spentBudget: 0,
-            notes: ''
-        };
+        currentProjectData.planning = { goals: [], milestones: [], team: [], risks: [], totalBudget: 0, spentBudget: 0, notes: '' };
     }
     
     document.getElementById('totalBudget').value = currentProjectData.planning.totalBudget || 0;
@@ -299,18 +284,12 @@ function saveProject() {
     if (!currentProject) return;
     
     try {
-        // Aktuelle Projekte aus localStorage laden
         const allProjects = JSON.parse(localStorage.getItem('projects') || '{}');
-        
-        // Dieses Projekt aktualisieren
         allProjects[currentProject] = currentProjectData;
-        
-        // Zurückspeichern
         localStorage.setItem('projects', JSON.stringify(allProjects));
-        
-        console.log('✓ Planung gespeichert für:', currentProjectData.name);
+        console.log('✓ Gespeichert:', currentProjectData.name);
     } catch (e) {
-        console.error('Fehler beim Speichern:', e);
+        console.error('Speichern fehlgeschlagen:', e);
     }
 }
 
@@ -319,16 +298,8 @@ function addGoal() {
     const text = document.getElementById('goalText').value.trim();
     const deadline = document.getElementById('goalDeadline').value;
     if (!text) return;
-    
     if (!currentProjectData.planning.goals) currentProjectData.planning.goals = [];
-    
-    currentProjectData.planning.goals.push({
-        id: 'goal_' + Date.now(),
-        text: text,
-        deadline: deadline,
-        completed: false
-    });
-    
+    currentProjectData.planning.goals.push({ id: 'goal_' + Date.now(), text, deadline, completed: false });
     saveProject();
     document.getElementById('goalText').value = '';
     document.getElementById('goalDeadline').value = '';
@@ -338,19 +309,10 @@ function addGoal() {
 function loadGoals() {
     const container = document.getElementById('goalsList');
     const goals = currentProjectData?.planning?.goals || [];
-    
-    if (goals.length === 0) {
-        container.innerHTML = '<p style="color: #999;">Keine Ziele definiert.</p>';
-        return;
-    }
-    
+    if (goals.length === 0) { container.innerHTML = '<p style="color: #999;">Keine Ziele definiert.</p>'; return; }
     container.innerHTML = goals.map(goal => `
         <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #fff9e6; border: 1px solid #ffc107; border-radius: 4px; margin-bottom: 8px;">
-            <div>
-                <input type="checkbox" ${goal.completed ? 'checked' : ''} onchange="toggleGoal('${goal.id}', this.checked)" style="margin-right: 10px;">
-                <span style="text-decoration: ${goal.completed ? 'line-through' : 'none'};">🎯 ${escapeHtml(goal.text)}</span>
-                ${goal.deadline ? `<small style="color: #666;"> (bis ${goal.deadline})</small>` : ''}
-            </div>
+            <div><input type="checkbox" ${goal.completed ? 'checked' : ''} onchange="toggleGoal('${goal.id}', this.checked)" style="margin-right: 10px;"><span style="text-decoration: ${goal.completed ? 'line-through' : 'none'};">🎯 ${escapeHtml(goal.text)}</span>${goal.deadline ? `<small> (bis ${goal.deadline})</small>` : ''}</div>
             <button onclick="deleteGoal('${goal.id}')" style="background:#dc3545; color:white; border:none; padding:4px 8px; border-radius:3px; cursor:pointer;">✕</button>
         </div>
     `).join('');
@@ -358,17 +320,12 @@ function loadGoals() {
 
 function toggleGoal(goalId, completed) {
     const goal = currentProjectData.planning.goals.find(g => g.id === goalId);
-    if (goal) {
-        goal.completed = completed;
-        saveProject();
-        loadGoals();
-    }
+    if (goal) { goal.completed = completed; saveProject(); loadGoals(); }
 }
 
 function deleteGoal(goalId) {
     currentProjectData.planning.goals = currentProjectData.planning.goals.filter(g => g.id !== goalId);
-    saveProject();
-    loadGoals();
+    saveProject(); loadGoals();
 }
 
 // ========== MEILENSTEINE ==========
@@ -376,15 +333,8 @@ function addMilestone() {
     const text = document.getElementById('milestoneText').value.trim();
     const date = document.getElementById('milestoneDate').value;
     if (!text) return;
-    
     if (!currentProjectData.planning.milestones) currentProjectData.planning.milestones = [];
-    
-    currentProjectData.planning.milestones.push({
-        id: 'ms_' + Date.now(),
-        name: text,
-        date: date
-    });
-    
+    currentProjectData.planning.milestones.push({ id: 'ms_' + Date.now(), name: text, date });
     saveProject();
     document.getElementById('milestoneText').value = '';
     document.getElementById('milestoneDate').value = '';
@@ -394,18 +344,10 @@ function addMilestone() {
 function loadMilestones() {
     const container = document.getElementById('milestonesList');
     const milestones = currentProjectData?.planning?.milestones || [];
-    
-    if (milestones.length === 0) {
-        container.innerHTML = '<p style="color: #999;">Keine Meilensteine definiert.</p>';
-        return;
-    }
-    
+    if (milestones.length === 0) { container.innerHTML = '<p style="color: #999;">Keine Meilensteine definiert.</p>'; return; }
     container.innerHTML = milestones.map(ms => `
         <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #fff3e0; border: 1px solid #ff9800; border-radius: 4px; margin-bottom: 8px;">
-            <div>
-                🏁 <strong>${escapeHtml(ms.name)}</strong>
-                ${ms.date ? `<small> (${ms.date})</small>` : ''}
-            </div>
+            <div>🏁 <strong>${escapeHtml(ms.name)}</strong>${ms.date ? `<small> (${ms.date})</small>` : ''}</div>
             <button onclick="deleteMilestone('${ms.id}')" style="background:#dc3545; color:white; border:none; padding:4px 8px; border-radius:3px; cursor:pointer;">✕</button>
         </div>
     `).join('');
@@ -413,8 +355,7 @@ function loadMilestones() {
 
 function deleteMilestone(msId) {
     currentProjectData.planning.milestones = currentProjectData.planning.milestones.filter(m => m.id !== msId);
-    saveProject();
-    loadMilestones();
+    saveProject(); loadMilestones();
 }
 
 // ========== TEAM ==========
@@ -422,15 +363,8 @@ function addTeamMember() {
     const name = document.getElementById('memberName').value.trim();
     const role = document.getElementById('memberRole').value.trim();
     if (!name || !role) return;
-    
     if (!currentProjectData.planning.team) currentProjectData.planning.team = [];
-    
-    currentProjectData.planning.team.push({
-        id: 'member_' + Date.now(),
-        name: name,
-        role: role
-    });
-    
+    currentProjectData.planning.team.push({ id: 'member_' + Date.now(), name, role });
     saveProject();
     document.getElementById('memberName').value = '';
     document.getElementById('memberRole').value = '';
@@ -440,42 +374,18 @@ function addTeamMember() {
 function loadTeam() {
     const container = document.getElementById('teamList');
     const team = currentProjectData?.planning?.team || [];
-    
-    if (team.length === 0) {
-        container.innerHTML = '<p style="color: #999;">Keine Teammitglieder.</p>';
-        return;
-    }
-    
-    container.innerHTML = `
-        <table style="width:100%; border-collapse: collapse;">
-            <tr style="background: #f0f0f0;">
-                <th style="padding: 8px; text-align: left;">Name</th>
-                <th style="padding: 8px; text-align: left;">Rolle</th>
-                <th style="padding: 8px; text-align: left;">Aktion</th>
-            </tr>
-            ${team.map(m => `
-                <tr>
-                    <td style="padding: 8px; border-bottom: 1px solid #ddd;">${escapeHtml(m.name)}</td>
-                    <td style="padding: 8px; border-bottom: 1px solid #ddd;">${escapeHtml(m.role)}</td>
-                    <td style="padding: 8px; border-bottom: 1px solid #ddd;">
-                        <button onclick="deleteTeamMember('${m.id}')" style="background:#dc3545; color:white; border:none; padding:4px 8px; border-radius:3px; cursor:pointer;">Löschen</button>
-                    </td>
-                </tr>
-            `).join('')}
-        </table>
-    `;
+    if (team.length === 0) { container.innerHTML = '<p style="color: #999;">Keine Teammitglieder.</p>'; return; }
+    container.innerHTML = `<table style="width:100%; border-collapse: collapse;"><tr style="background:#f0f0f0;"><th>Name</th><th>Rolle</th><th>Aktion</th></tr>${team.map(m => `<tr><td style="padding:8px;">${escapeHtml(m.name)}</td><td style="padding:8px;">${escapeHtml(m.role)}</td><td style="padding:8px;"><button onclick="deleteTeamMember('${m.id}')" style="background:#dc3545; color:white; border:none; padding:4px 8px; border-radius:3px; cursor:pointer;">Löschen</button></td></tr>`).join('')}</table>`;
 }
 
 function deleteTeamMember(memberId) {
     currentProjectData.planning.team = currentProjectData.planning.team.filter(m => m.id !== memberId);
-    saveProject();
-    loadTeam();
+    saveProject(); loadTeam();
 }
 
 // ========== BUDGET ==========
 function saveBudget() {
     if (!currentProjectData) return;
-    
     currentProjectData.planning.totalBudget = parseFloat(document.getElementById('totalBudget').value) || 0;
     currentProjectData.planning.spentBudget = parseFloat(document.getElementById('spentBudget').value) || 0;
     saveProject();
@@ -487,18 +397,10 @@ function updateBudgetDisplay() {
     const spent = currentProjectData?.planning?.spentBudget || 0;
     const remaining = total - spent;
     const percentage = total === 0 ? 0 : (spent / total) * 100;
-    
     document.getElementById('budgetRemaining').textContent = remaining.toFixed(2);
     document.getElementById('budgetUsage').textContent = percentage.toFixed(0);
     document.getElementById('budgetFill').style.width = percentage + '%';
-    
-    if (percentage > 80) {
-        document.getElementById('budgetFill').style.background = '#dc3545';
-    } else if (percentage > 60) {
-        document.getElementById('budgetFill').style.background = '#ffc107';
-    } else {
-        document.getElementById('budgetFill').style.background = 'linear-gradient(90deg, #28a745, #20c997)';
-    }
+    document.getElementById('budgetFill').style.background = percentage > 80 ? '#dc3545' : percentage > 60 ? '#ffc107' : 'linear-gradient(90deg, #28a745, #20c997)';
 }
 
 // ========== RISIKEN ==========
@@ -506,16 +408,8 @@ function addRisk() {
     const name = document.getElementById('riskName').value.trim();
     const level = document.getElementById('riskLevel').value;
     if (!name) return;
-    
     if (!currentProjectData.planning.risks) currentProjectData.planning.risks = [];
-    
-    currentProjectData.planning.risks.push({
-        id: 'risk_' + Date.now(),
-        name: name,
-        level: level,
-        status: 'Offen'
-    });
-    
+    currentProjectData.planning.risks.push({ id: 'risk_' + Date.now(), name, level, status: 'Offen' });
     saveProject();
     document.getElementById('riskName').value = '';
     document.getElementById('riskLevel').value = 'Mittel';
@@ -525,57 +419,42 @@ function addRisk() {
 function loadRisks() {
     const container = document.getElementById('risksList');
     const risks = currentProjectData?.planning?.risks || [];
-    
-    if (risks.length === 0) {
-        container.innerHTML = '<p style="color: #999;">Keine Risiken definiert.</p>';
-        return;
-    }
-    
+    if (risks.length === 0) { container.innerHTML = '<p style="color: #999;">Keine Risiken definiert.</p>'; return; }
     container.innerHTML = risks.map(risk => `
         <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 8px;">
-            <div style="flex: 2;">
-                <span class="risk-${risk.level.toLowerCase()}">${risk.level === 'Hoch' ? '🔴' : risk.level === 'Mittel' ? '🟡' : '🟢'} ${risk.level}</span>
-                <strong style="margin-left: 10px;">${escapeHtml(risk.name)}</strong>
-            </div>
-            <div>
-                <select onchange="updateRiskStatus('${risk.id}', this.value)" style="padding: 4px; margin-right: 10px;">
-                    <option ${risk.status === 'Offen' ? 'selected' : ''}>Offen</option>
-                    <option ${risk.status === 'Mitigiert' ? 'selected' : ''}>Mitigiert</option>
-                    <option ${risk.status === 'Gelöst' ? 'selected' : ''}>Gelöst</option>
-                </select>
-                <button onclick="deleteRisk('${risk.id}')" style="background:#dc3545; color:white; border:none; padding:4px 8px; border-radius:3px; cursor:pointer;">✕</button>
-            </div>
+            <div><span class="risk-${risk.level.toLowerCase()}">${risk.level === 'Hoch' ? '🔴' : risk.level === 'Mittel' ? '🟡' : '🟢'} ${risk.level}</span><strong style="margin-left:10px;">${escapeHtml(risk.name)}</strong></div>
+            <div><select onchange="updateRiskStatus('${risk.id}', this.value)" style="padding:4px; margin-right:10px;"><option ${risk.status === 'Offen' ? 'selected' : ''}>Offen</option><option ${risk.status === 'Mitigiert' ? 'selected' : ''}>Mitigiert</option><option ${risk.status === 'Gelöst' ? 'selected' : ''}>Gelöst</option></select><button onclick="deleteRisk('${risk.id}')" style="background:#dc3545; color:white; border:none; padding:4px 8px; border-radius:3px; cursor:pointer;">✕</button></div>
         </div>
     `).join('');
 }
 
 function updateRiskStatus(riskId, status) {
     const risk = currentProjectData.planning.risks.find(r => r.id === riskId);
-    if (risk) {
-        risk.status = status;
-        saveProject();
-    }
+    if (risk) { risk.status = status; saveProject(); }
 }
 
 function deleteRisk(riskId) {
     currentProjectData.planning.risks = currentProjectData.planning.risks.filter(r => r.id !== riskId);
-    saveProject();
-    loadRisks();
+    saveProject(); loadRisks();
 }
 
-// ========== NOTIZEN ==========
 function saveNotes() {
     if (!currentProjectData) return;
     currentProjectData.planning.notes = document.getElementById('notes').value;
     saveProject();
 }
 
-// ========== HELPER ==========
 function escapeHtml(text) {
     if (!text) return '';
     const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
     return text.replace(/[&<>"']/g, m => map[m]);
 }
+
+// ========== START ==========
+document.addEventListener("DOMContentLoaded", () => {
+    console.log("🔄 Projektplanung gestartet");
+    syncFromDashboard();
+});
 </script>
 
 </body>
