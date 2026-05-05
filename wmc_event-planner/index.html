@@ -293,7 +293,7 @@
     <a onclick="showTab('dashboard')" class="active">📋 Dashboard</a>
     <a onclick="showTab('planning')">📊 Projektplanung</a>
     <a onclick="showTab('ai')">⚡ Groq KI (kostenlos)</a>
-    <a href="info.html">ℹ️ Info</a>
+    <a onclick="showTab('info')">ℹ️ Info</a>
 </nav>
 
 <header>
@@ -464,6 +464,328 @@
         </div>
         
         <div id="aiResponse" class="ai-response-box" style="display: none;"></div>
+    </div>
+</div>
+
+<!-- INFO TAB -->
+<div id="infoTab" style="display: none;">
+    <div>
+        <h1>ℹ️ Projektplanung - Umfassender Leitfaden</h1>
+        <p>Bewährte Praktiken, Strategien und Tipps für erfolgreiches Projektmanagement</p>
+
+        <div class="form-section">
+            
+            <h2>📚 Was ist Projektplanung?</h2>
+            <p>Projektplanung ist der systematische Prozess, in dem die Ziele, Scope, Kosten, Ressourcen und Zeitplan eines Projekts definiert und dokumentiert werden. Sie ist das unverzichtbare Fundament für erfolgreiches Projektmanagement und ermöglicht es Teams, komplexe Aufgaben strukturiert und transparent zu bewältigen.</p>
+            
+            <p>Eine gute Projektplanung reduziert Risiken, verbessert die Kommunikation zwischen Stakeholdern, hilft bei der Ressourcenverteilung und sorgt für realistische Erwartungen bezüglich Kosten, Zeit und Qualität. Ohne adäquate Planung können selbst kleinere Projekte zu Budget-Overruns, Verzögerungen und Qualitätsproblemen führen.</p>
+
+            <h3>🎯 Die 6 Wichtigsten Planungselemente</h3>
+            <ul>
+                <li><strong>Scope (Umfang):</strong> Exakte Definition, was zum Projekt gehört und was bewusst ausgeschlossen wird. Scope Creep ist eine der häufigsten Quellen für Projektscheitern.</li>
+                <li><strong>Ressourcen:</strong> Menschen (mit spezifischen Fähigkeiten), Tools, Infrastruktur, Budget und materielle Ressourcen, die benötigt werden.</li>
+                <li><strong>Budget:</strong> Detaillierte Kostenkalkulationen, Kontingenzreserven (typisch 10-20%) und Kostenüberwachung während der Ausführung.</li>
+                <li><strong>Zeitplan (Timeline):</strong> Realistische Schätzungen mit Puffern, kritischer Pfad, Meilensteine und Abhängigkeiten zwischen Aufgaben.</li>
+                <li><strong>Risiken:</strong> Identifikation potenzieller Probleme, deren Wahrscheinlichkeit und Auswirkung sowie Mitigation-Strategien.</li>
+                <li><strong>Qualität:</strong> Definition von Standards, Akzeptanzkriterien, Testing-Strategie und Performance-Metriken.</li>
+            </ul>
+
+            <h2>✅ 15 Best Practices für erfolgreiche Projektplanung</h2>
+            <ol>
+                <li><strong>Ziele klar definieren mit SMART-Kriterien:</strong> Spezifisch (konkrete Ziele), Messbar (quantifizierbar), Annehmbar (stakeholder-approved), Realistisch (erreichbar), Zeitgebunden (mit Deadline). Fuzzy Ziele führen zu chaotischen Projekten.</li>
+                
+                <li><strong>Alle Stakeholder früh einbeziehen:</strong> Nicht nur Sponsor und Team, sondern auch End-User, Support, Operations. Deren Input am Anfang spart Wochen später.</li>
+                
+                <li><strong>Realistisch schätzen, nicht optimistisch:</strong> Multipliziere komplexe Aufgaben mit 1,5-2x. Beginne mit Bottom-Up-Schätzungen (von Team), nicht Top-Down-Diktat.</li>
+                
+                <li><strong>Ressourcenverfügbarkeit sichern:</strong> Kläre vorher mit anderen Projektleitern, ob das Team wirklich verfügbar ist. Geteilte Ressourcen sind ein klassischer Verspätungsgrund.</li>
+                
+                <li><strong>Risiken systematisch analysieren:</strong> Nutze Risk Register, identifiziere Eintrittswahrscheinlichkeit und Auswirkung, entwickle Pläne für High-Risk-Items.</li>
+                
+                <li><strong>Klare Meilensteine setzen:</strong> Nicht mehr als 6-8 pro Projekt. Meilensteine sollten messbar und nachprüfbar sein.</li>
+                
+                <li><strong>Kommunikationsplan erstellen:</strong> Wer bekommt welche Info, wie oft, in welcher Form? Unklare Kommunikation erzeugt Überraschungen.</li>
+                
+                <li><strong>Alles dokumentieren:</strong> Anforderungen, Annahmen, Entscheidungen, Änderungen. Dokumentation schützt vor Missverständnissen und rechtlichen Problemen.</li>
+                
+                <li><strong>Puffer einplanen, aber nicht verschenken:</strong> Parkinson's Law: „Work expands to fill the time available." Buffer sollte geheim sein, sonst wird er aufgebraucht.</li>
+                
+                <li><strong>Abhängigkeiten explizit machen:</strong> Nutze Gantt-Charts oder Netzwerkdiagramme. Versteckte Abhängigkeiten führen zu Bottlenecks.</li>
+                
+                <li><strong>Regelmäßig den Plan überprüfen:</strong> Wöchentliche Status-Checks, monatliche Plan-Anpassungen. Pläne werden obsolet, wenn sie nicht gepflegt werden.</li>
+                
+                <li><strong>Change Control implementieren:</strong> Keine Änderungen ohne Dokumentation und Approval. Unkontrollierte Änderungen zerstören jeden Plan.</li>
+                
+                <li><strong>Lessons Learned Session am Ende:</strong> Was hat funktioniert, was nicht? Dieses Wissen ist Gold für zukünftige Projekte.</li>
+                
+                <li><strong>Tools nutzen, nicht ersetzen:**  Software hilft bei Tracking, aber der menschliche Input und Judgment sind unverzichtbar.</li>
+                
+                <li><strong>Realistische Erwartungen setzen:</strong> Kommuniziere, dass Pläne Prognosen sind, keine Garantien. Unerwartete Probleme passieren immer.</li>
+            </ol>
+
+            <h2>❌ Die 12 häufigsten Fehler in der Projektplanung</h2>
+            <ul>
+                <li><strong>🔴 Zu optimistische Zeitschätzungen:</strong> Die #1 Ursache für verspätete Projekte. Menschen unterschätzen systematisch die Zeit.</li>
+                <li><strong>🔴 Unklare oder überlappende Anforderungen:</strong> Führt zu Rework und Konfusion. Anforderungen müssen eindeutig und dokumentiert sein.</li>
+                <li><strong>🔴 Fehlende oder schlechte Ressourcenplanung:</strong> Man plant Features, vergisst aber zu prüfen, ob die Leute verfügbar sind.</li>
+                <li><strong>🔴 Keine Kontingenz für Risiken:</strong> Budget und Zeit sind bis zum letzten Cent verplant — kein Puffer für Probleme.</li>
+                <li><strong>🔴 Scope Creep (unkontrollierte Umfangserweiterung):</strong> Kleine „Can we also..." Requests addieren sich zu großen Verzögerungen.</li>
+                <li><strong>🔴 Mangelnde Kommunikation mit dem Team:</strong> Wenn einzelne nicht wissen, warum etwas wichtig ist, sinkt Motivation und Qualität.</li>
+                <li><strong>🔴 Budget unrealistisch kalkuliert:</strong> Vergessen werden oft: Schulungen, Reisen, Tools, Support, Overhead.</li>
+                <li><strong>🔴 Abhängigkeiten nicht berücksichtigt:</strong> „Wir können parallel arbeiten" — aber eigentlich braucht Task B das Output von Task A.</li>
+                <li><strong>🔴 Keine Priorisierung von Aufgaben:</strong> Alles ist „urgent" — wirkliche Priorisierung gibt Fokus.</li>
+                <li><strong>🔴 Plan zu detailliert (zu weit in die Zukunft):</strong> Detailplanung ist nur für die nächsten 2-4 Wochen sinnvoll; weiter hinaus braucht Flexibilität.</li>
+                <li><strong>🔴 Stakeholder-Erwartungen nicht managen:</strong> Ein Sponsor stellt sich etwas völlig anderes vor als das Team.</li>
+                <li><strong>🔴 Kein Monitoring und Controlling:</strong> Plan wird erstellt, dann ignoriert. Pläne müssen wöchentlich gegen Ist abgeglichen werden.</li>
+            </ul>
+
+            <h2>🔄 Projektmanagement Methodologien im Detail</h2>
+
+            <h3>📊 Waterfall (Wasserfallmodell)</h3>
+            <p><strong>Prozess:</strong> Anforderungen → Design → Entwicklung → Testing → Deployment → Wartung (sequentiell, jede Phase feedet in die nächste)</p>
+            <p><strong>Geeignet für:</strong> 
+                <ul>
+                    <li>Projekte mit klaren, stabilen Anforderungen (z.B. Infrastruktur, Hardware-Projekte)</li>
+                    <li>Regulated Industries (z.B. Pharma, Banken) mit streng dokumentiertem Prozess</li>
+                    <li>Projekte mit festen Budget und Deadline</li>
+                    <li>Teams, die räumlich verteilt sind und keine tägliche Kommunikation brauchen</li>
+                </ul>
+            </p>
+            <p><strong>Vorteile:</strong>
+                <ul>
+                    <li>Klare, lineare Struktur — leicht nachvollziehbar</li>
+                    <li>Einfaches Tracking und Reporting</li>
+                    <li>Gutes für Budgetplanung (Kosten am Anfang bekannt)</li>
+                    <li>Gut dokumentiert — nützlich für Audits</li>
+                </ul>
+            </p>
+            <p><strong>Nachteile:</strong>
+                <ul>
+                    <li>Sehr unflexibel — Änderungen sind teuer</li>
+                    <li>Fehler/Probleme werden erst spät erkannt (am Ende)</li>
+                    <li>Keine Kundenfeedback während Development</li>
+                    <li>Kann zu „Big Bang Releases" führen mit hohem Risiko</li>
+                    <li>Wenn Anforderungen unklar sind, resultiert großer Rework</li>
+                </ul>
+            </p>
+
+            <h3>🔄 Agile / Scrum</h3>
+            <p><strong>Prozess:</strong> 2-4 Wochen Sprints mit täglichen Standups, Sprint Reviews, Retrospectives. Kontinuierliche Feedback-Schleifen.</p>
+            <p><strong>Geeignet für:</strong>
+                <ul>
+                    <li>Software-Entwicklung mit sich ändernden Anforderungen</li>
+                    <li>Startups und Innovation-Projekte</li>
+                    <li>Teams, die co-located oder sehr gut remote-sync sind</li>
+                    <li>Projekte, wo Kundenfeedback regelmäßig gebraucht wird</li>
+                    <li>Hochkomplexe Projekte mit großen Unsicherheiten</li>
+                </ul>
+            </p>
+            <p><strong>Vorteile:</strong>
+                <ul>
+                    <li>Sehr flexibel — Anpassungen an Änderungen sind normal</li>
+                    <li>Schnelles Feedback von echten Usern</li>
+                    <li>Tägliche Synchronisation reduziert Missverständnisse</li>
+                    <li>Frühe und häufige Releases / Produktlieferungen</li>
+                    <li>Team-Motivation oft höher (mehr Autonomie)</li>
+                </ul>
+            </p>
+            <p><strong>Nachteile:</strong>
+                <ul>
+                    <li>Erfordert aktiven Kundensupport (Verfügbarkeit!)</li>
+                    <li>Schwerer zu budgetieren (Kosten entstehen kontinuierlich)</li>
+                    <li>Kann ohne klare Governance zu Chaos führen</li>
+                    <li>Nicht für verteilte Teams über viele Zeitzonen geeignet</li>
+                    <li>Overhead durch tägliche Meetings</li>
+                </ul>
+            </p>
+
+            <h3>📋 Kanban</h3>
+            <p><strong>Prozess:</strong> Kontinuierlicher Fluss. Aufgaben in Spalten (To Do, In Progress, Review, Done). WIP-Limits (Work In Progress) um Bottlenecks zu identifizieren.</p>
+            <p><strong>Geeignet für:</strong>
+                <ul>
+                    <li>Laufende Operations und Support-Teams</li>
+                    <li>Maintenance und Bug-Fixing</li>
+                    <li>Projekte mit unterschiedlichen Aufgabengrößen</li>
+                    <li>Teams, die häufig mit Prioritätsänderungen umgehen</li>
+                </ul>
+            </p>
+            <p><strong>Vorteile:</strong>
+                <ul>
+                    <li>Einfach zu verstehen und einzuführen</li>
+                    <li>Visuelle Darstellung macht Bottlenecks sichtbar</li>
+                    <li>Flexibel — keine festen Sprints nötig</li>
+                    <li>Weniger Meeting-Overhead als Scrum</li>
+                    <li>Kurze Durchlaufzeiten möglich</li>
+                </ul>
+            </p>
+            <p><strong>Nachteile:</strong>
+                <ul>
+                    <li>Weniger Struktur — kann zu unkontrolliertem Fluss führen</li>
+                    <li>Schwerer für größere Projekte mit vielen Abhängigkeiten</li>
+                    <li>Weniger regelmäßiges Feedback-Cycle als Agile</li>
+                    <li>Capacity Planning ist schwieriger ohne Sprints</li>
+                </ul>
+            </p>
+
+            <h3>🎯 Hybrid-Ansätze (Scrumban, Agile Waterfall)</h3>
+            <p><strong>Konzept:</strong> Kombination von Waterfall und Agile je nach Projektphase oder Komponente. Beispiele:</p>
+            <ul>
+                <li>Phase 1 (Requirement & Design): Waterfall (klare, stabile Specs)</li>
+                <li>Phase 2-4 (Development): Agile 2-Wochen Sprints</li>
+                <li>Phase 5 (Testing & Deployment): Waterfall (strenge Prozesse)</li>
+            </ul>
+            <p>Oder: Große Komponenten in Waterfall-Phase (Epic), innerhalb jeder Komponente Agile Sprints für die User Stories.</p>
+
+            <h2>💰 Kostenmanagement in Projekten</h2>
+            <h3>Kostenarten, die oft vergessen werden:</h3>
+            <ul>
+                <li>Schulungen und Onboarding (z.B. für neue Tools)</li>
+                <li>Externe Schulungen, Zertifizierungen, Konferenzen</li>
+                <li>Reisekosten (wenn Team verteilt ist)</li>
+                <li>Software-Lizenzen, SaaS-Abos, Tools</li>
+                <li>Infrastruktur (Server, Cloud, Bandbreite)</li>
+                <li>Overhead für Projektmanagement (PM, QA, DevOps)</li>
+                <li>Dokumentation und Knowledge Management</li>
+                <li>Risiko-Kontingenz (üblicherweise 10-20% der direkten Kosten)</li>
+                <li>Management-Reserven (unvorhergesehene Probleme, ca. 5%)</li>
+            </ul>
+
+            <h3>Budgetüberwachung: Earned Value Management (EVM)</h3>
+            <p>EVM ist ein bewährtes Verfahren:</p>
+            <ul>
+                <li><strong>Planned Value (PV):</strong> Wie viel sollte bis heute abgeschlossen sein?</li>
+                <li><strong>Actual Cost (AC):</strong> Wie viel haben wir tatsächlich ausgegeben?</li>
+                <li><strong>Earned Value (EV):</strong> Welcher Wert ist wirklich abgeschlossen (nicht nur bezahlt)?</li>
+                <li>CPI (Cost Performance Index) = EV / AC. CPI > 1 = unter Budget, CPI < 1 = über Budget</li>
+                <li>SPI (Schedule Performance Index) = EV / PV. SPI > 1 = vor Schedule, SPI < 1 = hinter Schedule</li>
+            </ul>
+
+            <h2>⏰ Zeitplanmanagement & kritischer Pfad</h2>
+            <h3>Was ist der kritische Pfad?</h3>
+            <p>Die längste Abfolge von abhängigen Aufgaben. Jede Verzögerung in dieser Kette verzögert das ganze Projekt. Task außerhalb des kritischen Pfads haben Puffer (Slack) und können verzögert werden, ohne das Projekt zu verzögern.</p>
+            
+            <h3>Wie man Zeitpuffer richtig einplant:</h3>
+            <ul>
+                <li><strong>Task-Buffer:</strong> 10-20% extra für jede Aufgabe (Risikofaktoren)</li>
+                <li><strong>Feeding Buffer:</strong> Puffer vor kritischen Aufgaben (damit Verzögerungen in vorgelagerten Tasks nicht den kritischen Pfad treffen)</li>
+                <li><strong>Project Buffer:</strong> 10-15% Puffer am Ende des Projekts (für unvorhergesehene Probleme)</li>
+                <li><strong>Management Reserve:</strong> 5% für völlig unerwartete Probleme</li>
+            </ul>
+            
+            <h3>Häufige Schätzfehler und wie man sie vermeidet:</h3>
+            <ul>
+                <li><strong>Planning Fallacy:</strong> Wir unterschätzen immer Zeitaufwand. Lösung: Historical Data nutzen, nicht Bauchgefühl.</li>
+                <li><strong>Multitasking-Penalty:</strong> Wenn ein Team-Member 3 Projekte parallel hat, dauert jede 3x länger (Kontext-Wechsel). Lösung: Fokus, weniger Parallelität.</li>
+                <li><strong>Unknown Unknowns:</strong> Dinge, die wir nicht wissen, dass wir sie nicht wissen. Lösung: Risk Workshops mit erfahrenen Kollegen.</li>
+                <li><strong>Optimism Bias:</strong> „Das wird schneller gehen als die letzten Male." Lösung: Aktuelle Projektdaten als Baseline, nicht Wunschdenken.</li>
+            </ul>
+
+            <h2>👥 Team-Dynamik und Ressourcenmanagement</h2>
+            <h3>Wichtige Überlegungen:</h3>
+            <ul>
+                <li><strong>Team-Größe:</strong> Mit jeder zusätzlichen Person wächst Kommunikation exponentiell (n*(n-1)/2 Beziehungen). Kleinere, spezialisierte Teams sind oft effizienter.</li>
+                <li><strong>Ramp-Up Zeit:</strong> Neue Team-Member brauchen 2-4 Wochen, bis sie produktiv sind. Das muss in die Planung!</li>
+                <li><strong>Skill-Matrix:</strong> Nicht jeder kann alles. Skill-Gaps sollten früh identifiziert und durch Training oder externe Hilfe gedeckt werden.</li>
+                <li><strong>Motivation und Burnout:</strong> Unrealistische Deadlines führen zu Burnout und schlechter Qualität. Better to be 2 Wochen später mit glücklichem Team als früher mit ausgebrannten Leuten.</li>
+                <li><strong>Knowledge Silos vermeiden:</strong> Wenn nur eine Person weiß, wie etwas funktioniert, ist das ein Risiko. Pair Programming und Knowledge Sharing reduzieren dieses Risiko.</li>
+            </ul>
+
+            <h2>🚨 Risikostrategien in der Praxis</h2>
+            <h3>4 Risikostrategien:</h3>
+            <ul>
+                <li><strong>Avoid:</strong> Das Risiko umgehen (z.B. eine riskante Technologie nicht nutzen).</li>
+                <li><strong>Mitigate:</strong> Die Eintrittswahrscheinlichkeit oder Auswirkung reduzieren (z.B. Proof-of-Concept vor Full Implementation).</li>
+                <li><strong>Accept:</strong> Das Risiko bewusst akzeptieren und Fallback-Plan haben (z.B. „Wir könnten zwei Wochen verzögert sein, dafür sparen wir X Euro").</li>
+                <li><strong>Transfer:</strong> Das Risiko auf andere übertragen (z.B. Versicherung, Wartungsvertrag, Outsourcing).</li>
+            </ul>
+
+            <h2>📖 Praktische Fallstudien</h2>
+            
+            <h3>Fallstudie 1: Website-Relaunch (Größe: mittel, 6 Monate)</h3>
+            <p><strong>Was schiefging:</strong> Team unterschätzte Anforderungen (dachte 3 Monate, brauchte 6), keine Kundenfeedback-Sessions geplant, zu viel Scope ohne Prioritäten.</p>
+            <p><strong>Lessons:</strong> Größere Puffer bei Redesign-Projekten, monatliche Kunden-Reviews, strikte Scope-Verwaltung mit Change-Control.</p>
+
+            <h3>Fallstudie 2: Legacy-System Migration (Größe: groß, 12 Monate geplant, 18 Monate real)</h3>
+            <p><strong>Was schiefging:</strong> Unknown Unknowns in altem Code, Abhängigkeiten nicht dokumentiert, Datenqualitätsprobleme, Ressourcen wurden mid-project abgezogen für andere Projekte.</p>
+            <p><strong>Lessons:</strong> Erst richtig explorieren und dokumentieren, Ressourcen-Booking absichern, Parallelbetrieb länger planen (Ausfallsicherheit), regelmäßige Audits der Datenmigration.</p>
+
+            <h3>Fallstudie 3: Agile-Transformation im großen Unternehmen (Größe: sehr groß, 2 Jahre)</h3>
+            <p><strong>Was schiefging:</strong> Zu viel Top-Down von Management, Teams nicht vorbereitet, alte Prozesse/Policies nicht angepasst, Scrum Master fehlte, Executive Sponsorship schwach.</p>
+            <p><strong>Lessons:</strong> Change Management ist nicht optional, klare Executive Sponsorship, mehrere Pilot-Teams starten, Organizational Structure anpassen, regelmäßige Retrospectives auf Org-Ebene, nicht mit allen Teams gleichzeitig starten.</p>
+
+            <h2>💡 Advanced: Adaptive Projektmanagement</h2>
+            <p>Bei hoher Unsicherheit (z.B. Innovation, New Market, Cutting-Edge Tech) funktioniert klassische Planung nicht. Stattdessen:</p>
+            <ul>
+                <li><strong>Iterative Exploration:</strong> Schnelle Zyklen (weeks, not months) mit echtem Kundenfeedback</li>
+                <li><strong>Build-Measure-Learn:</strong> Minimal Viable Product bauen, User Feedback sammeln, anpassen</li>
+                <li><strong>Gate-Review Approach:</strong> Statt Waterfall, mehrere Entscheidungs-Gates (Go/No-Go).</li>
+                <li><strong>Real Options Thinking:</strong> Verschiedene Szenarien vorbereiten, später entscheiden</li>
+            </ul>
+
+            <h2>🎓 Weiterführende Ressourcen</h2>
+            <ul>
+                <li><strong>PMBOK (Project Management Body of Knowledge):</strong> Der Standard im Projektmanagement, von PMI. Gut für formelle Knowlege.</li>
+                <li><strong>Agile Manifesto:</strong> https://agilemanifesto.org (kurz, prägnant, Kernwerte von Agile)</li>
+                <li><strong>Scrum.org:</strong> Offizielle Ressourcen, Zertifizierungen, Guides für Scrum und Agile.</li>
+                <li><strong>The Goal (Buch):</strong> Theory of Constraints — wie man Bottlenecks in Projekten findet und beseitigt.</li>
+                <li><strong>Peopleware (Buch):</strong> Warum Menschen und Teams wichtiger sind als Tools und Prozesse.</li>
+                <li><strong>Risk Register Beispiele:</strong> Viele Org. teilen Risk Register Templates online — nutze diese als Basis.</li>
+            </ul>
+
+            <h2>❓ Erweiterte FAQ</h2>
+
+            <h3>Wie lange sollte die Planungsphase sein?</h3>
+            <p>Als Daumenregel: 10-15% der Gesamtprojektdauer. Bei einem 10-Wochen-Projekt also 1-1,5 Wochen. Bei größeren Projekten (>6 Monate) kann die Planung 3-4 Wochen dauern. Aber: Perfekte Pläne gibt's nicht — „Done is better than perfect" auch bei Planning.</p>
+
+            <h3>Was ist ein kritischer Pfad?</h3>
+            <p>Die längste Abfolge von abhängigen Aufgaben, bei denen Verzögerungen die gesamte Projektdauer verlängern würde. Andere Tasks (außerhalb des kritischen Pfads) haben Puffer und können verzögert werden, ohne das Gesamtprojekt zu verzögern. Im Gantt-Chart ist er üblicherweise rot markiert.</p>
+
+            <h3>Wie oft sollte ich den Plan überprüfen?</h3>
+            <p>Mindestens wöchentlich in aktiven Projektphasen (Status-Check gegen aktuelle Progress), monatlich eine formale Plan-Review (Anpassung, was hat sich geändert), täglich in Agile-Projekten (Standups).</p>
+
+            <h3>Was ist Scope Creep und wie vermeide ich es?</h3>
+            <p>Scope Creep ist die unkontrollierte, meist undokumentierte Ausweitung des Projektumfangs. Kleine „Can we also..." Requests addieren sich zu großen Verzögerungen. Vermeidung:</p>
+            <ul>
+                <li>Klare, dokumentierte Requirements von Anfang an</li>
+                <li>Change-Control-Prozess (jede Änderung muss genehmigt und kosten/zeit-impact geprüft werden)</li>
+                <li>Regelmäßige Stakeholder-Reviews (Alignment, dass wir das Richtige bauen)</li>
+                <li>Feature Backlog Priorisierung (was ist must-have vs. nice-to-have?)</li>
+            </ul>
+
+            <h3>Wie plane ich Risiken realistisch ein?</h3>
+            <p>Schritt-für-Schritt:</p>
+            <ol>
+                <li>Risk Brainstorm mit Team und Stakeholdern (Was könnte schiefgehen?)</li>
+                <li>Jedes Risiko mit Wahrscheinlichkeit (Hoch/Mittel/Niedrig) und Auswirkung (Zeit, Cost, Quality) bewerten</li>
+                <li>Risk Score = Wahrscheinlichkeit × Auswirkung. Top Risks priorisieren.</li>
+                <li>Für jedes Top-Risk: Mitigation Plan (Was machen wir proaktiv?) und Fallback Plan (Was wenn es trotzdem passiert?)</li>
+                <li>Kontingenz-Budget/Zeit basierend auf Risk Score einplanen (nicht basierend auf Bauchgefühl)</li>
+                <li>Risk Register regelmäßig (monatlich) überprüfen und aktualisieren</li>
+            </ol>
+
+            <h3>Sollten wir ein Projekt früher stoppen, wenn es schlecht läuft?</h3>
+            <p>Ja! Go/No-Go Gates sind wichtig. Klassische Signale zum Abbrechen:</p>
+            <ul>
+                <li>Kernannahmen haben sich als falsch herausgestellt</li>
+                <li>Business Case ist nicht mehr gültig (Markt hat sich geändert)</li>
+                <li>Risiken sind unrealistisch geworden</li>
+                <li>Team-Morale ist kollabiert</li>
+                <li>Kosten sind 50%+ über Budget und Nutzen ist unklar</li>
+            </ul>
+            <p>Ein Projekt zu stoppen ist nicht Scheitern — es ist eine kluge Entscheidung.</p>
+
+            <h3>Agile oder Waterfall — was sollten wir wählen?</h3>
+            <p>Decision Tree:</p>
+            <ul>
+                <li>Sind Anforderungen SEHR klar und stabil? → Waterfall</li>
+                <li>Viel Unsicherheit, schnelle Kundenfeedback-Zyklen möglich? → Agile</li>
+                <li>Regulated Industry mit striktem Audit-Trail? → Waterfall</li>
+                <li>Startup oder Innovation? → Agile</li>
+                <li>Große, komplexe, verteilte Teams? → Hybrid (Waterfall für Phasen, Agile für Componenten)</li>
+                <li>Betriebliches, repetitives Stuff? → Kanban</li>
+            </ul>
+
+        </div>
     </div>
 </div>
 
@@ -1081,7 +1403,8 @@ function showTab(tab) {
     document.getElementById('dashboardTab').style.display = tab === 'dashboard' ? 'block' : 'none';
     document.getElementById('planningTab').style.display = tab === 'planning' ? 'block' : 'none';
     document.getElementById('aiTab').style.display = tab === 'ai' ? 'block' : 'none';
-    document.querySelectorAll('nav a').forEach((a, i) => { a.classList.toggle('active', (tab === 'dashboard' && i === 0) || (tab === 'planning' && i === 1) || (tab === 'ai' && i === 2)); });
+    document.getElementById('infoTab').style.display = tab === 'info' ? 'block' : 'none';
+    document.querySelectorAll('nav a').forEach((a, i) => { a.classList.toggle('active', (tab === 'dashboard' && i === 0) || (tab === 'planning' && i === 1) || (tab === 'ai' && i === 2) || (tab === 'info' && i === 3)); });
     if (tab === 'planning') loadAllProjects();
     if (tab === 'ai') { loadAllProjects(); updateAiProjectSelect(); }
 }

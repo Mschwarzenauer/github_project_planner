@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projektplaner</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav>
+    <a href="index.html" class="active">📋 Dashboard</a>
+    <a href="projektplanung.html">📊 Projektplanung</a>
+    <a href="info.html">ℹ️ Info</a>
+</nav>
+
+<header>
+    <h1>📋 Projektplaner</h1>
+    <p>Projektplanung zur besseren Organisation</p>
+</header>
+
+<!-- LOGIN -->
+<section id="loginBox" class="form-section">
+    <h2>Login</h2>
+
+    <label>Benutzername</label>
+    <input id="username" type="text">
+
+    <label>Passwort</label>
+    <input id="password" type="password">
+
+    <button onclick="login()">Login</button>
+</section>
+
+<!-- APP -->
+<div id="app" style="display:none;">
+
+<!-- Projektwahl -->
+<section class="form-section">
+    <h2>🎯 Meine Projekte</h2>
+    <div id="projectList" style="display: flex; gap: 10px; flex-wrap: wrap; margin: 15px 0;">
+    </div>
+    
+    <button onclick="showNewProjectForm()" style="margin-top: 10px;">➕ Neues Projekt erstellen</button>
+</section>
+
+<!-- Neues Projekt Form (versteckt) -->
+<section id="newProjectForm" class="form-section" style="display: none;">
+    <h2>Neues Projekt</h2>
+    
+    <label>Projektname</label>
+    <input id="newProjectName" type="text" placeholder="z.B. Website Redesign">
+    
+    <label>Projektbeschreibung</label>
+    <textarea id="newProjectDesc" rows="3" placeholder="Worum geht es?"></textarea>
+    
+    <div class="grid-2">
+        <button onclick="createProject()" class="save-btn">✓ Projekt erstellen</button>
+        <button onclick="hideNewProjectForm()" class="save-btn">✗ Abbrechen</button>
+    </div>
+</section>
+
+<!-- Projekt-Detail (wird nach Auswahl angezeigt) -->
+<div id="projectDetail" style="display: none;">
+
+<section class="form-section">
+    <h2>📌 Projekt: <span id="projectNameDisplay"></span></h2>
+    <button onclick="goBack()" style="margin-bottom: 15px; background: #6c757d;">← Zurück zur Projektliste</button>
+</section>
+
+<section class="form-section">
+    <h2>ℹ️ Projektinformationen</h2>
+
+    <label>Projektname</label>
+    <input id="projectNameInput" type="text" onchange="saveProjectData()">
+
+    <label>Projektbeschreibung</label>
+    <textarea id="projectDesc" rows="4" onchange="saveProjectData()"></textarea>
+
+    <div class="grid-2">
+        <div>
+            <label>Startdatum</label>
+            <input id="startDate" type="date" onchange="saveProjectData()">
+        </div>
+        <div>
+            <label>Enddatum</label>
+            <input id="endDate" type="date" onchange="saveProjectData()">
+        </div>
+    </div>
+</section>
+
+<!-- Team-Mitglieder einladen -->
+<section class="form-section">
+    <h2>👥 Team-Mitglieder</h2>
+    
+    <label>Benutzer hinzufügen (müssen registriert sein)</label>
+    <div style="display: flex; gap: 10px;">
+        <input id="memberToAdd" type="text" placeholder="Benutzername eingeben" style="flex: 1;">
+        <button onclick="addMemberToProject()" style="padding: 10px 20px;">Hinzufügen</button>
+    </div>
+
+    <div id="teamList" style="margin-top: 15px;">
+        <h4>Aktuelle Mitglieder:</h4>
+        <ul id="teamMembers" style="list-style: none; padding: 0;">
+        </ul>
+    </div>
+</section>
+
+<section class="form-section">
+    <h2>Meilensteine</h2>
+    <table>
+        <tr>   
+            <th>Meilenstein</th>
+            <th>Fälligkeitsdatum</th>
+            <th>Status</th>
+        </tr>
+        <tbody id="milestoneTable">
+            <tr>
+                <td contenteditable="true" onblur="saveProjectData()">MVP</td>
+                <td><input type="date" onchange="saveProjectData()"></td>
+                <td contenteditable="true" onblur="saveProjectData()">In Planung</td>
+            </tr>
+            <tr>
+                <td contenteditable="true" onblur="saveProjectData()">Release 1.0</td>
+                <td><input type="date" onchange="saveProjectData()"></td>
+                <td contenteditable="true" onblur="saveProjectData()">Offen</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<section class="form-section">
+    <h2>Kanban Board</h2>
+
+    <div class="kanban">
+        <div class="col">
+            <h3>To Do</h3>
+            <input id="newTask" placeholder="Neue Aufgabe erstellen"
+                onkeydown="if(event.key==='Enter'){addTask()}">
+            <div class="kanban-box" id="todo"
+                ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        </div>
+
+        <div class="col">
+            <h3>In Progress</h3>
+            <div class="kanban-box" id="progress"
+                ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        </div>
+
+        <div class="col">
+            <h3>Review</h3>
+            <div class="kanban-box" id="review"
+                ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        </div>
+
+        <div class="col">
+            <h3>Done</h3>
+            <div class="kanban-box" id="done"
+                ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        </div>
+    </div>
+</section>
+
+<!-- Navigation Footer -->
+<section class="form-section">
+    <div class="button-group">
+        <button onclick="saveProjectData()" class="save-btn">💾 Speichern</button>
+        <button onclick="deleteProject()" style="background: #dc3545;">🗑️ Projekt löschen</button>
+        <button onclick="goBack()" style="background: #6c757d;">← Zurück</button>
+    </div>
+</section>
+
+</div><!-- end projectDetail -->
+
+<section class="form-section" style="margin-top: 20px;">
+    <div class="button-group">
+        <button onclick="showUserInfo()" class="info-btn">👤 Benutzerinfo</button>
+        <button onclick="logout()" class="logout-btn">🚪 Logout</button>
+    </div>
+</section>
+
+</div><!-- end app -->
+
+<footer>
+    <p>© 2025 Projektplaner • Multi-User & Multi-Project Management</p>
+</footer>
+
+<script>
+let currentUser = null;
+let currentProject = null;
+
+// Initialisierung
+document.addEventListener("DOMContentLoaded", () => {
+    const u = localStorage.getItem("currentUser");
+    if (u) {
+        currentUser = u;
+        showApp();
+        loadProjectList();
+    }
+    setActiveNav();
+});
+
+// ========== LOGIN & LOGOUT ==========
+function login() {
+    const user = document.getElementById("username").value.trim();
+    const pass = document.getElementById("password").value.trim();
+
+    if (!user || !pass) return alert("Benutzername und Passwort erforderlich");
+
+    const users = JSON.parse(localStorage.getItem("users") || "{}");
+
+    if (users[user] && users[user].password === pass) {
+        currentUser = user;
+        localStorage.setItem("currentUser", user);
+        document.getElementById("loginBox").style.display = "none";
+        showApp();
+        loadProjectList();
+    } else if (!users[user]) {
+        users[user] = { password: pass, projects: [] };
+        localStorage.setItem("users", JSON.stringify(users));
+        currentUser = user;
+        localStorage.setItem("currentUser", user);
+        document.getElementById("loginBox").style.display = "none";
+        showApp();
+        loadProjectList();
+    } else {
+        alert("Falsches Passwort");
+    }
+}
+
+function logout() {
+    if (confirm("Wirklich abmelden?")) {
+        currentUser = null;
+        currentProject = null;
+        localStorage.removeItem("currentUser");
+        localStorage.removeItem("currentProject");
+        document.getElementById("loginBox").style.display = "block";
+        document.getElementById("app").style.display = "none";
+        document.getElementById("username").value = "";
+        document.getElementById("password").value = "";
+    }
+}
+
+// ========== PROJEKT-VERWALTUNG ==========
+function loadProjectList() {
+    const users = JSON.parse(localStorage.getItem("users") || "{}");
+    const userData = users[currentUser] || { password: "", projects: [] };
+    const projects = userData.projects || [];
+
+    const html = projects.map((pid) => {
+        const p = getProjectById(pid);
+        const name = p ? p.name : "Gelöschtes Projekt";
+        return `<button onclick="selectProject('${pid}')" style="padding: 10px 20px; background: #0d6efd; color: white; border: none; border-radius: 4px; cursor: pointer;">${name}</button>`;
+    }).join("");
+
+    document.getElementById("projectList").innerHTML = html;
+}
+
+function selectProject(projectId) {
+    currentProject = projectId;
+    localStorage.setItem("currentProject", projectId);
+    loadProjectData();
+    document.getElementById("projectList").parentElement.style.display = "none";
+    document.getElementById("projectDetail").style.display = "block";
+    document.getElementById("newProjectForm").style.display = "none";
+}
+
+function goBack() {
+    currentProject = null;
+    document.getElementById("projectDetail").style.display = "none";
+    document.getElementById("projectList").parentElement.style.display = "block";
+    loadProjectList();
+}
+
+function showNewProjectForm() {
+    document.getElementById("newProjectForm").style.display = "block";
+}
+
+function hideNewProjectForm() {
+    document.getElementById("newProjectForm").style.display = "none";
+    document.getElementById("newProjectName").value = "";
+    document.getElementById("newProjectDesc").value = "";
+}
+
+function createProject() {
+    const name = document.getElementById("newProjectName").value.trim();
+    const desc = document.getElementById("newProjectDesc").value.trim();
+
+    if (!name) return alert("Projektname erforderlich");
+
+    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    const projectId = "proj_" + Date.now();
+
+    projects[projectId] = {
+        id: projectId,
+        name: name,
+        description: desc,
+        owner: currentUser,
+        members: [currentUser],
+        startDate: "",
+        endDate: "",
+        milestones: [],
+        kanban: { todo: [], progress: [], review: [], done: [] },
+        projectPlanning: {}
+    };
+
+    localStorage.setItem("projects", JSON.stringify(projects));
+
+    const users = JSON.parse(localStorage.getItem("users") || "{}");
+    if (!users[currentUser].projects) users[currentUser].projects = [];
+    users[currentUser].projects.push(projectId);
+    localStorage.setItem("users", JSON.stringify(users));
+
+    hideNewProjectForm();
+    loadProjectList();
+}
+
+function deleteProject() {
+    if (!currentProject) return;
+    if (!confirm("Projekt wirklich löschen?")) return;
+
+    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    const p = projects[currentProject];
+
+    if (p && p.owner === currentUser) {
+        delete projects[currentProject];
+        localStorage.setItem("projects", JSON.stringify(projects));
+
+        const users = JSON.parse(localStorage.getItem("users") || "{}");
+        Object.keys(users).forEach(u => {
+            if (users[u].projects) {
+                users[u].projects = users[u].projects.filter(id => id !== currentProject);
+            }
+        });
+        localStorage.setItem("users", JSON.stringify(users));
+
+        goBack();
+    } else {
+        alert("Nur der Projekt-Owner kann löschen");
+    }
+}
+
+function getProjectById(projectId) {
+    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    return projects[projectId] || null;
+}
+
+// ========== DATEN LADEN/SPEICHERN ==========
+function loadProjectData() {
+    const p = getProjectById(currentProject);
+    if (!p) {
+        alert("Projekt nicht gefunden");
+        goBack();
+        return;
+    }
+
+    document.getElementById("projectNameDisplay").textContent = p.name;
+    document.getElementById("projectNameInput").value = p.name || "";
+    document.getElementById("projectDesc").value = p.description || "";
+    document.getElementById("startDate").value = p.startDate || "";
+    document.getElementById("endDate").value = p.endDate || "";
+    
+    // Meilensteine laden
+    const mRows = document.getElementById("milestoneTable").querySelectorAll("tr");
+    p.milestones.forEach((m, i) => {
+        if (mRows[i + 1]) {
+            mRows[i + 1].querySelectorAll("td")[0].textContent = m.name;
+            mRows[i + 1].querySelectorAll("input")[0].value = m.date;
+            mRows[i + 1].querySelectorAll("td")[2].textContent = m.status;
+        }
+    });
+
+    // Kanban laden
+    loadKanbanBoard();
+
+    // Team-Mitglieder laden
+    loadTeamMembers();
+}
+
+function saveProjectData() {
+    if (!currentProject) return;
+
+    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    const p = projects[currentProject];
+
+    if (!p) return;
+
+    p.name = document.getElementById("projectNameInput").value;
+    p.description = document.getElementById("projectDesc").value;
+    p.startDate = document.getElementById("startDate").value;
+    p.endDate = document.getElementById("endDate").value;
+
+    // Meilensteine speichern
+    const milestones = [];
+    document.getElementById("milestoneTable").querySelectorAll("tr").forEach((row, idx) => {
+        if (idx > 0) {
+            const cells = row.querySelectorAll("td");
+            const input = row.querySelector("input");
+            milestones.push({
+                name: cells[0]?.textContent || "",
+                date: input?.value || "",
+                status: cells[2]?   .textContent || ""
+            });
+        }
+    });
+    p.milestones = milestones;
+
+    // Kanban speichern
+    const kanban = {};
+    ["todo", "progress", "review", "done"].forEach(col => {
+        const tasks = [];
+        document.getElementById(col).querySelectorAll(".task").forEach(task => {
+            tasks.push(task.textContent.trim());
+        });
+        kanban[col] = tasks;
+    });
+    p.kanban = kanban;
+
+    localStorage.setItem("projects", JSON.stringify(projects));
+    console.log("Projekt gespeichert");
+}
+
+// ========== KANBAN ==========
+function loadKanbanBoard() {
+    const p = getProjectById(currentProject);
+    if (!p || !p.kanban) return;
+
+    ["todo", "progress", "review", "done"].forEach(col => {
+        const box = document.getElementById(col);
+        box.innerHTML = "";
+        (p.kanban[col] || []).forEach(task => {
+            const div = document.createElement("div");
+            div.className = "task";
+            div.draggable = true;
+            div.textContent = task;
+            div.ondragstart = (e) => e.dataTransfer.setData("text", e.target.textContent);
+            box.appendChild(div);
+        });
+    });
+}
+
+function addTask() {
+    const task = document.getElementById("newTask").value.trim();
+    if (!task) return;
+
+    const div = document.createElement("div");
+    div.className = "task";
+    div.draggable = true;
+    div.textContent = task;
+    div.ondragstart = (e) => e.dataTransfer.setData("text", e.target.textContent);
+
+    document.getElementById("todo").appendChild(div);
+    document.getElementById("newTask").value = "";
+    saveProjectData();
+}
+
+function allowDrop(e) {
+    e.preventDefault();
+}
+
+function drop(e) {
+    e.preventDefault();
+    const task = e.dataTransfer.getData("text");
+    const targetBox = e.target.closest(".kanban-box");
+
+    if (!targetBox) return;
+
+    const allTasks = document.querySelectorAll(".task");
+    allTasks.forEach(t => {
+        if (t.textContent === task) {
+            t.remove();
+        }
+    });
+
+    const div = document.createElement("div");
+    div.className = "task";
+    div.draggable = true;
+    div.textContent = task;
+    div.ondragstart = (e) => e.dataTransfer.setData("text", e.target.textContent);
+     
+    targetBox.appendChild(div);
+    saveProjectData();
+}
+
+// ========== TEAM-MITGLIEDER ==========
+function loadTeamMembers() {
+    const p = getProjectById(currentProject);
+    if (!p) return;
+
+    const list = document.getElementById("teamMembers");
+    list.innerHTML = (p.members || []).map(m => {
+        const isOwner = m === p.owner;
+        const isMe = m === currentUser;
+        let action = "";
+        if (isMe && !isOwner && p.owner === currentUser) {
+            action = `<button onclick="removeMember('${m}')" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; margin-left: 10px;">✕</button>`;
+        }
+        return `<li style="padding: 8px; border-bottom: 1px solid #ddd;">${m} ${isOwner ? "(Owner)" : ""} ${action}</li>`;
+    }).join("");
+}
+
+function addMemberToProject() {
+    const p = getProjectById(currentProject);
+    if (!p) return;
+    if (p.owner !== currentUser) return alert("Nur der Owner kann Mitglieder hinzufügen");
+
+    const username = document.getElementById("memberToAdd").value.trim();
+    if (!username) return alert("Benutzername erforderlich");
+
+    const users = JSON.parse(localStorage.getItem("users") || "{}");
+    if (!users[username]) return alert("Benutzer nicht gefunden");
+
+    if (p.members.includes(username)) return alert("Benutzer ist bereits Mitglied");
+
+    p.members.push(username);
+
+    if (!users[username].projects) users[username].projects = [];
+    if (!users[username].projects.includes(currentProject)) {
+        users[username].projects.push(currentProject);
+    }
+
+    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    projects[currentProject] = p;
+    localStorage.setItem("projects", JSON.stringify(projects));
+    localStorage.setItem("users", JSON.stringify(users));
+
+    document.getElementById("memberToAdd").value = "";
+    loadTeamMembers();
+}
+
+function removeMember(username) {
+    if (!confirm(`${username} wirklich entfernen?`)) return;
+
+    const p = getProjectById(currentProject);
+    if (!p || p.owner !== currentUser) return;
+
+    p.members = p.members.filter(m => m !== username);
+
+    const users = JSON.parse(localStorage.getItem("users") || "{}");
+    if (users[username].projects) {
+        users[username].projects = users[username].projects.filter(id => id !== currentProject);
+    }
+
+    const projects = JSON.parse(localStorage.getItem("projects") || "{}");
+    projects[currentProject] = p;
+    localStorage.setItem("projects", JSON.stringify(projects));
+    localStorage.setItem("users", JSON.stringify(users));
+
+    loadTeamMembers();
+}
+
+// ========== UI HELPERS ==========
+function showApp() {
+    document.getElementById("app").style.display = "block";
+}
+
+function showUserInfo() {
+    const users = JSON.parse(localStorage.getItem("users") || "{}");
+    const allUsers = Object.keys(users).map(u => `${u} ${u === currentUser ? "(Sie)" : ""}`).join(", ");
+    alert(`Angemeldet als: ${currentUser}\n\nAlle Benutzer: ${allUsers}`);
+}
+
+function setActiveNav() {
+    document.querySelectorAll("nav a").forEach(link => {
+        link.classList.remove("active");
+        if (link.href.includes("index.html")) {
+            link.classList.add("active");
+        }
+    });
+}
+</script>
+
+</body>
+</html>
