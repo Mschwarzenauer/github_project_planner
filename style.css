@@ -24,15 +24,15 @@ nav a {
     transition: all 0.3s;  
     border-bottom: 3px solid transparent;
 }
-
+ 
 nav a:hover {
     background: rgba(0, 0, 0, 0.1);
-}  
+}   
 nav a.active {
     background: #006425;
     border-bottom: 3px solid #fff;
 }
-
+    
 header {
     text-align: center;  
     padding: 30px 25px;
