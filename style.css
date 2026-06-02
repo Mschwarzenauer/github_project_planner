@@ -29,7 +29,7 @@ nav a:hover {
     background: rgba(0, 0, 0, 0.1);
 }   
 nav a.active {
-    background: #006425;
+    background: #3ee17a;
     border-bottom: 3px solid #fff;
 }
     
