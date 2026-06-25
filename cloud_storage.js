@@ -1,13 +1,13 @@
 // ========== CLOUD STORAGE + LOGIN SYSTEM ==========
-// Nutzt Netlify Function als sicheren Proxy zu JSONBin.io
-// Der API Key bleibt versteckt auf dem Server
+// Benutzer-Accounts werden in JSONBin gespeichert (geräteübergreifend)
 
 const API_ENDPOINT = '/api/jsonbin';
+const USERS_BIN_ID_KEY = 'wmc_users_bin_id'; // Bin ID für alle User-Accounts
 
 let currentUser = null;
 let cloudSyncEnabled = false;
 
-// ========== EINFACHES HASH ==========
+// ========== HASH ==========
 function simpleHash(str) {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
@@ -18,91 +18,7 @@ function simpleHash(str) {
     return Math.abs(hash).toString(36);
 }
 
-// ========== USER MANAGEMENT ==========
-
-function getUsers() {
-    try { return JSON.parse(localStorage.getItem('wmc_users') || '{}'); } catch (e) { return {}; }
-}
-
-function saveUsers(users) {
-    localStorage.setItem('wmc_users', JSON.stringify(users));
-}
-
-function getUserStorageKey(username) {
-    return `wmc_projects_${username}`;
-}
-
-// ========== REGISTER / LOGIN ==========
-
-function registerUser(username, password) {
-    const users = getUsers();
-    const cleanUser = username.trim().toLowerCase();
-
-    if (!cleanUser || cleanUser.length < 2)
-        return { success: false, error: 'Benutzername muss mindestens 2 Zeichen haben.' };
-    if (!password || password.length < 4)
-        return { success: false, error: 'Passwort muss mindestens 4 Zeichen haben.' };
-    if (users[cleanUser])
-        return { success: false, error: 'Benutzername bereits vergeben.' };
-
-    users[cleanUser] = {
-        passwordHash: simpleHash(password + cleanUser),
-        createdAt: new Date().toISOString(),
-        binId: null
-    };
-    saveUsers(users);
-    return { success: true };
-}
-
-function loginUser(username, password) {
-    const users = getUsers();
-    const cleanUser = username.trim().toLowerCase();
-
-    if (!users[cleanUser])
-        return { success: false, error: 'Benutzername nicht gefunden.' };
-
-    if (users[cleanUser].passwordHash !== simpleHash(password + cleanUser))
-        return { success: false, error: 'Falsches Passwort.' };
-
-    currentUser = {
-        username: cleanUser,
-        data: users[cleanUser],
-        storageKey: getUserStorageKey(cleanUser)
-    };
-
-    sessionStorage.setItem('wmc_session', JSON.stringify({ username: cleanUser }));
-    cloudSyncEnabled = !!users[cleanUser].binId;
-    return { success: true };
-}
-
-function logoutUser() {
-    currentUser = null;
-    cloudSyncEnabled = false;
-    sessionStorage.removeItem('wmc_session');
-    showLoginScreen();
-}
-
-function checkSession() {
-    try {
-        const session = JSON.parse(sessionStorage.getItem('wmc_session') || 'null');
-        if (session && session.username) {
-            const users = getUsers();
-            if (users[session.username]) {
-                currentUser = {
-                    username: session.username,
-                    data: users[session.username],
-                    storageKey: getUserStorageKey(session.username)
-                };
-                cloudSyncEnabled = !!users[session.username].binId;
-                return true;
-            }
-        }
-    } catch (e) {}
-    return false;
-}
-
-// ========== NETLIFY PROXY CALLS ==========
-
+// ========== SERVER API ==========
 async function callProxy(action, extra = {}) {
     try {
         const response = await fetch(API_ENDPOINT, {
@@ -117,10 +33,135 @@ async function callProxy(action, extra = {}) {
     }
 }
 
-async function createCloudBin() {
+// ========== USERS BIN (gemeinsame Benutzerdatenbank) ==========
+
+async function getUsersBinId() {
+    // Erst lokal schauen
+    let binId = localStorage.getItem(USERS_BIN_ID_KEY);
+    if (binId) return binId;
+
+    // Vom Server holen (server.js gibt eine feste Bin-ID zurück)
+    try {
+        const res = await fetch('/api/users-bin');
+        const data = await res.json();
+        if (data.binId) {
+            localStorage.setItem(USERS_BIN_ID_KEY, data.binId);
+            return data.binId;
+        }
+    } catch(e) {}
+    return null;
+}
+
+async function loadAllUsers() {
+    const binId = await getUsersBinId();
+    if (!binId) return {};
+    const result = await callProxy('read', { binId });
+    if (!result.ok) return {};
+    return result.data.record?.users || {};
+}
+
+async function saveAllUsers(users) {
+    const binId = await getUsersBinId();
+    if (!binId) return false;
+    const result = await callProxy('write', { binId, data: { users } });
+    return result.ok;
+}
+
+// ========== REGISTER / LOGIN ==========
+
+async function registerUser(username, password) {
+    const cleanUser = username.trim().toLowerCase();
+
+    if (!cleanUser || cleanUser.length < 2)
+        return { success: false, error: 'Benutzername muss mindestens 2 Zeichen haben.' };
+    if (!password || password.length < 4)
+        return { success: false, error: 'Passwort muss mindestens 4 Zeichen haben.' };
+
+    const users = await loadAllUsers();
+
+    if (users[cleanUser])
+        return { success: false, error: 'Benutzername bereits vergeben.' };
+
+    users[cleanUser] = {
+        passwordHash: simpleHash(password + cleanUser),
+        createdAt: new Date().toISOString(),
+        binId: null
+    };
+
+    const saved = await saveAllUsers(users);
+    if (!saved) return { success: false, error: 'Fehler beim Speichern. Bitte nochmal versuchen.' };
+
+    return { success: true };
+}
+
+async function loginUser(username, password) {
+    const cleanUser = username.trim().toLowerCase();
+    const users = await loadAllUsers();
+
+    if (!users[cleanUser])
+        return { success: false, error: 'Benutzername nicht gefunden.' };
+
+    if (users[cleanUser].passwordHash !== simpleHash(password + cleanUser))
+        return { success: false, error: 'Falsches Passwort.' };
+
+    currentUser = {
+        username: cleanUser,
+        data: users[cleanUser],
+        storageKey: `wmc_projects_${cleanUser}`
+    };
+
+    sessionStorage.setItem('wmc_session', JSON.stringify({ username: cleanUser }));
+    cloudSyncEnabled = !!users[cleanUser].binId;
+    return { success: true };
+}
+
+function logoutUser() {
+    currentUser = null;
+    cloudSyncEnabled = false;
+    sessionStorage.removeItem('wmc_session');
+    showLoginScreen();
+}
+
+async function checkSession() {
+    try {
+        const session = JSON.parse(sessionStorage.getItem('wmc_session') || 'null');
+        if (session && session.username) {
+            const users = await loadAllUsers();
+            if (users[session.username]) {
+                currentUser = {
+                    username: session.username,
+                    data: users[session.username],
+                    storageKey: `wmc_projects_${session.username}`
+                };
+                cloudSyncEnabled = !!users[session.username].binId;
+                return true;
+            }
+        }
+    } catch (e) {}
+    return false;
+}
+
+// ========== PROJEKT CLOUD SYNC ==========
+
+async function ensureCloudBin() {
+    if (currentUser.data.binId) { cloudSyncEnabled = true; return; }
+
+    updateSyncStatus('☁️ Cloud wird eingerichtet...', 'warning');
     const result = await callProxy('create', { data: { username: currentUser.username } });
-    if (!result.ok) return null;
-    return result.data.metadata?.id || null;
+    if (!result.ok) { updateSyncStatus('⚠️ Nur lokal verfügbar', 'warning'); return; }
+
+    const binId = result.data.metadata?.id;
+    if (!binId) return;
+
+    // Bin ID beim User speichern
+    const users = await loadAllUsers();
+    if (users[currentUser.username]) {
+        users[currentUser.username].binId = binId;
+        await saveAllUsers(users);
+        currentUser.data.binId = binId;
+        cloudSyncEnabled = true;
+        updateSyncStatus('✅ Cloud bereit', 'success');
+    }
 }
 
 async function loadFromCloud() {
@@ -132,33 +173,9 @@ async function loadFromCloud() {
 
 async function saveToCloud(projects) {
     if (!currentUser?.data?.binId) return false;
-    const result = await callProxy('write', {
-        binId: currentUser.data.binId,
-        data: { projects }
-    });
+    const result = await callProxy('write', { binId: currentUser.data.binId, data: { projects } });
     return result.ok;
 }
-
-// ========== AUTO CLOUD SETUP beim ersten Login ==========
-
-async function ensureCloudBin() {
-    if (currentUser.data.binId) return; // Bereits vorhanden
-
-    updateSyncStatus('☁️ Cloud wird eingerichtet...', 'warning');
-    const binId = await createCloudBin();
-    if (binId) {
-        const users = getUsers();
-        users[currentUser.username].binId = binId;
-        saveUsers(users);
-        currentUser.data.binId = binId;
-        cloudSyncEnabled = true;
-        updateSyncStatus('✅ Cloud bereit', 'success');
-    } else {
-        updateSyncStatus('⚠️ Cloud nicht verfügbar – nur lokal', 'warning');
-    }
-}
-
-// ========== LOAD / SAVE ==========
 
 function loadLocalProjects() {
     if (!currentUser) return {};
@@ -172,8 +189,6 @@ function saveLocalProjects(projects) {
 
 async function cloudLoadProjects() {
     if (!currentUser) return {};
-
-    // Versuche Cloud Bin anzulegen falls noch keiner existiert
     await ensureCloudBin();
 
     if (cloudSyncEnabled) {
@@ -185,14 +200,12 @@ async function cloudLoadProjects() {
         }
         updateSyncStatus('⚠️ Cloud nicht erreichbar – lokale Daten', 'warning');
     }
-
     return loadLocalProjects();
 }
 
 async function cloudSaveProjects(projects) {
     if (!currentUser) return;
     saveLocalProjects(projects);
-
     if (cloudSyncEnabled) {
         saveToCloud(projects).then(ok => {
             updateSyncStatus(
@@ -205,10 +218,7 @@ async function cloudSaveProjects(projects) {
 
 function updateSyncStatus(message, type) {
     const el = document.getElementById('syncStatus');
-    if (el) {
-        el.textContent = message;
-        el.className = `sync-status sync-${type}`;
-    }
+    if (el) { el.textContent = message; el.className = `sync-status sync-${type}`; }
 }
 
 // ========== LOGIN SCREEN UI ==========
@@ -224,7 +234,14 @@ function showApp() {
     document.getElementById('appContainer').style.display = 'block';
     document.getElementById('currentUserDisplay').textContent = `👤 ${currentUser.username}`;
     const badge = document.getElementById('cloudBadge');
-    if (badge) badge.textContent = cloudSyncEnabled ? '☁️ Cloud' : '☁️ Verbinde...';
+    if (badge) badge.textContent = '☁️ Cloud';
 }
 
-console.log('✅ cloud_storage.js geladen (Netlify Proxy)');
+function openCloudSetup() {
+    alert('☁️ Cloud-Sync ist automatisch aktiv!\n\nDu kannst dich von jedem Computer mit deinem Benutzernamen + Passwort anmelden und deine Projekte sind überall verfügbar.');
+}
+function closeCloudSetup() {}
+async function saveCloudSettings() {}
+async function connectExistingBin() {}
+
+console.log('✅ cloud_storage.js geladen (Cloud-Accounts)');

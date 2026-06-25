@@ -490,14 +490,9 @@
             <input type="password" id="regPassword2" placeholder="Passwort wiederholen" autocomplete="new-password"
                    onkeydown="if(event.key==='Enter') doRegister()">
 
-            <div class="login-divider">— Optional: Cloud-Sync für alle Geräte —</div>
-            <p class="login-optional">
-                Für geräteübergreifenden Zugriff: Hole dir einen <strong>kostenlosen</strong> API-Key auf
-                <a href="https://jsonbin.io" target="_blank">jsonbin.io</a> (Account → API Keys).
-                Ohne Key werden Daten nur lokal gespeichert.
+            <p class="login-optional" style="background:#d4edda; color:#155724; padding:8px 12px; border-radius:6px;">
+                ☁️ Dein Account wird automatisch in der Cloud gespeichert — du kannst dich von jedem Computer anmelden!
             </p>
-            <input type="text" id="regJsonbinKey" placeholder="JSONBin.io API-Key (optional)" autocomplete="off">
-
             <button class="btn-primary" onclick="doRegister()">✨ Account erstellen</button>
         </div>
     </div>
@@ -1064,7 +1059,7 @@ function switchLoginTab(tab) {
     document.getElementById('registerTab').classList.toggle('active', tab === 'register');
 }
 
-function doLogin() {
+async function doLogin() {
     const username = document.getElementById('loginUsername').value;
     const password = document.getElementById('loginPassword').value;
     const errEl = document.getElementById('loginError');
@@ -1075,13 +1070,18 @@ function doLogin() {
         return;
     }
 
-    const result = loginUser(username, password);
+    errEl.textContent = '⏳ Anmelden...';
+    errEl.style.color = '#666';
+    errEl.style.display = 'block';
+
+    const result = await loginUser(username, password);
     if (result.success) {
         errEl.style.display = 'none';
         showApp();
         initApp();
     } else {
         errEl.textContent = '❌ ' + result.error;
+        errEl.style.color = '#dc3545';
         errEl.style.display = 'block';
     }
 }
@@ -1103,25 +1103,22 @@ async function doRegister() {
         return;
     }
 
-    const result = registerUser(username, password, apiKey);
+    succEl.textContent = '⏳ Account wird erstellt...';
+    succEl.style.display = 'block';
+
+    const result = await registerUser(username, password);
     if (!result.success) {
         errEl.textContent = '❌ ' + result.error;
         errEl.style.display = 'block';
+        succEl.style.display = 'none';
         return;
     }
 
     // Auto-Login nach Registrierung
-    const loginResult = loginUser(username, password);
+    const loginResult = await loginUser(username, password);
     if (loginResult.success) {
-        // Cloud Setup falls API Key angegeben
-        if (apiKey) {
-            succEl.textContent = '✅ Account erstellt! Cloud-Sync wird eingerichtet...';
-            succEl.style.display = 'block';
-            await setupJsonBin(apiKey);
-        } else {
-            succEl.textContent = '✅ Account erstellt! Du wirst eingeloggt...';
-            succEl.style.display = 'block';
-        }
+        succEl.textContent = '✅ Account erstellt! Du wirst eingeloggt...';
+        succEl.style.display = 'block';
         setTimeout(() => {
             showApp();
             initApp();
@@ -1134,7 +1131,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.log("🔄 Initialisiere...");
 
     // Prüfe ob noch eine Sitzung aktiv ist
-    if (checkSession()) {
+    if (await checkSession()) {
         showApp();
         await initApp();
     } else {
