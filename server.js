@@ -7,8 +7,8 @@ const JSONBIN_KEY = process.env.JSONBIN_KEY;
 
 app.use(express.json());
 
-// Statische Dateien (index.html, style.css, etc.)
-app.use(express.static(path.join(__dirname, 'public')));
+// Statische Dateien direkt im Hauptordner (index.html, style.css, etc.)
+app.use(express.static(__dirname));
 
 // ===== API PROXY: JSONBin (Key bleibt versteckt) =====
 app.post('/api/jsonbin', async (req, res) => {
@@ -68,7 +68,7 @@ app.post('/api/jsonbin', async (req, res) => {
 
 // Alle anderen Routen → index.html
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 app.listen(PORT, () => {
