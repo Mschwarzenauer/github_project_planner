@@ -62,6 +62,175 @@
             animation: spin 1s linear infinite;
             margin-right: 10px;
         }
+
+        /* ===== LOGIN SCREEN ===== */
+        #loginContainer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #059448 0%, #026d34 100%);
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .login-card {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .login-card h1 {
+            text-align: center;
+            color: #028641;
+            margin: 0 0 8px 0;
+            font-size: 1.8rem;
+        }
+        .login-card p.subtitle {
+            text-align: center;
+            color: #666;
+            margin: 0 0 30px 0;
+            font-size: 14px;
+        }
+        .login-tabs {
+            display: flex;
+            margin-bottom: 25px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #028641;
+        }
+        .login-tabs button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: white;
+            color: #028641;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .login-tabs button.active {
+            background: #028641;
+            color: white;
+        }
+        .login-form { display: none; }
+        .login-form.active { display: block; }
+        .login-form input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            margin-bottom: 14px;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+        .login-form input:focus {
+            outline: none;
+            border-color: #028641;
+        }
+        .login-form .btn-primary {
+            width: 100%;
+            padding: 13px;
+            background: linear-gradient(135deg, #028641, #026d34);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .login-form .btn-primary:hover { opacity: 0.9; }
+        .login-error {
+            color: #dc3545;
+            font-size: 13px;
+            margin-bottom: 12px;
+            padding: 8px 12px;
+            background: #ffeef0;
+            border-radius: 6px;
+            display: none;
+        }
+        .login-success {
+            color: #155724;
+            font-size: 13px;
+            margin-bottom: 12px;
+            padding: 8px 12px;
+            background: #d4edda;
+            border-radius: 6px;
+            display: none;
+        }
+        .login-divider {
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+            margin: 15px 0;
+        }
+        .login-optional {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        /* ===== NAV USER AREA ===== */
+        .nav-user {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-right: 15px;
+        }
+        #currentUserDisplay {
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        #cloudBadge {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        #cloudBadge:hover { background: rgba(255,255,255,0.3); }
+        .btn-logout {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.4);
+            padding: 5px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+        }
+        .btn-logout:hover { background: rgba(255,0,0,0.3); }
+
+        /* ===== SYNC STATUS ===== */
+        .sync-status {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        .sync-success { color: #155724; background: #d4edda; }
+        .sync-warning { color: #856404; background: #fff3cd; }
+
+        /* ===== CLOUD SETUP MODAL ===== */
+        #cloudSetupModal .modal-content {
+            max-width: 520px;
+        }
+        .setup-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .setup-section h4 {
+            margin: 0 0 10px 0;
+            color: #028641;
+        }
         .status-badge {
             display: inline-block;
             padding: 4px 8px;
@@ -292,11 +461,91 @@
 </head>
 <body>
 
+<!-- ===== LOGIN SCREEN ===== -->
+<div id="loginContainer" style="display:flex;">
+    <div class="login-card">
+        <h1>📋 Projektplaner</h1>
+        <p class="subtitle">Mit integrierter Groq KI • Von überall zugänglich</p>
+
+        <div class="login-tabs">
+            <button id="loginTab" class="active" onclick="switchLoginTab('login')">🔑 Anmelden</button>
+            <button id="registerTab" onclick="switchLoginTab('register')">✨ Registrieren</button>
+        </div>
+
+        <!-- LOGIN FORM -->
+        <div id="loginForm" class="login-form active">
+            <div id="loginError" class="login-error"></div>
+            <input type="text" id="loginUsername" placeholder="Benutzername" autocomplete="username">
+            <input type="password" id="loginPassword" placeholder="Passwort" autocomplete="current-password"
+                   onkeydown="if(event.key==='Enter') doLogin()">
+            <button class="btn-primary" onclick="doLogin()">🔐 Anmelden</button>
+        </div>
+
+        <!-- REGISTER FORM -->
+        <div id="registerForm" class="login-form">
+            <div id="registerError" class="login-error"></div>
+            <div id="registerSuccess" class="login-success"></div>
+            <input type="text" id="regUsername" placeholder="Benutzername (mind. 2 Zeichen)" autocomplete="username">
+            <input type="password" id="regPassword" placeholder="Passwort (mind. 4 Zeichen)" autocomplete="new-password">
+            <input type="password" id="regPassword2" placeholder="Passwort wiederholen" autocomplete="new-password"
+                   onkeydown="if(event.key==='Enter') doRegister()">
+
+            <div class="login-divider">— Optional: Cloud-Sync für alle Geräte —</div>
+            <p class="login-optional">
+                Für geräteübergreifenden Zugriff: Hole dir einen <strong>kostenlosen</strong> API-Key auf
+                <a href="https://jsonbin.io" target="_blank">jsonbin.io</a> (Account → API Keys).
+                Ohne Key werden Daten nur lokal gespeichert.
+            </p>
+            <input type="text" id="regJsonbinKey" placeholder="JSONBin.io API-Key (optional)" autocomplete="off">
+
+            <button class="btn-primary" onclick="doRegister()">✨ Account erstellen</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== APP CONTAINER ===== -->
+<div id="appContainer" style="display:none;">
+
+<!-- CLOUD SETUP MODAL -->
+<div id="cloudSetupModal" class="modal">
+    <div class="modal-content">
+        <h3>☁️ Cloud-Sync Einrichten</h3>
+        <p>Mit Cloud-Sync kannst du von jedem Computer auf deine Projekte zugreifen.</p>
+
+        <div class="setup-section">
+            <h4>📝 Schritt 1: Kostenlosen Account erstellen</h4>
+            <p>Gehe zu <a href="https://jsonbin.io" target="_blank">jsonbin.io</a> → Account erstellen (kostenlos) → API Keys → deinen Key kopieren</p>
+        </div>
+
+        <div class="setup-section">
+            <h4>🔑 Schritt 2: API-Key eingeben</h4>
+            <input type="text" id="jsonbinApiKey" placeholder="JSONBin.io Master Key ($2a$10$...)" style="width:100%; padding:10px; border:2px solid #ddd; border-radius:6px; box-sizing:border-box; margin-bottom:10px;">
+
+            <p style="font-size:12px; color:#666; margin:8px 0;">Vorhandenen Cloud-Speicher verbinden? Bin-ID eingeben:</p>
+            <input type="text" id="existingBinId" placeholder="Bin-ID (optional, z.B. 64abc123def...)" style="width:100%; padding:10px; border:2px solid #ddd; border-radius:6px; box-sizing:border-box; margin-bottom:10px;">
+
+            <div style="display:flex; gap:10px;">
+                <button onclick="saveCloudSettings()" style="flex:1; padding:10px; background:#028641; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">☁️ Neuen Cloud-Speicher erstellen</button>
+                <button onclick="connectExistingBin()" style="flex:1; padding:10px; background:#0d6efd; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">🔗 Vorhandenen verbinden</button>
+            </div>
+        </div>
+
+        <div id="cloudSetupStatus" style="margin:10px 0; font-size:14px;"></div>
+        <button onclick="closeCloudSetup()" style="padding:8px 20px; background:#6c757d; color:white; border:none; border-radius:6px; cursor:pointer;">✖ Schließen</button>
+    </div>
+</div>
+
 <nav>
     <a onclick="showTab('dashboard')" class="active">📋 Dashboard</a>
     <a onclick="showTab('planning')">📊 Projektplanung</a>
     <a onclick="showTab('ai')">⚡ Groq KI (kostenlos)</a>
     <a onclick="showTab('info')">ℹ️ Info</a>
+    <div class="nav-user">
+        <span id="syncStatus" class="sync-status"></span>
+        <span id="cloudBadge" onclick="openCloudSetup()" title="Cloud-Sync einrichten">💾 Lokal</span>
+        <span id="currentUserDisplay">👤</span>
+        <button class="btn-logout" onclick="logoutUser()">Abmelden</button>
+    </div>
 </nav>
 
 <header>
@@ -798,39 +1047,133 @@
     <p>© 2025 Projektplaner • Projektmanagement mit Groq KI - Komplett kostenlos!</p>
 </footer>
 
+</div><!-- end appContainer -->
+
 <script src="storage.js"></script>
+<script src="cloud_storage.js"></script>
 <script>
 // ========== GLOBALE VARIABLEN ==========
 let currentProject = null;
 let allProjects = {};
 
+// ========== LOGIN UI FUNKTIONEN ==========
+function switchLoginTab(tab) {
+    document.getElementById('loginForm').classList.toggle('active', tab === 'login');
+    document.getElementById('registerForm').classList.toggle('active', tab === 'register');
+    document.getElementById('loginTab').classList.toggle('active', tab === 'login');
+    document.getElementById('registerTab').classList.toggle('active', tab === 'register');
+}
+
+function doLogin() {
+    const username = document.getElementById('loginUsername').value;
+    const password = document.getElementById('loginPassword').value;
+    const errEl = document.getElementById('loginError');
+
+    if (!username || !password) {
+        errEl.textContent = '❌ Bitte Benutzername und Passwort eingeben.';
+        errEl.style.display = 'block';
+        return;
+    }
+
+    const result = loginUser(username, password);
+    if (result.success) {
+        errEl.style.display = 'none';
+        showApp();
+        initApp();
+    } else {
+        errEl.textContent = '❌ ' + result.error;
+        errEl.style.display = 'block';
+    }
+}
+
+async function doRegister() {
+    const username = document.getElementById('regUsername').value;
+    const password = document.getElementById('regPassword').value;
+    const password2 = document.getElementById('regPassword2').value;
+    const apiKey = document.getElementById('regJsonbinKey').value.trim();
+    const errEl = document.getElementById('registerError');
+    const succEl = document.getElementById('registerSuccess');
+
+    errEl.style.display = 'none';
+    succEl.style.display = 'none';
+
+    if (password !== password2) {
+        errEl.textContent = '❌ Passwörter stimmen nicht überein.';
+        errEl.style.display = 'block';
+        return;
+    }
+
+    const result = registerUser(username, password, apiKey);
+    if (!result.success) {
+        errEl.textContent = '❌ ' + result.error;
+        errEl.style.display = 'block';
+        return;
+    }
+
+    // Auto-Login nach Registrierung
+    const loginResult = loginUser(username, password);
+    if (loginResult.success) {
+        // Cloud Setup falls API Key angegeben
+        if (apiKey) {
+            succEl.textContent = '✅ Account erstellt! Cloud-Sync wird eingerichtet...';
+            succEl.style.display = 'block';
+            await setupJsonBin(apiKey);
+        } else {
+            succEl.textContent = '✅ Account erstellt! Du wirst eingeloggt...';
+            succEl.style.display = 'block';
+        }
+        setTimeout(() => {
+            showApp();
+            initApp();
+        }, 800);
+    }
+}
+
 // ========== INITIALISIERUNG ==========
 document.addEventListener("DOMContentLoaded", async () => {
     console.log("🔄 Initialisiere...");
-    try {
-        await window.waitForStorage();
-    } catch (e) {}
-    await loadAllProjects();
-    showTab('dashboard');
+
+    // Prüfe ob noch eine Sitzung aktiv ist
+    if (checkSession()) {
+        showApp();
+        await initApp();
+    } else {
+        showLoginScreen();
+    }
 });
 
+async function initApp() {
+    try { await window.waitForStorage(); } catch (e) {}
+    await loadAllProjects();
+    showTab('dashboard');
+}
+
 async function loadAllProjects() {
-    let projects = await getAllProjects();
-    if (!projects || Object.keys(projects).length === 0) {
+    let projects;
+    
+    if (currentUser) {
+        // Eingeloggt: nutze Cloud-Storage
+        projects = await cloudLoadProjects();
+    } else {
+        // Fallback: alter localStorage
         try { projects = JSON.parse(localStorage.getItem('projects') || '{}'); } catch(e) {}
     }
-    if ((!projects || Object.keys(projects).length === 0) && window.name) {
-        try { projects = JSON.parse(window.name || '{}'); } catch(e) {}
-    }
+    
     allProjects = projects || {};
     renderProjectLists();
     updateAiProjectSelect();
 }
 
 function saveAllProjects() {
-    saveProjectsData(allProjects);
-    localStorage.setItem('projects', JSON.stringify(allProjects));
-    window.name = JSON.stringify(allProjects);
+    if (currentUser) {
+        // Eingeloggt: nutze Cloud-Storage
+        cloudSaveProjects(allProjects);
+    } else {
+        // Fallback
+        saveProjectsData(allProjects);
+        localStorage.setItem('projects', JSON.stringify(allProjects));
+        window.name = JSON.stringify(allProjects);
+    }
     renderProjectLists();
     updateAiProjectSelect();
 }
